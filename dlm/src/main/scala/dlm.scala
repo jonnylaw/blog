@@ -3,8 +3,10 @@ import Scalaz._
 import java.io.{File, PrintWriter}
 import breeze.stats.distributions.Gaussian
 import Math.sqrt
+import KalmanFilter._
 
 object dlm {
+  type Loglikelihood = Double
   type Observation = Double
   type State = Double
   type Time = Double
