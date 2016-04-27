@@ -20,7 +20,8 @@ object KalmanFilter {
       filter(nextObservation, p) +: acc
     }).reverse
 
-    filtered.foldLeft(0.0)((acc, a) => acc + a.likelihood)
+    // sum the values of the likelihood
+    filtered.map(_.likelihood).sum
   }
 
   def filter(d: Data, p: Parameters): FilterOut = {
@@ -30,7 +31,7 @@ object KalmanFilter {
     val m1 = p.m0 + a1 * e1
     val c1 = a1 * p.v
 
-    val likelihood = Gaussian(m1, c1).logPdf(d.observation)
+    val likelihood = Gaussian(p.m0, p.c0 + p.w + p.v).logPdf(d.observation)
 
     // return the data with the expectation of the hidden state and the updated Parameters
     FilterOut(Data(d.time, d.observation, Some(m1)), Parameters(p.v, p.w, m1, c1), likelihood)
@@ -50,8 +51,7 @@ object KalmanFilter {
     }).reverse
   }
 
-
-  def main(args: Array[String]) = {
+  val runKalmanFilter = {
     val p = Parameters(3.0, 0.5, 0.0, 10.0)
     // simulate 16 different realisations of 100 observations, representing 16 stations
     val observations = (1 to 16) map (id => (id -> simulate(p).take(100).toVector))

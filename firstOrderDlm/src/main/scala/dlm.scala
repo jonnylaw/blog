@@ -29,7 +29,7 @@ object dlm {
       Data(t, x + Gaussian(0, sqrt(p.v)).draw, Some(x)) }
   }
 
-  def main(args: Array[String]) = {
+  val runSimulateFirstOrder = {
     val p = Parameters(3.0, 0.5, 0.0, 10.0)
     // simulate 16 different realisations of 100 observations, representing 16 stations
     val observations = (1 to 16) map (id => (id, simulate(p).take(100).toVector))
