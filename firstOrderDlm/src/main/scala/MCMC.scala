@@ -10,22 +10,12 @@ import Scalaz._
 object MCMC {
   case class MetropolisState(params: Parameters, accepted: Int, ll: Loglikelihood)
 
-  /**
-    * Adds gaussian noise to a double, but rejects if the number is below lower
-    */
-  def gaussianNoiseBound(lower: Double, noise: Double): Double => Double = {
-    x => {
-      val x1 = x + Gaussian(0, noise).draw
-      if (x1 < lower) gaussianNoiseBound(lower, noise)(x)
-      else x1
-  }}
-
     /**
       * Moves the parameters according to a random walk
       */
   def perturb(delta: Double): Parameters => Parameters = {
     p =>
-    Parameters(gaussianNoiseBound(0, delta)(p.v), gaussianNoiseBound(0, delta)(p.w), p.m0, p.c0)
+    Parameters(p.v + Gaussian(0, delta).draw, p.w + Gaussian(0, delta).draw, p.m0, p.c0)
   }
   /**
     * A metropolis hastings step
