@@ -9,50 +9,33 @@ object KalmanFilter {
   }
 
   def filterll(data: Seq[Data])(params: Parameters): Loglikelihood = {
-    val (v, w) = (params.v, params.w) // v and w are fixed
-    val initFilter = Vector[FilterOut](filter(data.head, params)) // initialise the filter
+    val initFilter = FilterOut(data.head, params, 0.0) // initialise the filter
 
-    val filtered = data.tail.foldLeft(initFilter)((acc, nextObservation) => {
-      // construct the parameters from the previous step of the filter
-      val p = Parameters(v, w, acc.head.p.m0, acc.head.p.c0)
-
-      // add the filtered observation to the head of the list
-      filter(nextObservation, p) +: acc
-    }).reverse
-
-    // sum the values of the likelihood
-    filtered.map(_.likelihood).sum
+    data.tail.foldLeft(initFilter)(filter).likelihood
   }
 
-  def filter(d: Data, p: Parameters): FilterOut = {
+  def filter(d: FilterOut, y: Data): FilterOut = {
     // update the mean and variance of the posterior to determine the state space
-    val e1 = d.observation - p.m0
-    val a1 = (p.c0 + p.w)/(p.c0 + p.w + p.v)
-    val m1 = p.m0 + a1 * e1
-    val c1 = a1 * p.v
+    val e1 = y.observation - d.p.m0
+    val a1 = (d.p.c0 + d.p.w)/(d.p.c0 + d.p.w + d.p.v)
+    val m1 = d.p.m0 + a1 * e1
+    val c1 = a1 * d.p.v
 
-    val likelihood = Gaussian(p.m0, p.c0 + p.w + p.v).logPdf(d.observation)
+    val likelihood = Gaussian(d.p.m0, d.p.c0 + d.p.w + d.p.v).logPdf(y.observation)
 
     // return the data with the expectation of the hidden state and the updated Parameters
-    FilterOut(Data(d.time, d.observation, Some(m1)), Parameters(p.v, p.w, m1, c1), likelihood)
+    FilterOut(Data(y.time, y.observation, Some(m1)), Parameters(d.p.v, d.p.w, m1, c1), likelihood)
   }
 
   def filterSeries(data: Seq[Data])(params: Parameters): Seq[FilterOut] = {
+    val initFilter = FilterOut(data.head, params, 0.0) // initialise the filter
 
-    val (v, w) = (params.v, params.w) // v and w are fixed
-    val initFilter = Vector[FilterOut](filter(data.head, params)) // initialise the filter
-
-    data.tail.foldLeft(initFilter)((acc, nextObservation) => {
-      // construct the parameters from the previous step of the filter
-      val p = Parameters(v, w, acc.head.p.m0, acc.head.p.c0)
-
-      // add the filtered observation to the head of the list
-      filter(nextObservation, p) +: acc
-    }).reverse
+    data.tail.scanLeft(initFilter)(filter)
   }
 
   val runKalmanFilter = {
     val p = Parameters(3.0, 0.5, 0.0, 10.0)
+
     // simulate 16 different realisations of 100 observations, representing 16 stations
     val observations = (1 to 16) map (id => (id -> simulate(p).take(100).toVector))
 

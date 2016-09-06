@@ -8,7 +8,8 @@ lapply(packages, require, character.only = T)
 plotIters = function(iters, variable, burnin, thin) {
   mcmcObject = mcmc(iters[seq(from = burnin, to = nrow(iters), by = thin), variable]) %>% ggs()
   
-  p1 = ggs_histogram(mcmcObject)
+  vline_data = data_frame(z = c(3.0, 0.5), Parameter = c("V", "W"))
+  p1 = ggs_histogram(mcmcObject) + geom_vline(aes(xintercept = z), vline_data)
   p2 = ggs_traceplot(mcmcObject)
   p3 = ggs_autocorrelation(mcmcObject)
   p4 = ggs_running(mcmcObject)
@@ -20,7 +21,12 @@ plotIters = function(iters, variable, burnin, thin) {
 # Visualise MCMC #
 ##################
 
-iters = read.csv("mcmcOut.csv")
-colnames(iters) <- c("V", "W", "m0", "c0")
+plotMCMC = function() {
+  iters = read.csv("mcmcOut.csv")
+  colnames(iters) = c("V", "W", "m0", "c0")
+  
+  plotIters(iters, variable = 1:2, burnin = 0, thin = 1)
+}
 
-plotIters(iters, variable = 1:2, burnin = nrow(iters)*0.1, thin = 1)
+plotMCMC()
+

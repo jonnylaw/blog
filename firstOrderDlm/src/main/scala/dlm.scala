@@ -1,5 +1,3 @@
-import scalaz._
-import Scalaz._
 import java.io.{File, PrintWriter}
 import breeze.stats.distributions.Gaussian
 import Math.sqrt
@@ -22,9 +20,8 @@ object dlm {
   }
 
   def simulate(p: Parameters): Stream[Data] = {
-    val stateSpace = unfold(Gaussian(p.m0, sqrt(p.c0)).draw)(x =>
-      Some(x, x + Gaussian(0, sqrt(p.w)).draw)
-    )
+    val stateSpace = Stream.iterate(Gaussian(p.m0, sqrt(p.c0)).draw)(x =>
+      x + Gaussian(0, sqrt(p.w)).draw)
     stateSpace.zipWithIndex map { case (x, t) => 
       Data(t, x + Gaussian(0, sqrt(p.v)).draw, Some(x)) }
   }

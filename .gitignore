@@ -25,3 +25,7 @@
 # SyncTeX
 *.synctex.gz
 .ensime_cache
+
+# ensime
+**/\#*
+**/~*
