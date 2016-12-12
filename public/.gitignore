@@ -1,0 +1,31 @@
+# LaTeX temp files
+*.aux
+*.log
+*.toc
+*.vrb
+*.out
+*.fdb_latexmk
+*.bbl
+*.blg
+
+# Misc Files
+*.pptx
+*.nav
+*.snm
+*.csv
+.Rhistory
+
+# LaTeX output files
+*.pdf
+*.dvi
+*.eps
+*.png
+*concordance.tex
+
+# SyncTeX
+*.synctex.gz
+.ensime_cache
+
+# ensime
+**/\#*
+**/~*
