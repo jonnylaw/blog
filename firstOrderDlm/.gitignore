@@ -1,0 +1,4 @@
+# scala stuff
+target/*
+project/*
+.ensime
