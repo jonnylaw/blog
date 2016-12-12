@@ -1,0 +1,611 @@
+
+
+
+    
+
+
+
+
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        
+            <title>Posts - Probabilistic Programming in Scala</title>
+        
+
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content="Hugo 0.17" />
+        
+
+
+        
+        
+            
+                <meta name="description" content="HTML5 UP theme, Future Imperfect with some extra goodies, ported by Julio Pescador. Powered by Hugo">
+            
+        
+
+        
+        <meta property="og:title" content="Posts" />
+<meta property="og:description" content="HTML5 UP theme, Future Imperfect with some extra goodies, ported by Julio Pescador. Powered by Hugo" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="/post/" />
+
+
+<meta property="og:updated_time" content="2016-12-12T12:13:14-05:00"/>
+
+
+
+
+
+
+
+
+
+        
+<meta itemprop="name" content="Posts">
+<meta itemprop="description" content="HTML5 UP theme, Future Imperfect with some extra goodies, ported by Julio Pescador. Powered by Hugo">
+
+
+        
+
+        
+
+        
+        
+            
+        
+
+        
+        
+
+        
+            
+                
+                    <link rel="stylesheet" href="../css/main.min.css" />
+                
+            
+        
+
+        
+        
+        
+            
+        
+    </head>
+    <body>
+
+        
+        <div id="wrapper">
+
+    
+<header id="header">
+    
+        <h1><a href="../">Probabilistic Programming in Scala</i></a></h1>
+    
+
+    <nav class="links">
+        <ul>
+            
+                <li>
+                    <a href="../blog">
+                        
+                            <i class="fa fa-newspaper-o">&nbsp;</i>Blog
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="../categories">
+                        Categories
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="../about">
+                        About
+                    </a>
+                </li>
+            
+        </ul>
+    </nav>
+    <nav class="main">
+        <ul>
+            
+            <li class="search">
+                <a class="fa-search" href="#search">Search</a>
+                <form id="search" method="get" action="//google.com/search">
+                    <input type="text" name="q" placeholder="Search" />
+                    <input type="hidden" name="q" value="site:/">
+                </form>
+            </li>
+            <li class="menu">
+                <a class="fa-bars" href="#menu">Menu</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+
+<section id="menu">
+
+    
+        <section>
+            <form class="search" method="get" action="//google.com/search">
+                <input type="text" name="q" placeholder="Search" />
+                <input type="hidden" name="q" value="site:/">
+            </form>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                
+                    <li>
+                        <a href="../blog">
+                            <h3>
+                                
+                                    <i class="fa fa-newspaper-o">&nbsp;</i>
+                                
+                                Blog
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="../categories">
+                            <h3>
+                                
+                                Categories
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="../about">
+                            <h3>
+                                
+                                About
+                            </h3>
+                        </a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    <li>
+                        <a href="../post/KalmanFilter/"><p>The Kalman Filter in Scala</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="../post/PracticalAkkaStreams/"><p>Practical Introduction to Akka Streaming</p></a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        
+</section>
+
+    
+    <div id="main">
+        
+        
+            
+        
+
+        
+            <article class="post">
+    <header>
+    <div class="title">
+        
+            <h2><a href="../post/KalmanFilter/">The Kalman Filter in Scala</a></h2>
+        
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2016-12-12'>
+            December 12, 2016</time>
+        <span class="author">Jonny Law</span>
+        
+            <p>7 minute read</p>
+        
+        
+    </div>
+</header>
+
+    
+
+    <p>A Dynamic Linear Model (DLM) is a special type of state space model, where the state and observation equations are Normally distributed and linear. A general DLM can be written as follows:
+[\begin{aligned} y_t &amp;= F_t x_t + \nu_t, \qquad \nu_t \sim \mathcal{N}(0, V_t) \ x_t &amp;= G<em>tx</em>{t-1} + \omega_t \qquad \omega_t \sim \mathcal{N}(0, W_t), \end{aligned}]
+(y_t) represents the observation of the process at time (t), (x_t) is the value of the unobserved state at time (t).</p>
+
+    <footer>
+        <ul class="actions">
+            <li><a href="../post/KalmanFilter/" class="button big">Continue Reading</a></li>
+        </ul>
+        <ul class="stats">
+    
+        
+
+        
+        
+            <li>
+                
+                
+                    
+
+                    
+
+                    
+
+                    
+                        Categories
+                    
+                
+            </li>
+        
+    
+
+    
+    
+    </footer>
+</article>
+
+        
+            <article class="post">
+    <header>
+    <div class="title">
+        
+            <h2><a href="../post/PracticalAkkaStreams/">Practical Introduction to Akka Streaming</a></h2>
+        
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2016-12-01'>
+            December 1, 2016</time>
+        <span class="author">Jonny Law</span>
+        
+            <p>7 minute read</p>
+        
+        
+    </div>
+</header>
+
+    
+
+    <p>Akka Streaming is a streaming IO engine used to build high performance, fault tolerant and scalable streaming data services. In this post I will describe how you can implement some of the features included in Akka Streaming using only simple streams of integers and strings, although the true power of Akka streams only becomes apparent when we are consuming data from real sources such as Websockets, databases and files. Akka is available in Java and Scala, but I will be focusing on the Scala API in this post.</p>
+
+    <footer>
+        <ul class="actions">
+            <li><a href="../post/PracticalAkkaStreams/" class="button big">Continue Reading</a></li>
+        </ul>
+        <ul class="stats">
+    
+        
+
+        
+        
+            <li>
+                
+                
+                    
+
+                    
+
+                    
+
+                    
+                        Categories
+                    
+                
+            </li>
+        
+    
+
+    
+    
+    </footer>
+</article>
+
+        
+
+        
+<ul class="actions pagination">
+    
+        <li><a href="#" class="disabled button big previous">Previous Page</a></li>
+    
+
+    
+        <li><a href="#" class="disabled button big next">Next Page</a></li>
+    
+</ul>
+
+    </div>
+    
+<section id="sidebar">
+
+    
+        <section id="intro">
+            
+            
+                
+                    <a href="../" class="logo"><img src="../img/main/logo.jpg" alt="Jonny Law&#39;s Blog" /></a>
+                
+            
+            
+                <header>
+                    <h2>Probabilistic Programming in Scala</h2>
+                    <p>Jonny Law</p>
+                </header>
+            
+            <ul class="icons">
+                
+                    <li><a href="../post/index.xml" type="application/rss+xml"
+                        target="_blank" title="RSS" class="fa fa-rss"></a></li>
+                
+                
+                    
+<li><a href="//github.com/jonnylaw" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//instagram.com/lawjonny" target="_blank" title="Instagram" class="fa fa-instagram"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="mailto:j.law1@ncl.ac.uk" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+        </section>
+
+    
+        <section id="recent-posts">
+            <ul class="posts">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="../post/KalmanFilter/">The Kalman Filter in Scala</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-12-12'>
+                                    December 12, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="../post/PracticalAkkaStreams/">Practical Introduction to Akka Streaming</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-12-01'>
+                                    December 1, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+
+                
+            </ul>
+        </section>
+
+    
+    
+    
+    
+        <section id="categories">
+            <ul class="posts">
+                <header>
+                    <h3><a href="../categories/">Categories</a></h3>
+                </header>
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../categories/scala/">scala</a>
+                                <span style="float:right;">3</span>
+                            </header>
+                        </article>
+                    </li>
+                
+            </ul>
+        </section>
+    
+
+    
+        
+
+    
+        <section id="footer">
+            <ul class="icons">
+                
+                    <li><a href="../post/index.xml" type="application/rss+xml"
+                        target="_blank" title="RSS" class="fa fa-rss"></a></li>
+                
+                
+                    
+<li><a href="//github.com/jonnylaw" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//instagram.com/lawjonny" target="_blank" title="Instagram" class="fa fa-instagram"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="mailto:j.law1@ncl.ac.uk" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+
+            <p class="copyright">&copy; Probabilistic Programming in Scala. Design: <a href="http://html5up.net" target="_blank">HTML5 UP</a>. Ported by <a href="//github.com/jpescador" target="_blank">Julio Pescador</a>. Powered by <a href="//gohugo.io" target="_blank">Hugo</a></p>
+        </section>
+
+</section>
+
+            </div>
+        <a id="back-to-top" href="#" class="fa fa-arrow-up fa-border fa-2x"></a>
+        
+
+        
+        
+            
+        
+
+        
+        
+
+        
+            
+                
+                    <script src="../js/main.min.js"></script>
+                
+            
+        
+
+            
+            <script>hljs.initHighlightingOnLoad();</script>
+            
+    </body>
+</html>
+

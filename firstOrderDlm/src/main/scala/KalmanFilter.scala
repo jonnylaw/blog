@@ -4,45 +4,41 @@ import java.io.{PrintWriter, File}
 
 object KalmanFilter {
 
-  case class FilterOut(data: Data, p: Parameters, likelihood: Loglikelihood) {
+  case class FilterState(data: Data, p: Parameters, likelihood: Loglikelihood) {
     override def toString = data.toString + ", " + p.toString
   }
 
   def filterll(data: Seq[Data])(params: Parameters): Loglikelihood = {
-    val initFilter = FilterOut(data.head, params, 0.0) // initialise the filter
+    val initFilter = FilterState(data.head, params, 0.0) // initialise the filter
 
-    data.tail.foldLeft(initFilter)(filter).likelihood
+    data.foldLeft(initFilter)(filter(params)).likelihood
   }
 
-  def filter(d: FilterOut, y: Data): FilterOut = {
-    // update the mean and variance of the posterior to determine the state space
-    val e1 = y.observation - d.p.m0
-    val a1 = (d.p.c0 + d.p.w)/(d.p.c0 + d.p.w + d.p.v)
-    val m1 = d.p.m0 + a1 * e1
-    val c1 = a1 * d.p.v
+  def filter(p: Parameters): (FilterState, Data) => FilterState = (s, d) => {
+    val r = s.p.c0 + p.w
+    val q = r + p.v
+    val e = d.observation - s.p.m0
 
-    val likelihood = Gaussian(d.p.m0, d.p.c0 + d.p.w + d.p.v).logPdf(y.observation)
+    // kalman gain
+    val k = r / q
+    val c1 = k * p.v
+    val m1 = s.p.m0 + k * e
+
+    val likelihood = Gaussian(s.p.m0, s.p.c0 + s.p.w + s.p.v).logPdf(d.observation)
 
     // return the data with the expectation of the hidden state and the updated Parameters
-    FilterOut(Data(y.time, y.observation, Some(m1)), Parameters(d.p.v, d.p.w, m1, c1), likelihood)
+    FilterState(Data(d.time, d.observation, Some(m1)), Parameters(p.v, p.w, m1, c1), likelihood)
   }
 
-  def filterSeries(data: Seq[Data])(params: Parameters): Seq[FilterOut] = {
-    val initFilter = FilterOut(data.head, params, 0.0) // initialise the filter
+  def filterSeries(data: Seq[Data])(params: Parameters): Seq[FilterState] = {
+    val initFilter = FilterState(data.head, params, 0.0) // initialise the filter
 
-    data.tail.scanLeft(initFilter)(filter)
+    data.scanLeft(initFilter)(filter(params)).
+      drop(1)
   }
 
-  val runKalmanFilter = {
+  def main(args: Array[String]): Unit = {
     val p = Parameters(3.0, 0.5, 0.0, 10.0)
-
-    // simulate 16 different realisations of 100 observations, representing 16 stations
-    val observations = (1 to 16) map (id => (id -> simulate(p).take(100).toVector))
-
-    // filter for one station, using simulated data
-    observations.
-      filter{ case (id, _) => id == 1 }.
-      flatMap{ case (_, d) => filterSeries(d)(p) }
 
     // or, read in data from the file we previously wrote
     val data = io.Source.fromFile("firstOrderDlm.csv").getLines.toList.
