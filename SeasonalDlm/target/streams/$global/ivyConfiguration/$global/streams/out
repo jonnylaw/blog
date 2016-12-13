@@ -1,0 +1,11 @@
+[0m[[0mdebug[0m] [0mOther repositories:[0m
+[0m[[0mdebug[0m] [0mDefault repositories:[0m
+[0m[[0mdebug[0m] [0mUsing inline dependencies specified in Scala.[0m
+[0m[[33mwarn[0m] [0mBinary version (2.10) for dependency org.scala-lang#scala-compiler;2.10.6[0m
+[0m[[33mwarn[0m] [0m	in default#seasonaldlm_2.11;1.0 differs from Scala binary version in project (2.11).[0m
+[0m[[33mwarn[0m] [0mBinary version (2.10) for dependency org.scala-lang#scala-library;2.10.6[0m
+[0m[[33mwarn[0m] [0m	in default#seasonaldlm_2.11;1.0 differs from Scala binary version in project (2.11).[0m
+[0m[[33mwarn[0m] [0mBinary version (2.10) for dependency org.scala-lang#scala-reflect;2.10.6[0m
+[0m[[33mwarn[0m] [0m	in default#seasonaldlm_2.11;1.0 differs from Scala binary version in project (2.11).[0m
+[0m[[33mwarn[0m] [0mBinary version (2.10) for dependency org.scala-lang#scalap;2.10.6[0m
+[0m[[33mwarn[0m] [0m	in default#seasonaldlm_2.11;1.0 differs from Scala binary version in project (2.11).[0m

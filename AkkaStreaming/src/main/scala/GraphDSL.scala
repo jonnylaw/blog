@@ -37,10 +37,4 @@ object GraphDsl extends App {
     ClosedShape
   })
 
-  val naturalNumbers = Source.unfold(1)(a => Some(a + 1, a))
-
-  naturalNumbers.
-    take(10).
-    runWith(Streaming.print_sink).
-    onComplete(_ => system.terminate)
 }

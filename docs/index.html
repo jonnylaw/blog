@@ -28,7 +28,7 @@
 <meta property="og:url" content="/" />
 
 
-<meta property="og:updated_time" content="2016-12-12T12:13:14-05:00"/>
+<meta property="og:updated_time" content="2016-12-13T12:13:14-05:00"/>
 
 
 
@@ -191,11 +191,19 @@
 
                 
                     <li>
+                        <a href="./post/SeasonalDlm/"><p>Seasonal DLM</p></a>
+                    </li>
+                
+                    <li>
                         <a href="./post/KalmanFilter/"><p>The Kalman Filter in Scala</p></a>
                     </li>
                 
                     <li>
                         <a href="./post/PracticalAkkaStreams/"><p>Practical Introduction to Akka Streaming</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="./post/Temperature/"><p></p></a>
                     </li>
                 
             </ul>
@@ -212,7 +220,7 @@
     <header>
     <div class="title">
         
-            <h2><a href="./post/KalmanFilter/">The Kalman Filter in Scala</a></h2>
+            <h2><a href="./post/SeasonalDlm/">Seasonal DLM</a></h2>
         
         
     </div>
@@ -222,11 +230,11 @@
         
 
         <time class="published"
-            datetime='2016-12-12'>
-            December 12, 2016</time>
+            datetime='2016-12-13'>
+            December 13, 2016</time>
         <span class="author">Jonny Law</span>
         
-            <p>7 minute read</p>
+            <p>4 minute read</p>
         
         
     </div>
@@ -241,102 +249,70 @@
     
 
     <div id="content">
-        ---
-title: "The Kalman Filter in Scala"
-author: "Jonny Law"
-date: '2016-12-12T12:13:14-05:00'
-categories: scala
----
 
 
+<div id="the-seasonal-dlm" class="section level2">
+<h2>The Seasonal DLM</h2>
+<p>I introduced the class of state space models called DLMs in a previous post covering the <a href="KalmanFilter/">Kalman Filter</a>. The seasonal DLM is similar to the first order DLM, however it incorporates a deterministic transformation to the state, in order to capture cyclic trends. Remember a general DLM can be written as:</p>
+<p><span class="math display">\[\begin{align}
+y_t &amp;= F_t x_t + \nu_t, \qquad \mathcal{N}(0, V_t), \\
+x_t &amp;= G_t x_{t-1} + \omega_t, \quad \mathcal{N}(0, W_t).
+\end{align}\]</span></p>
+<p>In the fourier-form seasonal DLM, the state is transformed by a block diagonal matrix, <span class="math inline">\(G_t\)</span>, containing rotation matrices. The rotation matrix is given by:</p>
+<p><span class="math display">\[R = \begin{pmatrix}
+\cos(\omega) &amp; -\sin(\omega) \\
+\sin(\omega) &amp; \cos(\omega)
+\end{pmatrix},\]</span> where <span class="math inline">\(\omega\)</span> is the frequency of the seasonality. In practice, it is easier to specify the period of the seasonality, <span class="math inline">\(T\)</span>, which is related to the frequency: <span class="math inline">\(\omega = 2 \pi/T\)</span>. This means if we have data measured at hourly intervals and we believe the process has a daily cycle, then we will set <span class="math inline">\(T = 24\)</span>.</p>
+<p>In order to model higher harmonics of the seasonality, we combine rotation matrices together into a block diagonal matrix, to form the <span class="math inline">\(G\)</span> matrix, for instance with 3 harmonics the system matrix is:</p>
+<p><span class="math display">\[G = \begin{pmatrix}
+\cos(\omega) &amp; -\sin(\omega) &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+\sin(\omega) &amp; \cos(\omega) &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; \cos(2\omega) &amp; -\sin(2\omega) &amp; 0&amp; 0 \\
+0 &amp; 0 &amp; \sin(2\omega) &amp; \cos(2\omega) &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; \cos(3\omega) &amp; -\sin(3\omega) \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; \sin(3\omega) &amp; \cos(3\omega) \\
+\end{pmatrix}.\]</span></p>
+<p>In this case, the latent state, <span class="math inline">\(x_t\)</span> is six-dimensional. This means system evolution variance-covariance matrix, <span class="math inline">\(W_t\)</span> is a six by six matrix.</p>
+<p>First we should make a trait in Scala representing a DLM, this allows us to specify methods on the <code>dlm</code> object, independent of the concrete reasisation of the DLM. This means in the future we can create new DLMs, and not have to write functions to simulate from them again. The trait will be for a DLM with constant <span class="math inline">\(F\)</span> and <span class="math inline">\(G\)</span> matrices.</p>
+<pre class="scala"><code>import breeze.linalg._
 
-
-<p>A Dynamic Linear Model (DLM) is a special type of state space model, where the state and observation equations are Normally distributed and linear. A general DLM can be written as follows:</p>
-<p><span class="math display">\[\begin{aligned} y_t &amp;= F_t x_t + \nu_t, \qquad \nu_t \sim \mathcal{N}(0, V_t) \\
-x_t &amp;= G_tx_{t-1} + \omega_t \qquad \omega_t \sim \mathcal{N}(0, W_t), \end{aligned}\]</span></p>
-<p><span class="math inline">\(y_t\)</span> represents the observation of the process at time <span class="math inline">\(t\)</span>, <span class="math inline">\(x_t\)</span> is the value of the unobserved state at time <span class="math inline">\(t\)</span>. The observation error <span class="math inline">\(\nu_t\)</span> and the system error <span class="math inline">\(\omega_t\)</span> are independent and identically distributed (iid) Normal random variables. <span class="math inline">\(F_t\)</span> is the observation matrix which transforms the state space to the observation, <span class="math inline">\(G_t\)</span> is the state transition matrix.</p>
-<div id="forward-simulating-from-the-dlm" class="section level2">
-<h2>Forward Simulating from the DLM</h2>
-<p>A first order polynomial DLM with constant <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span>, and <span class="math inline">\(F_t = 1\)</span>, <span class="math inline">\(G_t = 1\)</span>. can be simulated in scala as follows:</p>
-<pre class="scala"><code>import breeze.stats.distributions.Gaussian
-
-case class Data(time: Time, observation: Observation, state: Option[State])
-case class Parameters(v: Double, w: Double, m0: Double, c0: Double)
-
-def simulate(p: Parameters): Stream[Data] = {
-val stateSpace = Stream.iterate(Gaussian(p.m0, sqrt(p.c0)).draw)(x =&gt; Gaussian(x, sqrt(p.w)).draw)
-  stateSpace.zipWithIndex map { case (x, t) =&gt;
-    Data(t, x + Gaussian(0, sqrt(p.v)).draw, Some(x)) 
-  }
-}
-
-val p = Parameters(3.0, 0.5, 0.0, 10.0)
-// simulate 16 different realisations of 100 observations, representing 16 stations
-val data = (1 to 16) map (id =&gt; (id, simulate(p).take(100).toVector))</code></pre>
-<p>We use the built in streaming library’s <code>iterate</code> function to specify the evolution of the latent state. The initial state <span class="math inline">\(x_0\)</span> is a sample drawn from a normal distribution with mean <span class="math inline">\(m_0\)</span> and variance <span class="math inline">\(C_0\)</span>, <span class="math inline">\(x_t \sim \mathcal{N}(x_0 | m_0, C_0)\)</span>. The <a href="https://github.com/scalanlp/breeze/">Breeze numerical computing library</a> provides many statistical and mathematical functions is used. Subsequent states are generated by adding <span class="math inline">\(\mathcal{N}(0, W)\)</span> to the previous state:</p>
-<p><span class="math display">\[x_t = x_{t-1} + \omega, \qquad \omega \sim \mathcal{N}(0, V)\]</span></p>
-<p>We then construct a <code>Stream</code> of <code>Data</code> objects. The <code>Data</code> object has a timestamped observation and an optional state space. We construct the observation at time <span class="math inline">\(t\)</span> by simply adding the observation noise to the state space <span class="math inline">\(y_t \sim \mathcal{N}(y_t | x_t, V)\)</span>. The state is optional because we can’t observe the state of real data, only simulated data will have a known state.</p>
-<p>A graph of the data from four “stations”, produced using <a href="http://ggplot2.org">ggplot2</a> in R is shown in the figure below.</p>
-<p><img src="figures/unnamed-chunk-1-1.png" width="672" /></p>
-<div id="an-aside-on-referential-transparency" class="section level3">
-<h3>An Aside on Referential Transparency</h3>
-<p>Note that the function <code>simulate</code> is not referentially transparent, meaning the function will return a different <code>Stream</code> of data each time we run it. Referential transparency is important in functional programming, to allow us to easily reason about complex programs. The Breeze library implements another object for stateful random number generation, the <code>Process</code> object. The <code>MarkovChain</code> object can be used to construct a process without drawing explicitly from the distribution until we run the program. Firstly define a single step of the random walk:</p>
-<pre class="scala"><code>import breeze.stats.distributions._
-
-def step_rw(p: Parameters): Double =&gt; Rand[Double] = 
-  x =&gt; Gaussian(x, p.w)</code></pre>
-<p>If <code>step_rw</code> is supplied with a set of <code>Parameters</code>, it returns a function from the current state, which is assumed to be materialised, to the next state, which is a <code>Rand[Double]</code>. The actual random number isn’t generated until we sample from distribution represented by <code>Rand</code>. Next, we can construct a <code>MarkovChain</code> using the transition kernel <code>stepRw</code>:</p>
-<pre class="scala"><code>val random_walk: Process[Double] = MarkovChain(0.0)(step_rw(p))
-random_walk.
-  steps.
-  take(100)</code></pre>
-</div>
-</div>
-<div id="the-kalman-filter" class="section level2">
-<h2>The Kalman Filter</h2>
-<p>The Kalman Filter can be used to determine the posterior distribution of the state space given the current observation and the <span class="math inline">\(p(x_t|D_{t})\)</span>, where <span class="math inline">\(D_t = \{Y_t, D_{t-1}\}\)</span> and <span class="math inline">\(D_0\)</span> is the initial information, comprising of the parameters mode parameters <span class="math inline">\(W_0\)</span> and <span class="math inline">\(V_0\)</span> and the initial state <span class="math inline">\(x_0 \sim N(m_0, C_0)\)</span>. The full treatment of the Kalman Filter can be found in the excellent Bayesian Forecasting for Dynamic Models by West and Harrison.</p>
-<p>I will present the filtering equations for the simple model in this post. Suppose we start with the posterior distribution of <span class="math inline">\(x_{t-1} \sim N(m_{t-1}, C_{t-1})\)</span>. The first thing we need to do is advance the state, the equation to advance the state is a simple Markov transition <span class="math inline">\(x_t = x_{t-1} + \omega_t\)</span>. We simply add the system variance, the system variance is drawn from a Normal distribution with zero mean and variance <span class="math inline">\(W\)</span>. The <a href="https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables">sum of two Normal distributions is Normal</a> with the mean and variance added, hence the prior for <span class="math inline">\((x_t | D_{t-1}) \sim N(m_{t-1}, C_{t-1} + W)\)</span>.</p>
-<p>Next we need to construct the observation, using the observation equation which is commonly called the one-step forecast for the series, <span class="math inline">\(y_t = x_t + \nu_t\)</span>, since <span class="math inline">\(\nu_t\)</span> is Normally distributed with zero mean and variance <span class="math inline">\(V\)</span>, the distribution of the one step forecast is, <span class="math inline">\((y_t|D_{t-1}) \sim N(m_{t-1}, C_{t-1} + W + V)\)</span>.</p>
-<p>Now, we observe the true value of <span class="math inline">\(y_t\)</span> and are able to construct the posterior distribution of <span class="math inline">\((x_t | D_t) \sim N(m_t, C_t)\)</span>. <span class="math inline">\(m_t = m_{t-1} + A_t e_t\)</span> and <span class="math inline">\(C_t = A_tV\)</span>. <span class="math inline">\(A_t = \frac{C_{t-1} + W}{ C_{t-1} + W + V}\)</span> is known as the regression coefficient, and <span class="math inline">\(e_t = Y_t - m_{t-1}\)</span>. This result can be shown using properties of the multivariate normal distribution, and is presented in full in Bayesian Forecasting for Dynamic Models by West and Harrison.</p>
-<p>We now have the equations required to program up the Kalman Filter using Scala.</p>
-<pre class="scala"><code>case class FilterState(data: Data, p: Parameters)
-
-def filter(p: Parameters): (FilterState, Data) =&gt; FilterState = (s, d) =&gt; {
-  val r = s.p.c0 + p.w
-  val q = r + p.v
-  val e = d.observation - s.p.m0
-
-  // kalman gain
-  val k = r / q
-  val c1 = k * p.v
-  
-  // return the data with the expectation of the hidden state and the updated Parameters
-  FilterOut(Data(d.time, d.observation, Some(m1)), Parameters(p.v, p.w, m1, c1))
-} </code></pre>
-<p>The function filter simply takes in <code>Parameters</code> and one observation, represented by <code>Data</code> and returns the updated parameters required for the next step of the filter. Now we need to write a function which filters a sequence of <code>Data</code>, and returns a sequence consisting of the latent states, which we can do using the function <code>scanLeft</code>.</p>
-<p>A simplified function signature of <code>scanLeft</code> is given by: <code>scanLeft[A](l: List[A], z: A)(f: (A, A) =&gt; A): List[A]</code>. A list, <code>l</code> with elements of type <code>A</code> and an initial value, <code>z</code> also of type <code>A</code> if passed to a <code>Function2</code> and accumulated into another list with elements of type <code>A</code>. The function <code>f</code> is applied to each element of the list pairwise, starting the the head of the lift and the zero element, <code>z</code>. Consider calculating the <code>sum</code> of a list of numbers:</p>
-<pre class="scala"><code>val numbers = List(1,2,3,4,5)
-def sum(a: Int, b: Int): Int = a + b
-
-numbers.scanLeft(0)(sum)</code></pre>
-<p>The first calculation is (0 + 1) = 1, which is then used as the first argument in the pairwise <code>sum</code> function, then the second calculation is (1 + 2) = 3, the result of which is used again in the next application of <code>sum</code>. Each intermediate step of the calculation is retained and appended to a list to be output when the list of number is exhausted, so we end up with a cumulative sum, <code>List(0, 1, 3, 6, 10, 15)</code>. We can use <code>scanLeft</code> and the <code>Function2</code>, <code>filter</code> to calculate and retain the latent states in a DLM:</p>
-<pre class="scala"><code>def filterSeries(data: Seq[Data], initParams: Parameters): Seq[FilterOut] = {
-  val initFilter = FilterState(data.head, params, 0.0) // initialise the filter
-
-  data.
-    scanLeft(initFilter)(filter(initParams)).
-    drop(1)
+trait Dlm {
+  val f: DenseMatrix[Double]
+  val g: DenseMatrix[Double]
 }</code></pre>
-<p>Now, we can apply the filter to all the stations simultaneously:</p>
-<pre class="scala"><code>data.
-  groupBy{ case (id, _) =&gt; id }. //groups by id
-  map{ case (id, idAndData) =&gt;
-  (id, idAndData map (x =&gt; x._2)) }. // changes into (id, data) pairs
-  map{ case (id, data) =&gt;
-  (id, filterSeries(data.sortBy(_.time), p)) } // apply the filter to the sorted data</code></pre>
-<p>We can now plot the results of the filtering using R and ggplot2, overlaid with 95% prediction intervals.</p>
-<p><img src="figures/unnamed-chunk-3-1.png" width="672" /></p>
-<p>The full code is available in the <a href="https://github.com/jonnylaw/blog/tree/master/dlm">GitHub Repo</a> associated with this blog.</p>
+<p>Note that, for univariate observations <span class="math inline">\(F\)</span> will be a row vector, the recommended way to specify row vectors using <a href="https://github.com/scalanlp/breeze/">Breeze</a> is to use a matrix with a single row. The DLM also has associated parameters which we will assume are constant and model as a <code>case class</code>, a <code>case class</code> in Scala is a class with a default <code>apply</code> method used to construct instances of the class. The <code>case class</code> also has getter methods which can be used to access the values of the class.</p>
+<pre class="scala"><code>case class Parameters(v: Double, w: DenseMatrix[Double], m0: DenseVector[Double], c0: DenseMatrix[Double])</code></pre>
+<p>Then we can add a method to the <code>Dlm</code> trait to simulate forward given a value of the <code>Parameters</code>, firstly we will write a single step of the simulation:</p>
+<pre class="scala"><code>case class Data(time: Double, observation: Double, state: DenseVector[Double])
+
+def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
+    for {
+      w &lt;- MultivariateGaussian(DenseVector.zeros(p.w.cols), p.w)
+      x1 = g * d.state + w
+      v &lt;- Gaussian(0, p.v)
+      y = f.toDenseVector dot x1 + v
+    } yield Data(d.time + 1.0, y, x1)
+  }</code></pre>
+<p>This function contains a for comprehension, the <code>&lt;-</code> symbol represents either a <code>map</code> or a <code>flatMap</code>. Since the <code>w</code> and <code>v</code> are <code>Rand[Double]</code> values, we need to access the value inside of the <code>Rand</code> and perform a function on it, the for comprehension desugars to:</p>
+<pre class="scala"><code>MultivariateGaussian(DenseVector.zeros(p.w.cols), p.w).
+  flatMap(w =&gt; {
+    val x1 = g * d.state + w
+    Gaussian(0, p.v).map(v =&gt; {
+      val y = f.toDenseVector dot x1 + v
+      Data(d.time + 1.0, y, x1)
+    })}
+    )</code></pre>
+<p>The desugared chain of <code>flatMap</code> and <code>map</code> evaluates to the same result, but the for comprehesion is more readable. The for comprehension provides a clean and elegent way to work within the context of a Monad, <code>Rand</code> is an example of a Monad representing a distribution.</p>
+<p>Now, we can use the <code>MarkovChain</code> breeze object to simulate the full series:</p>
+<pre class="scala"><code>def simMarkov(p: Parameters): Rand[Process[Data]] = {
+  for {
+    x0 &lt;- MultivariateGaussian(p.m0, p.c0)
+    y0 &lt;- Gaussian(f.toDenseVector dot x0, p.v)
+    init = Data(0.0, y0, x0)
+  } yield MarkovChain(init)(simStep(p))
+}</code></pre>
+<p>Note that the Markov chain is a <code>Rand[Process[Double]]</code>, this is not the most elegant and I’m open to suggestions on a better way to formulate this. Once we have defined a Markov chain, we must draw from it which returns a <code>Process[Double]</code>, the initial draw is to sample from the initial state distribution <span class="math inline">\(\mathcal{N}(m_0, C_0)\)</span>. Next, we can sample from the <code>Process</code> and plot it. A simulation from the seasonal DLM, with parameters <span class="math inline">\(V = 3\)</span> and <span class="math inline">\(W = I_6\)</span>, is given below:</p>
+<p><img src="figures/unnamed-chunk-1-1.png" width="672" /></p>
 </div>
 
 
@@ -358,35 +334,17 @@ numbers.scanLeft(0)(sum)</code></pre>
     <footer>
         <ul class="stats">
     
-        
-
-        
-        
-            <li>
-                
-                
-                    
-
-                    
-
-                    
-
-                    
-                        Categories
-                    
-                
-            </li>
-        
-    
 
     
     
+</ul>
+
     </footer>
 </article>
 <ul class="actions pagination">
     
-        <li><a href="./post/PracticalAkkaStreams/"
-                class="button big previous">Practical Introduction to Akka Streaming</a></li>
+        <li><a href="./post/KalmanFilter/"
+                class="button big previous">The Kalman Filter in Scala</a></li>
     
 
     
@@ -399,9 +357,9 @@ numbers.scanLeft(0)(sum)</code></pre>
             <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'shortname';
-    var disqus_identifier = '\/post\/KalmanFilter\/';
-    var disqus_title = 'The Kalman Filter in Scala';
-    var disqus_url = '\/post\/KalmanFilter\/';
+    var disqus_identifier = '\/post\/SeasonalDlm\/';
+    var disqus_title = 'Seasonal DLM';
+    var disqus_url = '\/post\/SeasonalDlm\/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -532,6 +490,20 @@ numbers.scanLeft(0)(sum)</code></pre>
                     <li>
                         <article>
                             <header>
+                                <h3><a href="./post/SeasonalDlm/">Seasonal DLM</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-12-13'>
+                                    December 13, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
                                 <h3><a href="./post/KalmanFilter/">The Kalman Filter in Scala</a></h3>
                                 
                                     
@@ -553,6 +525,20 @@ numbers.scanLeft(0)(sum)</code></pre>
                                 <time class="published" datetime=
                                     '2016-12-01'>
                                     December 1, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="./post/Temperature/"></a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '0001-01-01'>
+                                    January 1, 0001</time>
                             </header>
                         </article>
                     </li>

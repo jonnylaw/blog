@@ -1,0 +1,41 @@
+---
+title: "Visualising Temperature Data in UO"
+author: "Jonny Law"
+date: "2016-12-13T12:13:14-05:00"
+draft: true
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(scales)
+```
+
+The [Urban Observatory](http://uoweb1.ncl.ac.uk/) is a collection of sensors deployed in Newcastle Upon Tyne, measuring weather and environment, traffic and parking and tidal and river level. Let's first consider temperature data located around St James' Park, there is a high density of sensors here and temperature is easy to identify faulty sensors, since we have familiarity with the type of data.
+
+Let's first look at a single sensor on the site, and examine it's temperature readings
+
+```{r, echo=FALSE, fig.cap="Temperature During September 2016 at a single Sensor"}
+one_sensor = read_csv("../../../PhD/MultivariateAnalysis/new_new_emote_2905.csv")
+
+one_sensor %>% 
+  filter(timestamp <= "2016-09-30") %>%
+  filter(reading == "Temperature") %>%
+  ggplot(aes(x = timestamp, y = value)) +
+  scale_x_datetime(labels = date_format("%d-%a"), breaks = date_breaks("3 day")) +
+  geom_line()
+```
+
+In this figure, we can see a strong daily seasonal trend.
+
+## Modelling the data
+
+```{r}
+one_sensor %>%
+  filter(timestamp <= "2016-09-07") %>%
+  filter(reading == "Temperature") %>%
+  ggplot(aes(x = value)) + geom_histogram(bins = 50)
+```
+
+
+In order to fit the model

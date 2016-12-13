@@ -6,8 +6,106 @@
     <description>Recent content in Post-rsses on Probabilistic Programming in Scala</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 12 Dec 2016 12:13:14 -0500</lastBuildDate>
+    <lastBuildDate>Tue, 13 Dec 2016 12:13:14 -0500</lastBuildDate>
     <atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Seasonal DLM</title>
+      <link>/post/SeasonalDlm/</link>
+      <pubDate>Tue, 13 Dec 2016 12:13:14 -0500</pubDate>
+      
+      <guid>/post/SeasonalDlm/</guid>
+      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
+
+/BLOGDOWN-BODY-BEFORE --&gt;
+
+&lt;div id=&#34;the-seasonal-dlm&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;The Seasonal DLM&lt;/h2&gt;
+&lt;p&gt;I introduced the class of state space models called DLMs in a previous post covering the &lt;a href=&#34;KalmanFilter/&#34;&gt;Kalman Filter&lt;/a&gt;. The seasonal DLM is similar to the first order DLM, however it incorporates a deterministic transformation to the state, in order to capture cyclic trends. Remember a general DLM can be written as:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[\begin{align}
+y_t &amp;amp;= F_t x_t + \nu_t, \qquad \mathcal{N}(0, V_t), \\
+x_t &amp;amp;= G_t x_{t-1} + \omega_t, \quad \mathcal{N}(0, W_t).
+\end{align}\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;In the fourier-form seasonal DLM, the state is transformed by a block diagonal matrix, &lt;span class=&#34;math inline&#34;&gt;\(G_t\)&lt;/span&gt;, containing rotation matrices. The rotation matrix is given by:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[R = \begin{pmatrix}
+\cos(\omega) &amp;amp; -\sin(\omega) \\
+\sin(\omega) &amp;amp; \cos(\omega)
+\end{pmatrix},\]&lt;/span&gt; where &lt;span class=&#34;math inline&#34;&gt;\(\omega\)&lt;/span&gt; is the frequency of the seasonality. In practice, it is easier to specify the period of the seasonality, &lt;span class=&#34;math inline&#34;&gt;\(T\)&lt;/span&gt;, which is related to the frequency: &lt;span class=&#34;math inline&#34;&gt;\(\omega = 2 \pi/T\)&lt;/span&gt;. This means if we have data measured at hourly intervals and we believe the process has a daily cycle, then we will set &lt;span class=&#34;math inline&#34;&gt;\(T = 24\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;In order to model higher harmonics of the seasonality, we combine rotation matrices together into a block diagonal matrix, to form the &lt;span class=&#34;math inline&#34;&gt;\(G\)&lt;/span&gt; matrix, for instance with 3 harmonics the system matrix is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[G = \begin{pmatrix}
+\cos(\omega) &amp;amp; -\sin(\omega) &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0\\
+\sin(\omega) &amp;amp; \cos(\omega) &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 \\
+0 &amp;amp; 0 &amp;amp; \cos(2\omega) &amp;amp; -\sin(2\omega) &amp;amp; 0&amp;amp; 0 \\
+0 &amp;amp; 0 &amp;amp; \sin(2\omega) &amp;amp; \cos(2\omega) &amp;amp; 0 &amp;amp; 0 \\
+0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; \cos(3\omega) &amp;amp; -\sin(3\omega) \\
+0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; \sin(3\omega) &amp;amp; \cos(3\omega) \\
+\end{pmatrix}.\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;In this case, the latent state, &lt;span class=&#34;math inline&#34;&gt;\(x_t\)&lt;/span&gt; is six-dimensional. This means system evolution variance-covariance matrix, &lt;span class=&#34;math inline&#34;&gt;\(W_t\)&lt;/span&gt; is a six by six matrix.&lt;/p&gt;
+&lt;p&gt;First we should make a trait in Scala representing a DLM, this allows us to specify methods on the &lt;code&gt;dlm&lt;/code&gt; object, independent of the concrete reasisation of the DLM. This means in the future we can create new DLMs, and not have to write functions to simulate from them again. The trait will be for a DLM with constant &lt;span class=&#34;math inline&#34;&gt;\(F\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(G\)&lt;/span&gt; matrices.&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import breeze.linalg._
+
+trait Dlm {
+  val f: DenseMatrix[Double]
+  val g: DenseMatrix[Double]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that, for univariate observations &lt;span class=&#34;math inline&#34;&gt;\(F\)&lt;/span&gt; will be a row vector, the recommended way to specify row vectors using &lt;a href=&#34;https://github.com/scalanlp/breeze/&#34;&gt;Breeze&lt;/a&gt; is to use a matrix with a single row. The DLM also has associated parameters which we will assume are constant and model as a &lt;code&gt;case class&lt;/code&gt;, a &lt;code&gt;case class&lt;/code&gt; in Scala is a class with a default &lt;code&gt;apply&lt;/code&gt; method used to construct instances of the class. The &lt;code&gt;case class&lt;/code&gt; also has getter methods which can be used to access the values of the class.&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;case class Parameters(v: Double, w: DenseMatrix[Double], m0: DenseVector[Double], c0: DenseMatrix[Double])&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Then we can add a method to the &lt;code&gt;Dlm&lt;/code&gt; trait to simulate forward given a value of the &lt;code&gt;Parameters&lt;/code&gt;, firstly we will write a single step of the simulation:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;case class Data(time: Double, observation: Double, state: DenseVector[Double])
+
+def simStep(p: Parameters): Data =&amp;gt; Rand[Data] = d =&amp;gt; {
+    for {
+      w &amp;lt;- MultivariateGaussian(DenseVector.zeros(p.w.cols), p.w)
+      x1 = g * d.state + w
+      v &amp;lt;- Gaussian(0, p.v)
+      y = f.toDenseVector dot x1 + v
+    } yield Data(d.time + 1.0, y, x1)
+  }&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This function contains a for comprehension, the &lt;code&gt;&amp;lt;-&lt;/code&gt; symbol represents either a &lt;code&gt;map&lt;/code&gt; or a &lt;code&gt;flatMap&lt;/code&gt;. Since the &lt;code&gt;w&lt;/code&gt; and &lt;code&gt;v&lt;/code&gt; are &lt;code&gt;Rand[Double]&lt;/code&gt; values, we need to access the value inside of the &lt;code&gt;Rand&lt;/code&gt; and perform a function on it, the for comprehension desugars to:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;MultivariateGaussian(DenseVector.zeros(p.w.cols), p.w).
+  flatMap(w =&amp;gt; {
+    val x1 = g * d.state + w
+    Gaussian(0, p.v).map(v =&amp;gt; {
+      val y = f.toDenseVector dot x1 + v
+      Data(d.time + 1.0, y, x1)
+    })}
+    )&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The desugared chain of &lt;code&gt;flatMap&lt;/code&gt; and &lt;code&gt;map&lt;/code&gt; evaluates to the same result, but the for comprehesion is more readable. The for comprehension provides a clean and elegent way to work within the context of a Monad, &lt;code&gt;Rand&lt;/code&gt; is an example of a Monad representing a distribution.&lt;/p&gt;
+&lt;p&gt;Now, we can use the &lt;code&gt;MarkovChain&lt;/code&gt; breeze object to simulate the full series:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def simMarkov(p: Parameters): Rand[Process[Data]] = {
+  for {
+    x0 &amp;lt;- MultivariateGaussian(p.m0, p.c0)
+    y0 &amp;lt;- Gaussian(f.toDenseVector dot x0, p.v)
+    init = Data(0.0, y0, x0)
+  } yield MarkovChain(init)(simStep(p))
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that the Markov chain is a &lt;code&gt;Rand[Process[Double]]&lt;/code&gt;, this is not the most elegant and I’m open to suggestions on a better way to formulate this. Once we have defined a Markov chain, we must draw from it which returns a &lt;code&gt;Process[Double]&lt;/code&gt;, the initial draw is to sample from the initial state distribution &lt;span class=&#34;math inline&#34;&gt;\(\mathcal{N}(m_0, C_0)\)&lt;/span&gt;. Next, we can sample from the &lt;code&gt;Process&lt;/code&gt; and plot it. A simulation from the seasonal DLM, with parameters &lt;span class=&#34;math inline&#34;&gt;\(V = 3\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(W = I_6\)&lt;/span&gt;, is given below:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;#####../content/post/SeasonalDlm_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+
+
+&lt;!-- dynamically load mathjax for compatibility with self-contained --&gt;
+&lt;script&gt;
+  (function () {
+    var script = document.createElement(&#34;script&#34;);
+    script.type = &#34;text/javascript&#34;;
+    script.src  = &#34;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&#34;;
+    if (location.protocol !== &#34;file:&#34; &amp;&amp; /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, &#39;&#39;);
+    document.getElementsByTagName(&#34;head&#34;)[0].appendChild(script);
+  })();
+&lt;/script&gt;
+
+&lt;!-- BLOGDOWN-HEAD
+
+
+
+
+
+
+/BLOGDOWN-HEAD --&gt;
+</description>
+    </item>
     
     <item>
       <title>The Kalman Filter in Scala</title>
@@ -15,15 +113,7 @@
       <pubDate>Mon, 12 Dec 2016 12:13:14 -0500</pubDate>
       
       <guid>/post/KalmanFilter/</guid>
-      <description>---
-title: &#34;The Kalman Filter in Scala&#34;
-author: &#34;Jonny Law&#34;
-date: &#39;2016-12-12T12:13:14-05:00&#39;
-categories: scala
----
-
-
-&lt;!-- BLOGDOWN-BODY-BEFORE
+      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
 
 /BLOGDOWN-BODY-BEFORE --&gt;
 
@@ -291,6 +381,56 @@ val zipStream = RunnableGraph.fromGraph(FlowGraph.create() { implicit builder =&
 &lt;div id=&#34;summary&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Summary&lt;/h2&gt;
 &lt;p&gt;We have covered a few ways to express simple streams using Akka Streaming. The real power of Akka streaming is when it is combined with file or connection handling. Streaming libraries can be used to process extremely large, or unbounded, data files using a bounded amount of computational power. This is useful when dealing with infinite sources of data, such as streaming data from Twitter.&lt;/p&gt;
+&lt;/div&gt;
+
+
+
+&lt;!-- BLOGDOWN-HEAD
+
+
+
+
+
+
+/BLOGDOWN-HEAD --&gt;
+</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>/post/Temperature/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/post/Temperature/</guid>
+      <description>/BLOGDOWN-BODY-BEFORE --&gt;
+
+&lt;p&gt;The &lt;a href=&#34;http://uoweb1.ncl.ac.uk/&#34;&gt;Urban Observatory&lt;/a&gt; is a collection of sensors deployed in Newcastle Upon Tyne, measuring weather and environment, traffic and parking and tidal and river level. Let’s first consider temperature data located around St James’ Park, there is a high density of sensors here and temperature is easy to identify faulty sensors, since we have familiarity with the type of data.&lt;/p&gt;
+&lt;p&gt;Let’s first look at a single sensor on the site, and examine it’s temperature readings&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;## Parsed with column specification:
+## cols(
+##   theme = col_character(),
+##   reading = col_character(),
+##   value = col_double(),
+##   timestamp = col_datetime(format = &amp;quot;&amp;quot;),
+##   sensor_name = col_character(),
+##   lon = col_double(),
+##   lat = col_double()
+## )&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;figure&#34;&gt;&lt;span id=&#34;fig:unnamed-chunk-1&#34;&gt;&lt;/span&gt;
+&lt;img src=&#34;Temperature_files/figure-html/unnamed-chunk-1-1.png&#34; alt=&#34;Temperature During September 2016 at a single Sensor&#34; width=&#34;672&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;
+Figure 1: Temperature During September 2016 at a single Sensor
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;In this figure, we can see a strong daily seasonal trend.&lt;/p&gt;
+&lt;div id=&#34;modelling-the-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Modelling the data&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;one_sensor %&amp;gt;%
+  filter(timestamp &amp;lt;= &amp;quot;2016-09-07&amp;quot;) %&amp;gt;%
+  filter(reading == &amp;quot;Temperature&amp;quot;) %&amp;gt;%
+  ggplot(aes(x = value)) + geom_histogram(bins = 50)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;Temperature_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;In order to fit the model&lt;/p&gt;
 &lt;/div&gt;
 
 
