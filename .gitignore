@@ -19,7 +19,6 @@
 *.pdf
 *.dvi
 *.eps
-*.png
 *concordance.tex
 
 # SyncTeX
