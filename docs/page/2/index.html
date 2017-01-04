@@ -34,7 +34,7 @@
 <meta property="og:url" content="/" />
 
 
-<meta property="og:updated_time" content="2016-01-04T12:13:14-05:00"/>
+<meta property="og:updated_time" content="2016-12-01T12:13:14-05:00"/>
 
 
 
@@ -186,6 +186,10 @@
 
                 
                     <li>
+                        <a href="../../post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
+                    </li>
+                
+                    <li>
                         <a href="../../post/SeasonalDlm/"><p>Seasonal DLM</p></a>
                     </li>
                 
@@ -195,10 +199,6 @@
                 
                     <li>
                         <a href="../../post/PracticalAkkaStreams/"><p>Practical Introduction to Akka Streaming</p></a>
-                    </li>
-                
-                    <li>
-                        <a href="../../post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
                     </li>
                 
                     <li>
@@ -224,7 +224,7 @@
     <header>
     <div class="title">
         
-            <h2><a href="../../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h2>
+            <h2><a href="../../post/PracticalAkkaStreams/">Practical Introduction to Akka Streaming</a></h2>
         
         
     </div>
@@ -234,11 +234,11 @@
         
 
         <time class="published"
-            datetime='2016-01-04'>
-            January 4, 2016</time>
+            datetime='2016-12-01'>
+            December 1, 2016</time>
         <span class="author">Jonny Law</span>
         
-            <p>5 minute read</p>
+            <p>7 minute read</p>
         
         
     </div>
@@ -246,12 +246,11 @@
 
     
 
-    <p>In this post I will give a practical introduction to some useful structures for handling failure in functional programming.
-Referential Transparency One of the most important properties of functional programming is referential transparency and programming with pure functions. This means we can substitute a pure function with its result, for intance if we have the function def f = 1 + 2, we can replace every occurence of f with 3 and the final evaluation will remain unchanged</p>
+    <p>Akka Streaming is a streaming IO engine used to build high performance, fault tolerant and scalable streaming data services. In this post I will describe how you can implement some of the features included in Akka Streaming using only simple streams of integers and strings, although the true power of Akka streams only becomes apparent when we are consuming data from real sources such as Websockets, databases and files. Akka is available in Java and Scala, but I will be focusing on the Scala API in this post.</p>
 
     <footer>
         <ul class="actions">
-            <li><a href="../../post/FailureInFunctionalProgramming/" class="button big">Continue Reading</a></li>
+            <li><a href="../../post/PracticalAkkaStreams/" class="button big">Continue Reading</a></li>
         </ul>
         <ul class="stats">
     
@@ -443,6 +442,20 @@ Let’s first look at a single sensor on the site, and examine it’s temperatur
                     <li>
                         <article>
                             <header>
+                                <h3><a href="../../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-01-04'>
+                                    January 4, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
                                 <h3><a href="../../post/SeasonalDlm/">Seasonal DLM</a></h3>
                                 
                                     
@@ -478,20 +491,6 @@ Let’s first look at a single sensor on the site, and examine it’s temperatur
                                 <time class="published" datetime=
                                     '2016-12-01'>
                                     December 1, 2016</time>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <h3><a href="../../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
-                                
-                                    
-                                
-                                <time class="published" datetime=
-                                    '2016-01-04'>
-                                    January 4, 2016</time>
                             </header>
                         </article>
                     </li>

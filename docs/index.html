@@ -28,7 +28,7 @@
 <meta property="og:url" content="/" />
 
 
-<meta property="og:updated_time" content="2016-12-13T12:13:14-05:00"/>
+<meta property="og:updated_time" content="2017-01-04T12:13:14-05:00"/>
 
 
 
@@ -191,6 +191,10 @@
 
                 
                     <li>
+                        <a href="./post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
+                    </li>
+                
+                    <li>
                         <a href="./post/SeasonalDlm/"><p>Seasonal DLM</p></a>
                     </li>
                 
@@ -200,10 +204,6 @@
                 
                     <li>
                         <a href="./post/PracticalAkkaStreams/"><p>Practical Introduction to Akka Streaming</p></a>
-                    </li>
-                
-                    <li>
-                        <a href="./post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
                     </li>
                 
                     <li>
@@ -224,7 +224,7 @@
     <header>
     <div class="title">
         
-            <h2><a href="./post/SeasonalDlm/">Seasonal DLM</a></h2>
+            <h2><a href="./post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h2>
         
         
     </div>
@@ -234,11 +234,11 @@
         
 
         <time class="published"
-            datetime='2016-12-13'>
-            December 13, 2016</time>
+            datetime='2017-01-04'>
+            January 4, 2017</time>
         <span class="author">Jonny Law</span>
         
-            <p>4 minute read</p>
+            <p>5 minute read</p>
         
         
     </div>
@@ -255,82 +255,90 @@
     <div id="content">
 
 
-<div id="the-seasonal-dlm" class="section level2">
-<h2>The Seasonal DLM</h2>
-<p>I introduced the class of state space models called DLMs in a previous post covering the <a href="KalmanFilter/">Kalman Filter</a>. The seasonal DLM is similar to the first order DLM, however it incorporates a deterministic transformation to the state, in order to capture cyclic trends. Remember a general DLM can be written as:</p>
-<p><span class="math display">\[\begin{align}
-y_t &amp;= F_t x_t + \nu_t, \qquad \mathcal{N}(0, V_t), \\
-x_t &amp;= G_t x_{t-1} + \omega_t, \quad \mathcal{N}(0, W_t).
-\end{align}\]</span></p>
-<p>In the fourier-form seasonal DLM, the state is transformed by a block diagonal matrix, <span class="math inline">\(G_t\)</span>, containing rotation matrices. The rotation matrix is given by:</p>
-<p><span class="math display">\[R = \begin{pmatrix}
-\cos(\omega) &amp; -\sin(\omega) \\
-\sin(\omega) &amp; \cos(\omega)
-\end{pmatrix},\]</span> where <span class="math inline">\(\omega\)</span> is the frequency of the seasonality. In practice, it is easier to specify the period of the seasonality, <span class="math inline">\(T\)</span>, which is related to the frequency: <span class="math inline">\(\omega = 2 \pi/T\)</span>. This means if we have data measured at hourly intervals and we believe the process has a daily cycle, then we will set <span class="math inline">\(T = 24\)</span>.</p>
-<p>In order to model higher harmonics of the seasonality, we combine rotation matrices together into a block diagonal matrix, to form the <span class="math inline">\(G\)</span> matrix, for instance with 3 harmonics the system matrix is:</p>
-<p><span class="math display">\[G = \begin{pmatrix}
-\cos(\omega) &amp; -\sin(\omega) &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
-\sin(\omega) &amp; \cos(\omega) &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
-0 &amp; 0 &amp; \cos(2\omega) &amp; -\sin(2\omega) &amp; 0&amp; 0 \\
-0 &amp; 0 &amp; \sin(2\omega) &amp; \cos(2\omega) &amp; 0 &amp; 0 \\
-0 &amp; 0 &amp; 0 &amp; 0 &amp; \cos(3\omega) &amp; -\sin(3\omega) \\
-0 &amp; 0 &amp; 0 &amp; 0 &amp; \sin(3\omega) &amp; \cos(3\omega) \\
-\end{pmatrix}.\]</span></p>
-<p>In this case, the latent state, <span class="math inline">\(x_t\)</span> is six-dimensional. This means system evolution variance-covariance matrix, <span class="math inline">\(W_t\)</span> is a six by six matrix.</p>
-<p>First we should make a trait in Scala representing a DLM, this allows us to specify methods on the <code>dlm</code> object, independent of the concrete reasisation of the DLM. This means in the future we can create new DLMs, and not have to write functions to simulate from them again. The trait will be for a DLM with constant <span class="math inline">\(F\)</span> and <span class="math inline">\(G\)</span> matrices.</p>
-<pre class="scala"><code>import breeze.linalg._
-
-trait Dlm {
-  val f: DenseMatrix[Double]
-  val g: DenseMatrix[Double]
+<p>In this post I will give a practical introduction to some useful structures for handling failure in functional programming.</p>
+<div id="referential-transparency" class="section level2">
+<h2>Referential Transparency</h2>
+<p>One of the most important properties of functional programming is referential transparency and programming with pure functions. This means we can substitute a pure function with its result, for intance if we have the function <code>def f = 1 + 2</code>, we can replace every occurence of <code>f</code> with <code>3</code> and the final evaluation will remain unchanged</p>
+<p>This simple idea can lead to difficulties when considering functions which involve side effects, such as reading from external sources or generating random numbers. One example of a side effect is an exception, an imperative programmer might write a function to calculate a square root as:</p>
+<pre class="scala"><code>def unsafe_sqrt(a: Double): Double = {
+  if (a &gt; 0) math.sqrt(a)
+  else throw new Exception(&quot;Can&#39;t calculate square root of negative number&quot;)
 }</code></pre>
-<p>Note that, for univariate observations <span class="math inline">\(F\)</span> will be a row vector, the recommended way to specify row vectors using <a href="https://github.com/scalanlp/breeze/">Breeze</a> is to use a matrix with a single row. The DLM also has associated parameters which we will assume are constant and model as a <code>case class</code>, a <code>case class</code> in Scala is a class with a default <code>apply</code> method used to construct instances of the class. The <code>case class</code> also has getter methods which can be used to access the values of the class.</p>
-<pre class="scala"><code>case class Parameters(v: Double, w: DenseMatrix[Double], m0: DenseVector[Double], c0: DenseMatrix[Double])</code></pre>
-<p>Then we can add a method to the <code>Dlm</code> trait to simulate forward given a value of the <code>Parameters</code>, firstly we will write a single step of the simulation:</p>
-<pre class="scala"><code>case class Data(time: Double, observation: Double, state: DenseVector[Double])
-
-def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
-    for {
-      w &lt;- MultivariateGaussian(DenseVector.zeros(p.w.cols), p.w)
-      x1 = g * d.state + w
-      v &lt;- Gaussian(0, p.v)
-      y = f.toDenseVector dot x1 + v
-    } yield Data(d.time + 1.0, y, x1)
-  }</code></pre>
-<p>This function contains a for comprehension, the <code>&lt;-</code> symbol represents either a <code>map</code> or a <code>flatMap</code>. Since the <code>w</code> and <code>v</code> are <code>Rand[Double]</code> values, we need to access the value inside of the <code>Rand</code> and perform a function on it, the for comprehension desugars to:</p>
-<pre class="scala"><code>MultivariateGaussian(DenseVector.zeros(p.w.cols), p.w).
-  flatMap(w =&gt; {
-    val x1 = g * d.state + w
-    Gaussian(0, p.v).map(v =&gt; {
-      val y = f.toDenseVector dot x1 + v
-      Data(d.time + 1.0, y, x1)
-    })}
-    )</code></pre>
-<p>The desugared chain of <code>flatMap</code> and <code>map</code> evaluates to the same result, but the for comprehesion is more readable. The for comprehension provides a clean and elegent way to work within the context of a Monad, <code>Rand</code> is an example of a Monad representing a distribution.</p>
-<p>Now, we can use the <code>MarkovChain</code> breeze object to simulate the full series:</p>
-<pre class="scala"><code>def simMarkov(p: Parameters): Rand[Process[Data]] = {
-  for {
-    x0 &lt;- MultivariateGaussian(p.m0, p.c0)
-    y0 &lt;- Gaussian(f.toDenseVector dot x0, p.v)
-    init = Data(0.0, y0, x0)
-  } yield MarkovChain(init)(simStep(p))
+<p>This compiles fine, however if we wrote this function for an end user and they didn’t look at the implementation they might not know the function can possibly return an exception.</p>
+</div>
+<div id="try" class="section level2">
+<h2>Try</h2>
+<p>In order to make it clear that a function can fail, we can return a <code>Try</code>:</p>
+<pre class="scala"><code>def try_sqrt(a: Double): Try[Double] = {
+  if (a &gt; 0) Success(math.sqrt(a))
+  else Failure(throw new Exception(&quot;Can&#39;t calculate square root of negative number&quot;))
 }</code></pre>
-<p>Note that the Markov chain is a <code>Rand[Process[Double]]</code>, this is not the most elegant and I’m open to suggestions on a better way to formulate this. Once we have defined a Markov chain, we must draw from it which returns a <code>Process[Double]</code>, the initial draw is to sample from the initial state distribution <span class="math inline">\(\mathcal{N}(m_0, C_0)\)</span>. Next, we can sample from the <code>Process</code> and plot it. A simulation from the seasonal DLM, with parameters <span class="math inline">\(V = 3\)</span> and <span class="math inline">\(W = I_6\)</span>, is given below:</p>
-<p><img src="figures/unnamed-chunk-1-1.png" width="672" /></p>
+<p>Now, if someone were to use this function they would be forced to deal with the <code>Try</code> return type and understand that the function can return an exception. Try is actually an algebraic datatype (ADT), an illustrative implementation is:</p>
+<pre class="scala"><code>sealed trait Try[+A]
+case class Success[+A](a: A) extends Try[A]
+case class Failure[+A](exception: Throwable) extends Try[A]</code></pre>
+<p>This means that a <code>Try</code> can either be a <code>Success</code> or <code>Failure</code>. Learn more about <code>Try</code> in Daniel Westheide’s excellent <a href="http://danielwestheide.com/blog/2012/12/26/the-neophytes-guide-to-scala-part-6-error-handling-with-try.html">Neophyte’s Guide to Scala</a>.</p>
+</div>
+<div id="option" class="section level2">
+<h2>Option</h2>
+<p>Another simple structure to represent computations which may fail is <code>Option</code>, this is an algebraic datatype:</p>
+<pre class="scala"><code>sealed trait Option[+A]
+case class Some[+A](a: A) extends Option[A]
+case class None extends Option[Nothing]</code></pre>
+<p>In this case, option can either contain a value using the constructor <code>Some</code>, or can represent the absense of a value using <code>None</code>. This provides less information on failure that <code>Try</code>, but nevertheless is sometimes useful. We can re-write the <code>sqrt</code> function to return an optional value</p>
+<pre class="scala"><code>def option_sqrt(a: Double): Option[Double] = {
+  if (a &gt; 0) Some(math.sqrt(a))
+  else None
+}</code></pre>
+<p>Now, when provide an incorrect argument to the function, we get <code>None</code> as the result.</p>
+</div>
+<div id="chaining-computations" class="section level1">
+<h1>Chaining Computations</h1>
+<p>In real world functional codebases we compose programs from many small functions. Let’s consider the problem of how to apply <code>def sqrt(a: Double): Option[Double]</code> twice. A naive attempt would be to simply compose the functions as we would for the Scala math library:</p>
+<pre class="scala"><code>def sqrt_twice = unsafe_sqrt _ compose unsafe_sqrt _</code></pre>
+<p>The <code>_</code> represents partial application of <code>unsafe_sqrt</code>, if we try to compose the <code>option_sqrt</code> function as in this example we will get a type mismatch. One application of <code>option_sqrt</code> returns a typle <code>Option[Double]</code>, but we need the type <code>Double</code>. Luckily <code>Option</code> has a function defined on it for composing operations like this:</p>
+<pre class="scala"><code>def flatMap[A, B](a: Option[A])(f: A =&gt; Option[B]): Option[B]</code></pre>
+<p>We can now use <code>flatMap</code> to compose <code>option_sqrt</code>:</p>
+<pre class="scala"><code>def sqrt_twice_option(x: Double): Option[Double] = 
+  option_sqrt(x) flatMap option_sqrt</code></pre>
+<p>Now we can calculate <code>sqrt_twice_option(81) = Some(3.0)</code>.</p>
+<p>We can compose <code>try_sqrt</code> in the same way:</p>
+<pre class="scala"><code>def sqrt_twice_try(x: Double): Try[Double] = 
+  try_sqrt(81) flatMap try_sqrt</code></pre>
+<p>Now, what if we want to compose <code>option_sqrt</code> and <code>try_sqrt</code>. This is not an easy problem in general, however the Scala standard library implements a <code>toOption</code> method on <code>Try</code> values. Hence we can just convert the output of <code>try_sqrt</code> to an <code>Option</code>, however we lose the text from the exception upon failure, which could illuminating in the event of a failure. Let’s consider a more general way to compose the two.</p>
+<div id="nested-maps" class="section level2">
+<h2>Nested Maps</h2>
+<p><code>Option</code> and <code>Try</code> are both monads (strictly <code>Try</code> is <a href="https://issues.scala-lang.org/browse/SI-6284">not a proper monad</a>), which means they are equipped with two methods which satisfy the monad laws. The two methods defined for all monads are:</p>
+<pre class="scala"><code>trait Monad[A, M[_]] {
+  def flatMap[B](f: A =&gt; M[B]): M[B]
+  def pure(a: A): M[A]
+}</code></pre>
+<p>We can define all the functions on <code>Try</code> and <code>Option</code> using these two functions, for instance <code>map</code>:</p>
+<pre class="scala"><code>def map[B](f: A =&gt; B): M[B] = this.flatMap(a =&gt; pure(f(a)))</code></pre>
+<p>Now, we can use the <code>map</code> function to compose <code>option_sqrt</code> and <code>try_sqrt</code>:</p>
+<pre class="scala"><code>def sqrt_twice(a: Double): Try[Option[Double]] = try_sqrt(a) map option_sqrt</code></pre>
+<p>However, what if we want to apply another function to a value returned by this function:</p>
+<pre class="scala"><code>def f(a: Double) = a + 1
+sqrt_twice(81) map (_.map(f))
+// Success(Some(4.0))</code></pre>
+<p>We get the correct value, but we have to apply <code>map</code> twice, this seems cumbersome. There is a better way!</p>
+</div>
+<div id="monad-transformers" class="section level2">
+<h2>Monad Transformers</h2>
+<p>The functional programming library <a href="http://typelevel.org/cats/">cats</a>, short for category, has some built in types for dealing with nesting in a more elegent way. The type <code>OptionT[F[_], A]</code> can be used instead of <code>F[Option[A]]</code>, our <code>F[_]</code> type in this case is <code>Try[A]</code></p>
+<pre class="scala"><code>import cats.implicits._
+import cats.data.OptionT
+
+def sqrt_twice_trans(a: Double): OptionT[Try, Double] = 
+  OptionT.fromOption[Try](option_sqrt(a)) flatMap (b =&gt; OptionT.liftF(try_sqrt(b))</code></pre>
+<p><code>OptionT</code> provides the function <code>fromOption</code> to transform the result of the <code>option_sqrt</code> function into the <code>OptionT</code> monad. The function <code>liftF</code> is used to lift any monad, in this case <code>Try</code> into the <code>OptionT</code> monad. This compiles and we if we now try to apply the function <code>def f(a: Double) = a + 1</code> to the result of this function we only need a single call to <code>map</code>. This is because <code>OptionT</code> is also a monad:</p>
+<pre class="scala"><code>sqrt_twice_trans(81) map f
+// OptionT(Success(Some(4.0)))</code></pre>
+<p>This may seem like quite a lot of effort to remove a call to map, but removing unecessary duplication can help with readability of code, and enable bugs to be spotted earlier.</p>
+</div>
 </div>
 
 
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
 
 
     </div>
@@ -338,17 +346,35 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
     <footer>
         <ul class="stats">
     
+        
+
+        
+        
+            <li>
+                
+                
+                    
+
+                    
+
+                    
+
+                    
+                        Categories
+                    
+                
+            </li>
+        
+    
 
     
     
-</ul>
-
     </footer>
 </article>
 <ul class="actions pagination">
     
-        <li><a href="./post/KalmanFilter/"
-                class="button big previous">The Kalman Filter in Scala</a></li>
+        <li><a href="./post/SeasonalDlm/"
+                class="button big previous">Seasonal DLM</a></li>
     
 
     
@@ -361,9 +387,9 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
             <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'shortname';
-    var disqus_identifier = '\/post\/SeasonalDlm\/';
-    var disqus_title = 'Seasonal DLM';
-    var disqus_url = '\/post\/SeasonalDlm\/';
+    var disqus_identifier = '\/post\/FailureInFunctionalProgramming\/';
+    var disqus_title = 'Using Monads for Handling Failures and Exceptions';
+    var disqus_url = '\/post\/FailureInFunctionalProgramming\/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -494,6 +520,20 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
                     <li>
                         <article>
                             <header>
+                                <h3><a href="./post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-01-04'>
+                                    January 4, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
                                 <h3><a href="./post/SeasonalDlm/">Seasonal DLM</a></h3>
                                 
                                     
@@ -529,20 +569,6 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
                                 <time class="published" datetime=
                                     '2016-12-01'>
                                     December 1, 2016</time>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <h3><a href="./post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
-                                
-                                    
-                                
-                                <time class="published" datetime=
-                                    '2016-01-04'>
-                                    January 4, 2016</time>
                             </header>
                         </article>
                     </li>

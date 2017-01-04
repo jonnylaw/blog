@@ -6,8 +6,114 @@
     <description>Recent content on Probabilistic Programming in Scala</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 13 Dec 2016 12:13:14 -0500</lastBuildDate>
+    <lastBuildDate>Wed, 04 Jan 2017 12:13:14 -0500</lastBuildDate>
     <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Using Monads for Handling Failures and Exceptions</title>
+      <link>/post/FailureInFunctionalProgramming/</link>
+      <pubDate>Wed, 04 Jan 2017 12:13:14 -0500</pubDate>
+      
+      <guid>/post/FailureInFunctionalProgramming/</guid>
+      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
+
+/BLOGDOWN-BODY-BEFORE --&gt;
+
+&lt;p&gt;In this post I will give a practical introduction to some useful structures for handling failure in functional programming.&lt;/p&gt;
+&lt;div id=&#34;referential-transparency&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Referential Transparency&lt;/h2&gt;
+&lt;p&gt;One of the most important properties of functional programming is referential transparency and programming with pure functions. This means we can substitute a pure function with its result, for intance if we have the function &lt;code&gt;def f = 1 + 2&lt;/code&gt;, we can replace every occurence of &lt;code&gt;f&lt;/code&gt; with &lt;code&gt;3&lt;/code&gt; and the final evaluation will remain unchanged&lt;/p&gt;
+&lt;p&gt;This simple idea can lead to difficulties when considering functions which involve side effects, such as reading from external sources or generating random numbers. One example of a side effect is an exception, an imperative programmer might write a function to calculate a square root as:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def unsafe_sqrt(a: Double): Double = {
+  if (a &amp;gt; 0) math.sqrt(a)
+  else throw new Exception(&amp;quot;Can&amp;#39;t calculate square root of negative number&amp;quot;)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This compiles fine, however if we wrote this function for an end user and they didn’t look at the implementation they might not know the function can possibly return an exception.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;try&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Try&lt;/h2&gt;
+&lt;p&gt;In order to make it clear that a function can fail, we can return a &lt;code&gt;Try&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def try_sqrt(a: Double): Try[Double] = {
+  if (a &amp;gt; 0) Success(math.sqrt(a))
+  else Failure(throw new Exception(&amp;quot;Can&amp;#39;t calculate square root of negative number&amp;quot;))
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now, if someone were to use this function they would be forced to deal with the &lt;code&gt;Try&lt;/code&gt; return type and understand that the function can return an exception. Try is actually an algebraic datatype (ADT), an illustrative implementation is:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;sealed trait Try[+A]
+case class Success[+A](a: A) extends Try[A]
+case class Failure[+A](exception: Throwable) extends Try[A]&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This means that a &lt;code&gt;Try&lt;/code&gt; can either be a &lt;code&gt;Success&lt;/code&gt; or &lt;code&gt;Failure&lt;/code&gt;. Learn more about &lt;code&gt;Try&lt;/code&gt; in Daniel Westheide’s excellent &lt;a href=&#34;http://danielwestheide.com/blog/2012/12/26/the-neophytes-guide-to-scala-part-6-error-handling-with-try.html&#34;&gt;Neophyte’s Guide to Scala&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;option&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Option&lt;/h2&gt;
+&lt;p&gt;Another simple structure to represent computations which may fail is &lt;code&gt;Option&lt;/code&gt;, this is an algebraic datatype:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;sealed trait Option[+A]
+case class Some[+A](a: A) extends Option[A]
+case class None extends Option[Nothing]&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In this case, option can either contain a value using the constructor &lt;code&gt;Some&lt;/code&gt;, or can represent the absense of a value using &lt;code&gt;None&lt;/code&gt;. This provides less information on failure that &lt;code&gt;Try&lt;/code&gt;, but nevertheless is sometimes useful. We can re-write the &lt;code&gt;sqrt&lt;/code&gt; function to return an optional value&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def option_sqrt(a: Double): Option[Double] = {
+  if (a &amp;gt; 0) Some(math.sqrt(a))
+  else None
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now, when provide an incorrect argument to the function, we get &lt;code&gt;None&lt;/code&gt; as the result.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;chaining-computations&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Chaining Computations&lt;/h1&gt;
+&lt;p&gt;In real world functional codebases we compose programs from many small functions. Let’s consider the problem of how to apply &lt;code&gt;def sqrt(a: Double): Option[Double]&lt;/code&gt; twice. A naive attempt would be to simply compose the functions as we would for the Scala math library:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def sqrt_twice = unsafe_sqrt _ compose unsafe_sqrt _&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;_&lt;/code&gt; represents partial application of &lt;code&gt;unsafe_sqrt&lt;/code&gt;, if we try to compose the &lt;code&gt;option_sqrt&lt;/code&gt; function as in this example we will get a type mismatch. One application of &lt;code&gt;option_sqrt&lt;/code&gt; returns a typle &lt;code&gt;Option[Double]&lt;/code&gt;, but we need the type &lt;code&gt;Double&lt;/code&gt;. Luckily &lt;code&gt;Option&lt;/code&gt; has a function defined on it for composing operations like this:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def flatMap[A, B](a: Option[A])(f: A =&amp;gt; Option[B]): Option[B]&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can now use &lt;code&gt;flatMap&lt;/code&gt; to compose &lt;code&gt;option_sqrt&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def sqrt_twice_option(x: Double): Option[Double] = 
+  option_sqrt(x) flatMap option_sqrt&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can calculate &lt;code&gt;sqrt_twice_option(81) = Some(3.0)&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;We can compose &lt;code&gt;try_sqrt&lt;/code&gt; in the same way:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def sqrt_twice_try(x: Double): Try[Double] = 
+  try_sqrt(81) flatMap try_sqrt&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now, what if we want to compose &lt;code&gt;option_sqrt&lt;/code&gt; and &lt;code&gt;try_sqrt&lt;/code&gt;. This is not an easy problem in general, however the Scala standard library implements a &lt;code&gt;toOption&lt;/code&gt; method on &lt;code&gt;Try&lt;/code&gt; values. Hence we can just convert the output of &lt;code&gt;try_sqrt&lt;/code&gt; to an &lt;code&gt;Option&lt;/code&gt;, however we lose the text from the exception upon failure, which could illuminating in the event of a failure. Let’s consider a more general way to compose the two.&lt;/p&gt;
+&lt;div id=&#34;nested-maps&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Nested Maps&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Option&lt;/code&gt; and &lt;code&gt;Try&lt;/code&gt; are both monads (strictly &lt;code&gt;Try&lt;/code&gt; is &lt;a href=&#34;https://issues.scala-lang.org/browse/SI-6284&#34;&gt;not a proper monad&lt;/a&gt;), which means they are equipped with two methods which satisfy the monad laws. The two methods defined for all monads are:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;trait Monad[A, M[_]] {
+  def flatMap[B](f: A =&amp;gt; M[B]): M[B]
+  def pure(a: A): M[A]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can define all the functions on &lt;code&gt;Try&lt;/code&gt; and &lt;code&gt;Option&lt;/code&gt; using these two functions, for instance &lt;code&gt;map&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def map[B](f: A =&amp;gt; B): M[B] = this.flatMap(a =&amp;gt; pure(f(a)))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now, we can use the &lt;code&gt;map&lt;/code&gt; function to compose &lt;code&gt;option_sqrt&lt;/code&gt; and &lt;code&gt;try_sqrt&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def sqrt_twice(a: Double): Try[Option[Double]] = try_sqrt(a) map option_sqrt&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;However, what if we want to apply another function to a value returned by this function:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def f(a: Double) = a + 1
+sqrt_twice(81) map (_.map(f))
+// Success(Some(4.0))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We get the correct value, but we have to apply &lt;code&gt;map&lt;/code&gt; twice, this seems cumbersome. There is a better way!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;monad-transformers&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Monad Transformers&lt;/h2&gt;
+&lt;p&gt;The functional programming library &lt;a href=&#34;http://typelevel.org/cats/&#34;&gt;cats&lt;/a&gt;, short for category, has some built in types for dealing with nesting in a more elegent way. The type &lt;code&gt;OptionT[F[_], A]&lt;/code&gt; can be used instead of &lt;code&gt;F[Option[A]]&lt;/code&gt;, our &lt;code&gt;F[_]&lt;/code&gt; type in this case is &lt;code&gt;Try[A]&lt;/code&gt;&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import cats.implicits._
+import cats.data.OptionT
+
+def sqrt_twice_trans(a: Double): OptionT[Try, Double] = 
+  OptionT.fromOption[Try](option_sqrt(a)) flatMap (b =&amp;gt; OptionT.liftF(try_sqrt(b))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;OptionT&lt;/code&gt; provides the function &lt;code&gt;fromOption&lt;/code&gt; to transform the result of the &lt;code&gt;option_sqrt&lt;/code&gt; function into the &lt;code&gt;OptionT&lt;/code&gt; monad. The function &lt;code&gt;liftF&lt;/code&gt; is used to lift any monad, in this case &lt;code&gt;Try&lt;/code&gt; into the &lt;code&gt;OptionT&lt;/code&gt; monad. This compiles and we if we now try to apply the function &lt;code&gt;def f(a: Double) = a + 1&lt;/code&gt; to the result of this function we only need a single call to &lt;code&gt;map&lt;/code&gt;. This is because &lt;code&gt;OptionT&lt;/code&gt; is also a monad:&lt;/p&gt;
+&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;sqrt_twice_trans(81) map f
+// OptionT(Success(Some(4.0)))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This may seem like quite a lot of effort to remove a call to map, but removing unecessary duplication can help with readability of code, and enable bugs to be spotted earlier.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;!-- BLOGDOWN-HEAD
+
+
+
+
+
+
+/BLOGDOWN-HEAD --&gt;
+</description>
+    </item>
     
     <item>
       <title>Seasonal DLM</title>
@@ -511,112 +617,6 @@ val zipStream = RunnableGraph.fromGraph(FlowGraph.create() { implicit builder =&
 &lt;div id=&#34;summary&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Summary&lt;/h2&gt;
 &lt;p&gt;We have covered a few ways to express simple streams using Akka Streaming. The real power of Akka streaming is when it is combined with file or connection handling. Streaming libraries can be used to process extremely large, or unbounded, data files using a bounded amount of computational power. This is useful when dealing with infinite sources of data, such as streaming data from Twitter.&lt;/p&gt;
-&lt;/div&gt;
-
-
-
-&lt;!-- BLOGDOWN-HEAD
-
-
-
-
-
-
-/BLOGDOWN-HEAD --&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Using Monads for Handling Failures and Exceptions</title>
-      <link>/post/FailureInFunctionalProgramming/</link>
-      <pubDate>Mon, 04 Jan 2016 12:13:14 -0500</pubDate>
-      
-      <guid>/post/FailureInFunctionalProgramming/</guid>
-      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE --&gt;
-
-&lt;p&gt;In this post I will give a practical introduction to some useful structures for handling failure in functional programming.&lt;/p&gt;
-&lt;div id=&#34;referential-transparency&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Referential Transparency&lt;/h2&gt;
-&lt;p&gt;One of the most important properties of functional programming is referential transparency and programming with pure functions. This means we can substitute a pure function with its result, for intance if we have the function &lt;code&gt;def f = 1 + 2&lt;/code&gt;, we can replace every occurence of &lt;code&gt;f&lt;/code&gt; with &lt;code&gt;3&lt;/code&gt; and the final evaluation will remain unchanged&lt;/p&gt;
-&lt;p&gt;This simple idea can lead to difficulties when considering functions which involve side effects, such as reading from external sources or generating random numbers. One example of a side effect is an exception, an imperative programmer might write a function to calculate a square root as:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def unsafe_sqrt(a: Double): Double = {
-  if (a &amp;gt; 0) math.sqrt(a)
-  else throw new Exception(&amp;quot;Can&amp;#39;t calculate square root of negative number&amp;quot;)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This compiles fine, however if we wrote this function for an end user and they didn’t look at the implementation they might not know the function can possibly return an exception.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;try&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Try&lt;/h2&gt;
-&lt;p&gt;In order to make it clear that a function can fail, we can return a &lt;code&gt;Try&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def try_sqrt(a: Double): Try[Double] = {
-  if (a &amp;gt; 0) Success(math.sqrt(a))
-  else Failure(throw new Exception(&amp;quot;Can&amp;#39;t calculate square root of negative number&amp;quot;))
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, if someone were to use this function they would be forced to deal with the &lt;code&gt;Try&lt;/code&gt; return type and understand that the function can return an exception. Try is actually an algebraic datatype (ADT), an illustrative implementation is:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;sealed trait Try[+A]
-case class Success[+A](a: A) extends Try[A]
-case class Failure[+A](exception: Throwable) extends Try[A]&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This means that a &lt;code&gt;Try&lt;/code&gt; can either be a &lt;code&gt;Success&lt;/code&gt; or &lt;code&gt;Failure&lt;/code&gt;. Learn more about &lt;code&gt;Try&lt;/code&gt; in Daniel Westheide’s excellent &lt;a href=&#34;http://danielwestheide.com/blog/2012/12/26/the-neophytes-guide-to-scala-part-6-error-handling-with-try.html&#34;&gt;Neophyte’s Guide to Scala&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;option&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Option&lt;/h2&gt;
-&lt;p&gt;Another simple structure to represent computations which may fail is &lt;code&gt;Option&lt;/code&gt;, this is an algebraic datatype:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;sealed trait Option[+A]
-case class Some[+A](a: A) extends Option[A]
-case class None extends Option[Nothing]&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;In this case, option can either contain a value using the constructor &lt;code&gt;Some&lt;/code&gt;, or can represent the absense of a value using &lt;code&gt;None&lt;/code&gt;. This provides less information on failure that &lt;code&gt;Try&lt;/code&gt;, but nevertheless is sometimes useful. We can re-write the &lt;code&gt;sqrt&lt;/code&gt; function to return an optional value&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def option_sqrt(a: Double): Option[Double] = {
-  if (a &amp;gt; 0) Some(math.sqrt(a))
-  else None
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, when provide an incorrect argument to the function, we get &lt;code&gt;None&lt;/code&gt; as the result.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;chaining-computations&#34; class=&#34;section level1&#34;&gt;
-&lt;h1&gt;Chaining Computations&lt;/h1&gt;
-&lt;p&gt;In real world functional codebases we compose programs from many small functions. Let’s consider the problem of how to apply &lt;code&gt;def sqrt(a: Double): Option[Double]&lt;/code&gt; twice. A naive attempt would be to simply compose the functions as we would for the Scala math library:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def sqrt_twice = unsafe_sqrt _ compose unsafe_sqrt _&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The &lt;code&gt;_&lt;/code&gt; represents partial application of &lt;code&gt;unsafe_sqrt&lt;/code&gt;, if we try to compose the &lt;code&gt;option_sqrt&lt;/code&gt; function as in this example we will get a type mismatch. One application of &lt;code&gt;option_sqrt&lt;/code&gt; returns a typle &lt;code&gt;Option[Double]&lt;/code&gt;, but we need the type &lt;code&gt;Double&lt;/code&gt;. Luckily &lt;code&gt;Option&lt;/code&gt; has a function defined on it for composing operations like this:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def flatMap[A, B](a: Option[A])(f: A =&amp;gt; Option[B]): Option[B]&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We can now use &lt;code&gt;flatMap&lt;/code&gt; to compose &lt;code&gt;option_sqrt&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def sqrt_twice_option(x: Double): Option[Double] = 
-  option_sqrt(x) flatMap option_sqrt&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now we can calculate &lt;code&gt;sqrt_twice_option(81) = Some(3.0)&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;We can compose &lt;code&gt;try_sqrt&lt;/code&gt; in the same way:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def sqrt_twice_try(x: Double): Try[Double] = 
-  try_sqrt(81) flatMap try_sqrt&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, what if we want to compose &lt;code&gt;option_sqrt&lt;/code&gt; and &lt;code&gt;try_sqrt&lt;/code&gt;. This is not an easy problem in general, however the Scala standard library implements a &lt;code&gt;toOption&lt;/code&gt; method on &lt;code&gt;Try&lt;/code&gt; values. Hence we can just convert the output of &lt;code&gt;try_sqrt&lt;/code&gt; to an &lt;code&gt;Option&lt;/code&gt;, however we lose the text from the exception upon failure, which could illuminating in the event of a failure. Let’s consider a more general way to compose the two.&lt;/p&gt;
-&lt;div id=&#34;nested-maps&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Nested Maps&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;Option&lt;/code&gt; and &lt;code&gt;Try&lt;/code&gt; are both monads (strictly &lt;code&gt;Try&lt;/code&gt; is &lt;a href=&#34;https://issues.scala-lang.org/browse/SI-6284&#34;&gt;not a proper monad&lt;/a&gt;), which means they are equipped with two methods which satisfy the monad laws. The two methods defined for all monads are:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;trait Monad[A, M[_]] {
-  def flatMap[B](f: A =&amp;gt; M[B]): M[B]
-  def pure(a: A): M[A]
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We can define all the functions on &lt;code&gt;Try&lt;/code&gt; and &lt;code&gt;Option&lt;/code&gt; using these two functions, for instance &lt;code&gt;map&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def map[B](f: A =&amp;gt; B): M[B] = this.flatMap(a =&amp;gt; pure(f(a)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, we can use the &lt;code&gt;map&lt;/code&gt; function to compose &lt;code&gt;option_sqrt&lt;/code&gt; and &lt;code&gt;try_sqrt&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def sqrt_twice(a: Double): Try[Option[Double]] = try_sqrt(a) map option_sqrt&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;However, what if we want to apply another function to a value returned by this function:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def f(a: Double) = a + 1
-sqrt_twice(81) map (_.map(f))
-// Success(Some(4.0))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We get the correct value, but we have to apply &lt;code&gt;map&lt;/code&gt; twice, this seems cumbersome. There is a better way!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;monad-transformers&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Monad Transformers&lt;/h2&gt;
-&lt;p&gt;The functional programming library &lt;a href=&#34;http://typelevel.org/cats/&#34;&gt;cats&lt;/a&gt;, short for category, has some built in types for dealing with nesting in a more elegent way. The type &lt;code&gt;OptionT[F[_], A]&lt;/code&gt; can be used instead of &lt;code&gt;F[Option[A]]&lt;/code&gt;, our &lt;code&gt;F[_]&lt;/code&gt; type in this case is &lt;code&gt;Try[A]&lt;/code&gt;&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import cats.implicits._
-import cats.data.OptionT
-
-def sqrt_twice_trans(a: Double): OptionT[Try, Double] = 
-  OptionT.fromOption[Try](option_sqrt(a)) flatMap (b =&amp;gt; OptionT.liftF(try_sqrt(b))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;code&gt;OptionT&lt;/code&gt; provides the function &lt;code&gt;fromOption&lt;/code&gt; to transform the result of the &lt;code&gt;option_sqrt&lt;/code&gt; function into the &lt;code&gt;OptionT&lt;/code&gt; monad. The function &lt;code&gt;liftF&lt;/code&gt; is used to lift any monad, in this case &lt;code&gt;Try&lt;/code&gt; into the &lt;code&gt;OptionT&lt;/code&gt; monad. This compiles and we if we now try to apply the function &lt;code&gt;def f(a: Double) = a + 1&lt;/code&gt; to the result of this function we only need a single call to &lt;code&gt;map&lt;/code&gt;. This is because &lt;code&gt;OptionT&lt;/code&gt; is also a monad:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;sqrt_twice_trans(81) map f
-// OptionT(Success(Some(4.0)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This may seem like quite a lot of effort to remove a call to map, but removing unecessary duplication can help with readability of code, and enable bugs to be spotted earlier.&lt;/p&gt;
-&lt;/div&gt;
 &lt;/div&gt;
 
 
