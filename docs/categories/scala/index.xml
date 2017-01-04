@@ -430,7 +430,7 @@ val zipStream = RunnableGraph.fromGraph(FlowGraph.create() { implicit builder =&
     <item>
       <title>Using Monads for Handling Failures and Exceptions</title>
       <link>/post/FailureInFunctionalProgramming/</link>
-      <pubDate>Thu, 01 Dec 2016 12:13:14 -0500</pubDate>
+      <pubDate>Mon, 04 Jan 2016 12:13:14 -0500</pubDate>
       
       <guid>/post/FailureInFunctionalProgramming/</guid>
       <description>&lt;!-- BLOGDOWN-BODY-BEFORE
