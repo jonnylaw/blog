@@ -148,4 +148,4 @@ sqrt_twice_trans(81) map f
 // OptionT(Success(Some(4.0)))
 ```
 
-This may seem like quite a lot of effort to remove a call to map, but removing unecessary duplication can help with readability of code, and enable bugs to be spotted earlier.
+This may seem like quite a lot of effort to remove a call to map, but removing unecessary duplication can help with readability of code, and enable bugs to be spotted earlier. The code has been assembled in a [Github gist](https://gist.github.com/jonnylaw/99460d466c84d9b52b57010d28b6a4f6).

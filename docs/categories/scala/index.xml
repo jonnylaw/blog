@@ -97,7 +97,7 @@ def sqrt_twice_trans(a: Double): OptionT[Try, Double] =
 &lt;p&gt;&lt;code&gt;OptionT&lt;/code&gt; provides the function &lt;code&gt;fromOption&lt;/code&gt; to transform the result of the &lt;code&gt;option_sqrt&lt;/code&gt; function into the &lt;code&gt;OptionT&lt;/code&gt; monad. The function &lt;code&gt;liftF&lt;/code&gt; is used to lift any monad, in this case &lt;code&gt;Try&lt;/code&gt; into the &lt;code&gt;OptionT&lt;/code&gt; monad. This compiles and we if we now try to apply the function &lt;code&gt;def f(a: Double) = a + 1&lt;/code&gt; to the result of this function we only need a single call to &lt;code&gt;map&lt;/code&gt;. This is because &lt;code&gt;OptionT&lt;/code&gt; is also a monad:&lt;/p&gt;
 &lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;sqrt_twice_trans(81) map f
 // OptionT(Success(Some(4.0)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This may seem like quite a lot of effort to remove a call to map, but removing unecessary duplication can help with readability of code, and enable bugs to be spotted earlier.&lt;/p&gt;
+&lt;p&gt;This may seem like quite a lot of effort to remove a call to map, but removing unecessary duplication can help with readability of code, and enable bugs to be spotted earlier. The code has been assembled in a &lt;a href=&#34;https://gist.github.com/jonnylaw/99460d466c84d9b52b57010d28b6a4f6&#34;&gt;Github gist&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 

@@ -89,7 +89,7 @@ def sqrt_twice_trans(a: Double): OptionT[Try, Double] =
 <p><code>OptionT</code> provides the function <code>fromOption</code> to transform the result of the <code>option_sqrt</code> function into the <code>OptionT</code> monad. The function <code>liftF</code> is used to lift any monad, in this case <code>Try</code> into the <code>OptionT</code> monad. This compiles and we if we now try to apply the function <code>def f(a: Double) = a + 1</code> to the result of this function we only need a single call to <code>map</code>. This is because <code>OptionT</code> is also a monad:</p>
 <pre class="scala"><code>sqrt_twice_trans(81) map f
 // OptionT(Success(Some(4.0)))</code></pre>
-<p>This may seem like quite a lot of effort to remove a call to map, but removing unecessary duplication can help with readability of code, and enable bugs to be spotted earlier.</p>
+<p>This may seem like quite a lot of effort to remove a call to map, but removing unecessary duplication can help with readability of code, and enable bugs to be spotted earlier. The code has been assembled in a <a href="https://gist.github.com/jonnylaw/99460d466c84d9b52b57010d28b6a4f6">Github gist</a>.</p>
 </div>
 </div>
 

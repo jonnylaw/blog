@@ -11,7 +11,7 @@ googleAnalytics = ""
 
 [params]
   # Sets the meta tag description, usually reserved for the main page
-  description          = "HTML5 UP theme, Future Imperfect with some extra goodies, ported by Julio Pescador. Powered by Hugo"
+  description          = "Bayesian Statistics and Functional Programming using Scala"
   # This will appear on the top left of the navigation bar
   navbarTitle          = "Probabilistic Programming in Scala"
   # Social media buttons that appear on the sidebar
@@ -22,7 +22,7 @@ googleAnalytics = ""
   
   # Optional Params
   categoriesByCount    = true
-  includeReadingTime   = true
+  includeReadingTime   = false
   # The set of favicons used are based on the write-up from this link:
   # https://github.com/audreyr/favicon-cheat-sheet
   # Please see the favicon partial template for more information
@@ -74,10 +74,10 @@ googleAnalytics = ""
   identifier = "fa fa-newspaper-o"
   weight = 1
   
-  [[menu.main]]
-  name = "Categories"
-  url = "/categories"
-  weight = 2
+  #[[menu.main]]
+  #name = "Categories"
+  #url = "/categories"
+  #weight = 2
   
   [[menu.main]]
   name = "About"
