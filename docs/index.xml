@@ -6,8 +6,27 @@
     <description>Recent content on Probabilistic Programming in Scala</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 04 Jan 2017 12:13:14 -0500</lastBuildDate>
+    <lastBuildDate>Thu, 02 Feb 2017 00:00:00 +0000</lastBuildDate>
     <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>About Me</title>
+      <link>/about/</link>
+      <pubDate>Thu, 02 Feb 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/about/</guid>
+      <description>
+
+&lt;p&gt;Jonathan Law is a current PhD student on the &lt;a href=&#34;http://www.bigdata-cdt.ac.uk/&#34;&gt;Cloud Computing for Big Data CDT&lt;/a&gt;, funded by the &lt;a href=&#34;https://www.epsrc.ac.uk&#34;&gt;EPSRC&lt;/a&gt;. His primary research interest is in using functional programming for Bayesian Inference (often called probabilistic programming), using the language &lt;a href=&#34;http://www.scala-lang.org/&#34;&gt;Scala&lt;/a&gt;. Prior to embarking on the PhD, he worked in industry as an Insight Analyst, extracting value from large customer data sets.&lt;/p&gt;
+
+&lt;h2 id=&#34;selected-projects&#34;&gt;Selected Projects&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Composable POMP Models&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://git.io/statespace&#34;&gt;git.io/statespace&lt;/a&gt;
+&lt;em&gt;A library for online Bayesian filtering of univariate state space models, sometimes called POMP (Partially Observed Markov Process Models).&lt;/em&gt;&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Using Monads for Handling Failures and Exceptions</title>
@@ -103,10 +122,7 @@ def sqrt_twice_trans(a: Double): OptionT[Try, Double] =
 &lt;/div&gt;
 
 
-
 &lt;!-- BLOGDOWN-HEAD
-
-
 
 
 
@@ -186,25 +202,11 @@ def simStep(p: Parameters): Data =&amp;gt; Rand[Data] = d =&amp;gt; {
   } yield MarkovChain(init)(simStep(p))
 }&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Note that the Markov chain is a &lt;code&gt;Rand[Process[Double]]&lt;/code&gt;, this is not the most elegant and I’m open to suggestions on a better way to formulate this. Once we have defined a Markov chain, we must draw from it which returns a &lt;code&gt;Process[Double]&lt;/code&gt;, the initial draw is to sample from the initial state distribution &lt;span class=&#34;math inline&#34;&gt;\(\mathcal{N}(m_0, C_0)\)&lt;/span&gt;. Next, we can sample from the &lt;code&gt;Process&lt;/code&gt; and plot it. A simulation from the seasonal DLM, with parameters &lt;span class=&#34;math inline&#34;&gt;\(V = 3\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(W = I_6\)&lt;/span&gt;, is given below:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/SeasonalDlm_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;SeasonalDlm_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 
 
-&lt;!-- dynamically load mathjax for compatibility with self-contained --&gt;
-&lt;script&gt;
-  (function () {
-    var script = document.createElement(&#34;script&#34;);
-    script.type = &#34;text/javascript&#34;;
-    script.src  = &#34;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&#34;;
-    if (location.protocol !== &#34;file:&#34; &amp;&amp; /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, &#39;&#39;);
-    document.getElementsByTagName(&#34;head&#34;)[0].appendChild(script);
-  })();
-&lt;/script&gt;
-
 &lt;!-- BLOGDOWN-HEAD
-
-
 
 
 
@@ -219,15 +221,7 @@ def simStep(p: Parameters): Data =&amp;gt; Rand[Data] = d =&amp;gt; {
       <pubDate>Mon, 12 Dec 2016 12:13:14 -0500</pubDate>
       
       <guid>/blog/KalmanFilter/</guid>
-      <description>---
-title: &#34;The Kalman Filter in Scala&#34;
-author: &#34;Jonny Law&#34;
-date: &#39;2016-12-12T12:13:14-05:00&#39;
-categories: scala
----
-
-
-&lt;!-- BLOGDOWN-BODY-BEFORE
+      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
 
 /BLOGDOWN-BODY-BEFORE --&gt;
 
@@ -257,7 +251,7 @@ val data = (1 to 16) map (id =&amp;gt; (id, simulate(p).take(100).toVector))&lt;
 &lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[x_t = x_{t-1} + \omega, \qquad \omega \sim \mathcal{N}(0, V)\]&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;We then construct a &lt;code&gt;Stream&lt;/code&gt; of &lt;code&gt;Data&lt;/code&gt; objects. The &lt;code&gt;Data&lt;/code&gt; object has a timestamped observation and an optional state space. We construct the observation at time &lt;span class=&#34;math inline&#34;&gt;\(t\)&lt;/span&gt; by simply adding the observation noise to the state space &lt;span class=&#34;math inline&#34;&gt;\(y_t \sim \mathcal{N}(y_t | x_t, V)\)&lt;/span&gt;. The state is optional because we can’t observe the state of real data, only simulated data will have a known state.&lt;/p&gt;
 &lt;p&gt;A graph of the data from four “stations”, produced using &lt;a href=&#34;http://ggplot2.org&#34;&gt;ggplot2&lt;/a&gt; in R is shown in the figure below.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/KalmanFilter_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;#####content/blog/KalmanFilter_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;an-aside-on-referential-transparency&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;An Aside on Referential Transparency&lt;/h3&gt;
 &lt;p&gt;Note that the function &lt;code&gt;simulate&lt;/code&gt; is not referentially transparent, meaning the function will return a different &lt;code&gt;Stream&lt;/code&gt; of data each time we run it. Referential transparency is important in functional programming, to allow us to easily reason about complex programs. The Breeze library implements another object for stateful random number generation, the &lt;code&gt;Process&lt;/code&gt; object. The &lt;code&gt;MarkovChain&lt;/code&gt; object can be used to construct a process without drawing explicitly from the distribution until we run the program. Firstly define a single step of the random walk:&lt;/p&gt;
@@ -315,26 +309,12 @@ numbers.scanLeft(0)(sum)&lt;/code&gt;&lt;/pre&gt;
   map{ case (id, data) =&amp;gt;
   (id, filterSeries(data.sortBy(_.time), p)) } // apply the filter to the sorted data&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;We can now plot the results of the filtering using R and ggplot2, overlaid with 95% prediction intervals.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/KalmanFilter_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;#####content/blog/KalmanFilter_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The full code is available in the &lt;a href=&#34;https://github.com/jonnylaw/blog/tree/master/dlm&#34;&gt;GitHub Repo&lt;/a&gt; associated with this blog.&lt;/p&gt;
 &lt;/div&gt;
 
 
-&lt;!-- dynamically load mathjax for compatibility with self-contained --&gt;
-&lt;script&gt;
-  (function () {
-    var script = document.createElement(&#34;script&#34;);
-    script.type = &#34;text/javascript&#34;;
-    script.src  = &#34;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&#34;;
-    if (location.protocol !== &#34;file:&#34; &amp;&amp; /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, &#39;&#39;);
-    document.getElementsByTagName(&#34;head&#34;)[0].appendChild(script);
-  })();
-&lt;/script&gt;
-
 &lt;!-- BLOGDOWN-HEAD
-
-
 
 
 
@@ -379,7 +359,7 @@ val data = (1 to 16) map (id =&amp;gt; (id, simulate(p).take(100).toVector))&lt;
 &lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[x_t = x_{t-1} + \omega, \qquad \omega \sim \mathcal{N}(0, V)\]&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;We then construct a &lt;code&gt;Stream&lt;/code&gt; of &lt;code&gt;Data&lt;/code&gt; objects. The &lt;code&gt;Data&lt;/code&gt; object has a timestamped observation and an optional state space. We construct the observation at time &lt;span class=&#34;math inline&#34;&gt;\(t\)&lt;/span&gt; by simply adding the observation noise to the state space &lt;span class=&#34;math inline&#34;&gt;\(y_t \sim \mathcal{N}(y_t | x_t, V)\)&lt;/span&gt;. The state is optional because we can’t observe the state of real data, only simulated data will have a known state.&lt;/p&gt;
 &lt;p&gt;A graph of the data from four “stations”, produced using &lt;a href=&#34;http://ggplot2.org&#34;&gt;ggplot2&lt;/a&gt; in R is shown in the figure below.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/KalmanFilter_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;#####content/post/KalmanFilter_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;an-aside-on-referential-transparency&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;An Aside on Referential Transparency&lt;/h3&gt;
 &lt;p&gt;Note that the function &lt;code&gt;simulate&lt;/code&gt; is not referentially transparent, meaning the function will return a different &lt;code&gt;Stream&lt;/code&gt; of data each time we run it. Referential transparency is important in functional programming, to allow us to easily reason about complex programs. The Breeze library implements another object for stateful random number generation, the &lt;code&gt;Process&lt;/code&gt; object. The &lt;code&gt;MarkovChain&lt;/code&gt; object can be used to construct a process without drawing explicitly from the distribution until we run the program. Firstly define a single step of the random walk:&lt;/p&gt;
@@ -437,26 +417,12 @@ numbers.scanLeft(0)(sum)&lt;/code&gt;&lt;/pre&gt;
   map{ case (id, data) =&amp;gt;
   (id, filterSeries(data.sortBy(_.time), p)) } // apply the filter to the sorted data&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;We can now plot the results of the filtering using R and ggplot2, overlaid with 95% prediction intervals.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/KalmanFilter_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;#####content/post/KalmanFilter_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The full code is available in the &lt;a href=&#34;https://github.com/jonnylaw/blog/tree/master/dlm&#34;&gt;GitHub Repo&lt;/a&gt; associated with this blog.&lt;/p&gt;
 &lt;/div&gt;
 
 
-&lt;!-- dynamically load mathjax for compatibility with self-contained --&gt;
-&lt;script&gt;
-  (function () {
-    var script = document.createElement(&#34;script&#34;);
-    script.type = &#34;text/javascript&#34;;
-    script.src  = &#34;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&#34;;
-    if (location.protocol !== &#34;file:&#34; &amp;&amp; /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, &#39;&#39;);
-    document.getElementsByTagName(&#34;head&#34;)[0].appendChild(script);
-  })();
-&lt;/script&gt;
-
 &lt;!-- BLOGDOWN-HEAD
-
-
 
 
 
@@ -620,98 +586,7 @@ val zipStream = RunnableGraph.fromGraph(FlowGraph.create() { implicit builder =&
 &lt;/div&gt;
 
 
-
 &lt;!-- BLOGDOWN-HEAD
-
-
-
-
-
-
-/BLOGDOWN-HEAD --&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>About Hugo</title>
-      <link>/about/</link>
-      <pubDate>Wed, 09 Apr 2014 00:00:00 +0000</pubDate>
-      
-      <guid>/about/</guid>
-      <description>
-
-&lt;p&gt;Hugo is a static site engine written in Go.&lt;/p&gt;
-
-&lt;p&gt;It makes use of a variety of open source projects including:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/spf13/cobra&#34;&gt;Cobra&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/spf13/viper&#34;&gt;Viper&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/spf13/jWalterWeatherman&#34;&gt;J Walter Weatherman&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/spf13/cast&#34;&gt;Cast&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Learn more and contribute on &lt;a href=&#34;https://github.com/spf13&#34;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;setup&#34;&gt;Setup&lt;/h2&gt;
-
-&lt;p&gt;Some fun facts about &lt;a href=&#34;http://gohugo.io/&#34;&gt;Hugo&lt;/a&gt;:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Built in &lt;a href=&#34;http://golang.org/&#34;&gt;Go&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Loosely inspired by &lt;a href=&#34;http://jekyllrb.com/&#34;&gt;Jekyll&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Primarily developed by &lt;a href=&#34;http://spf13.com/&#34;&gt;spf13&lt;/a&gt; on the train while commuting to and from Manhattan.&lt;/li&gt;
-&lt;li&gt;Coded in &lt;a href=&#34;http://vim.org&#34;&gt;Vim&lt;/a&gt; using &lt;a href=&#34;http://vim.spf13.com/&#34;&gt;spf13-vim&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Have questions or suggestions? Feel free to &lt;a href=&#34;https://github.com/spf13/hugo/issues/new&#34;&gt;open an issue on GitHub&lt;/a&gt; or &lt;a href=&#34;https://twitter.com/spf13&#34;&gt;ask me on Twitter&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Thanks for reading!&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title></title>
-      <link>/post/Temperature/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/post/Temperature/</guid>
-      <description>/BLOGDOWN-BODY-BEFORE --&gt;
-
-&lt;p&gt;The &lt;a href=&#34;http://uoweb1.ncl.ac.uk/&#34;&gt;Urban Observatory&lt;/a&gt; is a collection of sensors deployed in Newcastle Upon Tyne, measuring weather and environment, traffic and parking and tidal and river level. Let’s first consider temperature data located around St James’ Park, there is a high density of sensors here and temperature is easy to identify faulty sensors, since we have familiarity with the type of data.&lt;/p&gt;
-&lt;p&gt;Let’s first look at a single sensor on the site, and examine it’s temperature readings&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;## Parsed with column specification:
-## cols(
-##   theme = col_character(),
-##   reading = col_character(),
-##   value = col_double(),
-##   timestamp = col_datetime(format = &amp;quot;&amp;quot;),
-##   sensor_name = col_character(),
-##   lon = col_double(),
-##   lat = col_double()
-## )&lt;/code&gt;&lt;/pre&gt;
-&lt;div class=&#34;figure&#34;&gt;&lt;span id=&#34;fig:unnamed-chunk-1&#34;&gt;&lt;/span&gt;
-&lt;img src=&#34;Temperature_files/figure-html/unnamed-chunk-1-1.png&#34; alt=&#34;Temperature During September 2016 at a single Sensor&#34; width=&#34;672&#34; /&gt;
-&lt;p class=&#34;caption&#34;&gt;
-Figure 1: Temperature During September 2016 at a single Sensor
-&lt;/p&gt;
-&lt;/div&gt;
-&lt;p&gt;In this figure, we can see a strong daily seasonal trend.&lt;/p&gt;
-&lt;div id=&#34;modelling-the-data&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Modelling the data&lt;/h2&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;one_sensor %&amp;gt;%
-  filter(timestamp &amp;lt;= &amp;quot;2016-09-07&amp;quot;) %&amp;gt;%
-  filter(reading == &amp;quot;Temperature&amp;quot;) %&amp;gt;%
-  ggplot(aes(x = value)) + geom_histogram(bins = 50)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;Temperature_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;In order to fit the model&lt;/p&gt;
-&lt;/div&gt;
-
-
-
-&lt;!-- BLOGDOWN-HEAD
-
-
 
 
 

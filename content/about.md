@@ -8,5 +8,6 @@ Jonathan Law is a current PhD student on the [Cloud Computing for Big Data CDT](
 ## Selected Projects
 
 **Composable POMP Models**
+
 [git.io/statespace](https://git.io/statespace) 
 *A library for online Bayesian filtering of univariate state space models, sometimes called POMP (Partially Observed Markov Process Models).*

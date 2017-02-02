@@ -1,0 +1,111 @@
+\documentclass[1pt,a4paper,verdana]{moderncv} % Font sizes: 10, 11, or 12; paper sizes: a4paper, letterpaper, a5paper, legalpaper, executivepaper or landscape; font families: sans or roman
+
+\moderncvstyle{casual} % CV theme - options include: 'casual' (default), 'classic', 'oldstyle' and 'banking'
+\moderncvcolor{blue} % CV color - options include: 'blue' (default), 'orange', 'green', 'red', 'purple', 'grey' and 'black'
+
+\usepackage[scale=0.75]{geometry} % Reduce document margins
+%\setlength{\hintscolumnwidth}{3cm} % Uncomment to change the width of the dates column
+%\setlength{\makecvtitlenamewidth}{10cm} % For the 'classic' style, uncomment to adjust the width of the space allocated to your name
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CONTACT INFORMATION SECTION
+%----------------------------------------------------------------------------------------
+
+\firstname{Jonathan} % Your first name
+\familyname{Law} % Your last name
+
+% All information in this block is optional, comment out any lines you don't need
+
+\newcommand{\cvdoublecolumn}[2]{%
+  \cvitem[0.75em]{}{%
+    \begin{minipage}[t]{\listdoubleitemmaincolumnwidth}#1\end{minipage}%
+    \hfill%
+    \begin{minipage}[t]{\listdoubleitemmaincolumnwidth}#2\end{minipage}%
+    }%
+}
+
+
+\newcommand{\cvreference}[7]{%
+    \textbf{#1}\newline% Name
+    \ifthenelse{\equal{#2}{}}{}{\addresssymbol~#2\newline}%
+    \ifthenelse{\equal{#3}{}}{}{#3\newline}%
+    \ifthenelse{\equal{#4}{}}{}{#4\newline}%
+    \ifthenelse{\equal{#5}{}}{}{#5\newline}%
+    \ifthenelse{\equal{#6}{}}{}{\emailsymbol~\texttt{#6}\newline}%
+    \ifthenelse{\equal{#7}{}}{}{\phonesymbol~#7}}
+
+
+\title{Data Scientist}
+\address{117 Great North Road}{Newcastle Upon Tyne, NE3 2DQ}
+\mobile{07825 345 276}
+\email{law.jonny@googlemail.com}
+\homepage{https://jonnylaw.github.io/blog/} {jonnylaw.github.io/blog}% The first argument is the url for the clickable link, the second argument is the url displayed in the template - this allows special characters to be displayed such as the tilde in this example
+%\extrainfo{additional information}
+\photo[70pt][0.4pt]{picture} % The first bracket is the picture height, the second is the thickness of the frame around the picture (0pt for no frame)
+%\quote{"A witty and playful quotation" - John Smith}
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\makecvtitle % Print the CV title
+
+%----------------------------------------------------------------------------------------
+%	OBJECTIVE SECTION
+%----------------------------------------------------------------------------------------
+ 
+\section{PROFILE}
+
+\cvitem{}{I am a current PhD student in the Cloud Computing for Big Data Centre for Doctoral training, my work focuses on Statistical modelling for large Streaming data using Scala. Prior to embarking on my PhD I was a Senior Insight Analyst at the Internet Service Provider Plusnet. I am excited to pursue opportunities allowing me to combine my skills in software engineering and large scale data analysis.}
+
+%----------------------------------------------------------------------------------------
+%	EDUCATION SECTION
+%----------------------------------------------------------------------------------------
+
+\section{EDUCATION}
+
+\cventry{}{PhD Statistics}{Newcastle University}{UK}{}{September 2014 - In Progress}
+\cventry{}{PgDip, Cloud Computing for Big Data}{Newcastle University}{UK}{}{September 2014 - July 2015}
+\cventry{}{PgDip Direct and Digital Marketing}{The Institute of Direct and Digital Marketing}{UK}{}{Part Time: January 2013 - June 2013}
+\cventry{}{Mathematics BSc}{University of York}{UK}{}{September 2009 - July 2012}
+
+%----------------------------------------------------------------------------------------
+%	PROFESSIONAL EXPERIENCE SECTION
+%----------------------------------------------------------------------------------------
+ 
+\section{EXPERIENCE}
+
+\cventry{}{Senior Insight Analyst}{Plusnet plc}{UK}{}{September 2012 - August 2014}
+\cvitem{}{Developed statistical models for email campaign response, customer lifetime value and churn using SQL and R}
+\cvitem{}{Assisted with planning and implementation of outbound calling campaign}
+\cvitem{}{Ad-hoc analysis for other business functions, including finance, marketing and call centre operations}
+\cvitem{}{Presenting findings in quarterly insight meeting to board of directors}{}
+ 
+%----------------------------------------------------------------------------------------
+%	SKILLS SECTION
+%----------------------------------------------------------------------------------------
+
+
+\section{Skills}
+
+\cvitem{}{Data exploration, visualisation and modelling using R and SQL}
+\cvitem{}{Building streaming data analysis pipelines with \emph{Scala}}
+\cvitem{}{Distributed streaming data analysis using Spark, Cassandra and Akka}
+\cvitem{}{Statistics and Machine Learning}
+
+%----------------------------------------------------------------------------------------
+%	EXTRA-CURRICULAR ACTIVITIES SECTION
+%----------------------------------------------------------------------------------------
+
+\section{Extra-curricular activities}
+
+\cvitem{2017}{Winner of Digital Catapult ``Hacking Happiness'' hackathon with Application Route2Happiness} 
+\cvitem{}{Participant in tech meetups, Functional Programming North East}
+\cvitem{}{Runner and club secretary of England Athletics club Jesmond Joggers}
+\cvitem{}{Road cyclist, Guitar player, Darts Player}
+
+
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

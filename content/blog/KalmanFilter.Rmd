@@ -47,7 +47,12 @@ We then construct a `Stream` of `Data` objects. The `Data` object has a timestam
 A graph of the data from four "stations", produced using [ggplot2](http://ggplot2.org) in R is shown in the figure below.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
-data = read_csv("../../../firstOrderDlm/firstOrderDlm.csv", col_names = c("stationId", "time", "observation", "state"))
+destfile="../../firstOrderDlm/firstOrderDlm.csv" 
+if(!file.exists(destfile)){
+    system("cd ../../firstOrderDlm && sbt \"run-main dlm\"")
+}
+
+data = read_csv(destfile, col_names = c("stationId", "time", "observation", "state"))
 
 ## clean the data using dplyr and plot using ggplot2
 data %>%
@@ -148,7 +153,11 @@ We can now plot the results of the filtering using R and ggplot2, overlaid with 
 # Visualise Kalman Filtered Data #
 ##################################
 
-filtered = read_csv("../../../firstOrderDlm/filteredDlm.csv", c("stationId", "time", "observation", "stateEstimate", "v", "w", "m", "c"))
+destfile = "../../firstOrderDlm/filteredDlm.csv"
+if(!file.exists(destfile)){
+    system("cd ../../firstOrderDlm && sbt \"run-main KalmanFilter\"")
+}
+filtered = read_csv(destfile, c("stationId", "time", "observation", "stateEstimate", "v", "w", "m", "c"))
 
 ## calculate upper and lower 95% bounds of the state estimate
 filtered %>%

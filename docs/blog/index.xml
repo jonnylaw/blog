@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Blog-rsses on Probabilistic Programming in Scala</title>
+    <title>Blogs on Probabilistic Programming in Scala</title>
     <link>/blog/index.xml</link>
-    <description>Recent content in Blog-rsses on Probabilistic Programming in Scala</description>
+    <description>Recent content in Blogs on Probabilistic Programming in Scala</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 12 Dec 2016 12:13:14 -0500</lastBuildDate>
@@ -15,15 +15,7 @@
       <pubDate>Mon, 12 Dec 2016 12:13:14 -0500</pubDate>
       
       <guid>/blog/KalmanFilter/</guid>
-      <description>---
-title: &#34;The Kalman Filter in Scala&#34;
-author: &#34;Jonny Law&#34;
-date: &#39;2016-12-12T12:13:14-05:00&#39;
-categories: scala
----
-
-
-&lt;!-- BLOGDOWN-BODY-BEFORE
+      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
 
 /BLOGDOWN-BODY-BEFORE --&gt;
 
@@ -53,7 +45,7 @@ val data = (1 to 16) map (id =&amp;gt; (id, simulate(p).take(100).toVector))&lt;
 &lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[x_t = x_{t-1} + \omega, \qquad \omega \sim \mathcal{N}(0, V)\]&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;We then construct a &lt;code&gt;Stream&lt;/code&gt; of &lt;code&gt;Data&lt;/code&gt; objects. The &lt;code&gt;Data&lt;/code&gt; object has a timestamped observation and an optional state space. We construct the observation at time &lt;span class=&#34;math inline&#34;&gt;\(t\)&lt;/span&gt; by simply adding the observation noise to the state space &lt;span class=&#34;math inline&#34;&gt;\(y_t \sim \mathcal{N}(y_t | x_t, V)\)&lt;/span&gt;. The state is optional because we can’t observe the state of real data, only simulated data will have a known state.&lt;/p&gt;
 &lt;p&gt;A graph of the data from four “stations”, produced using &lt;a href=&#34;http://ggplot2.org&#34;&gt;ggplot2&lt;/a&gt; in R is shown in the figure below.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/KalmanFilter_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;#####content/blog/KalmanFilter_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;an-aside-on-referential-transparency&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;An Aside on Referential Transparency&lt;/h3&gt;
 &lt;p&gt;Note that the function &lt;code&gt;simulate&lt;/code&gt; is not referentially transparent, meaning the function will return a different &lt;code&gt;Stream&lt;/code&gt; of data each time we run it. Referential transparency is important in functional programming, to allow us to easily reason about complex programs. The Breeze library implements another object for stateful random number generation, the &lt;code&gt;Process&lt;/code&gt; object. The &lt;code&gt;MarkovChain&lt;/code&gt; object can be used to construct a process without drawing explicitly from the distribution until we run the program. Firstly define a single step of the random walk:&lt;/p&gt;
@@ -111,26 +103,12 @@ numbers.scanLeft(0)(sum)&lt;/code&gt;&lt;/pre&gt;
   map{ case (id, data) =&amp;gt;
   (id, filterSeries(data.sortBy(_.time), p)) } // apply the filter to the sorted data&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;We can now plot the results of the filtering using R and ggplot2, overlaid with 95% prediction intervals.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/KalmanFilter_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;#####content/blog/KalmanFilter_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The full code is available in the &lt;a href=&#34;https://github.com/jonnylaw/blog/tree/master/dlm&#34;&gt;GitHub Repo&lt;/a&gt; associated with this blog.&lt;/p&gt;
 &lt;/div&gt;
 
 
-&lt;!-- dynamically load mathjax for compatibility with self-contained --&gt;
-&lt;script&gt;
-  (function () {
-    var script = document.createElement(&#34;script&#34;);
-    script.type = &#34;text/javascript&#34;;
-    script.src  = &#34;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&#34;;
-    if (location.protocol !== &#34;file:&#34; &amp;&amp; /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, &#39;&#39;);
-    document.getElementsByTagName(&#34;head&#34;)[0].appendChild(script);
-  })();
-&lt;/script&gt;
-
 &lt;!-- BLOGDOWN-HEAD
-
-
 
 
 
