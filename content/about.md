@@ -1,29 +1,12 @@
 +++
-title = "About Hugo"
-date = "2014-04-09"
+title = "About Me"
+date = "2017-02-02"
 +++
 
-Hugo is a static site engine written in Go.
+Jonathan Law is a current PhD student on the [Cloud Computing for Big Data CDT](http://www.bigdata-cdt.ac.uk/), funded by the [EPSRC](https://www.epsrc.ac.uk). His primary research interest is in using functional programming for Bayesian Inference (often called probabilistic programming), using the language [Scala](http://www.scala-lang.org/). Prior to embarking on the PhD, he worked in industry as an Insight Analyst, extracting value from large customer data sets.
 
+## Selected Projects
 
-It makes use of a variety of open source projects including:
-
-* [Cobra](https://github.com/spf13/cobra)
-* [Viper](https://github.com/spf13/viper)
-* [J Walter Weatherman](https://github.com/spf13/jWalterWeatherman)
-* [Cast](https://github.com/spf13/cast)
-
-Learn more and contribute on [GitHub](https://github.com/spf13).
-
-## Setup
-
-Some fun facts about [Hugo](http://gohugo.io/):
-
-* Built in [Go](http://golang.org/)
-* Loosely inspired by [Jekyll](http://jekyllrb.com/)
-* Primarily developed by [spf13](http://spf13.com/) on the train while commuting to and from Manhattan.
-* Coded in [Vim](http://vim.org) using [spf13-vim](http://vim.spf13.com/)
-
-Have questions or suggestions? Feel free to [open an issue on GitHub](https://github.com/spf13/hugo/issues/new) or [ask me on Twitter](https://twitter.com/spf13).
-
-Thanks for reading!
+**Composable POMP Models**
+[git.io/statespace](https://git.io/statespace) 
+*A library for online Bayesian filtering of univariate state space models, sometimes called POMP (Partially Observed Markov Process Models).*
