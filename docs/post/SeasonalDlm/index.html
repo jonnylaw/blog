@@ -60,11 +60,11 @@
 
 
 <meta itemprop="dateModified" content="2016-12-13T12:13:14-05:00" />
-<meta itemprop="wordCount" content="791">
+<meta itemprop="wordCount" content="816">
 
 
 
-<meta itemprop="keywords" content="scala," />
+<meta itemprop="keywords" content="scala,scala, streaming, akka," />
 
         
 
@@ -91,6 +91,8 @@
         
             
         
+
+
 
 
 
@@ -195,6 +197,10 @@
                     
                 
 
+                
+                    <li>
+                        <a href="../../post/AkkaClient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
+                    </li>
                 
                     <li>
                         <a href="../../post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
@@ -329,9 +335,21 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
   } yield MarkovChain(init)(simStep(p))
 }</code></pre>
 <p>Note that the Markov chain is a <code>Rand[Process[Double]]</code>, this is not the most elegant and I’m open to suggestions on a better way to formulate this. Once we have defined a Markov chain, we must draw from it which returns a <code>Process[Double]</code>, the initial draw is to sample from the initial state distribution <span class="math inline">\(\mathcal{N}(m_0, C_0)\)</span>. Next, we can sample from the <code>Process</code> and plot it. A simulation from the seasonal DLM, with parameters <span class="math inline">\(V = 3\)</span> and <span class="math inline">\(W = I_6\)</span>, is given below:</p>
-<p><img src="SeasonalDlm_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="figures/unnamed-chunk-1-1.png" width="672" /></p>
 </div>
 
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 
 
     </div>
@@ -482,6 +500,20 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
                     <li>
                         <article>
                             <header>
+                                <h3><a href="../../post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-02-21'>
+                                    February 21, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
                                 <h3><a href="../../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
                                 
                                     
@@ -537,6 +569,16 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
                 
 
                 
+                    <li>
+                        <ul class="actions">
+                            <li><a href=
+                            
+                                /blog/
+                            
+                            class="button">View more posts</a></li>
+                        </ul>
+                    </li>
+                
             </ul>
         </section>
 
@@ -560,6 +602,15 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
                             <header>
                                 <a href="../../categories/scala/">scala</a>
                                 <span style="float:right;">4</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/scala-streaming-akka/">scala, streaming, akka</a>
+                                <span style="float:right;">1</span>
                             </header>
                         </article>
                     </li>

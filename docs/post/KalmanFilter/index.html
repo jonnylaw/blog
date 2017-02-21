@@ -63,11 +63,11 @@
 
 
 <meta itemprop="dateModified" content="2016-12-12T12:13:14-05:00" />
-<meta itemprop="wordCount" content="1307">
+<meta itemprop="wordCount" content="1340">
 
 
 
-<meta itemprop="keywords" content="scala," />
+<meta itemprop="keywords" content="scala,scala, streaming, akka," />
 
         
 
@@ -94,6 +94,8 @@
         
             
         
+
+
 
 
 
@@ -198,6 +200,10 @@
                     
                 
 
+                
+                    <li>
+                        <a href="../../post/AkkaClient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
+                    </li>
                 
                     <li>
                         <a href="../../post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
@@ -339,6 +345,7 @@ def filter(p: Parameters): (FilterState, Data) =&gt; FilterState = (s, d) =&gt; 
 def sum(a: Int, b: Int): Int = a + b
 
 numbers.scanLeft(0)(sum)</code></pre>
+<pre><code>## cat: /release: No such file or directory</code></pre>
 <p>The first calculation is (0 + 1) = 1, which is then used as the first argument in the pairwise <code>sum</code> function, then the second calculation is (1 + 2) = 3, the result of which is used again in the next application of <code>sum</code>. Each intermediate step of the calculation is retained and appended to a list to be output when the list of number is exhausted, so we end up with a cumulative sum, <code>List(0, 1, 3, 6, 10, 15)</code>. We can use <code>scanLeft</code> and the <code>Function2</code>, <code>filter</code> to calculate and retain the latent states in a DLM:</p>
 <pre class="scala"><code>def filterSeries(data: Seq[Data], initParams: Parameters): Seq[FilterOut] = {
   val initFilter = FilterState(data.head, params, 0.0) // initialise the filter
@@ -359,6 +366,18 @@ numbers.scanLeft(0)(sum)</code></pre>
 <p>The full code is available in the <a href="https://github.com/jonnylaw/blog/tree/master/dlm">GitHub Repo</a> associated with this blog.</p>
 </div>
 
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 
 
     </div>
@@ -523,6 +542,20 @@ numbers.scanLeft(0)(sum)</code></pre>
                     <li>
                         <article>
                             <header>
+                                <h3><a href="../../post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-02-21'>
+                                    February 21, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
                                 <h3><a href="../../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
                                 
                                     
@@ -578,6 +611,16 @@ numbers.scanLeft(0)(sum)</code></pre>
                 
 
                 
+                    <li>
+                        <ul class="actions">
+                            <li><a href=
+                            
+                                /blog/
+                            
+                            class="button">View more posts</a></li>
+                        </ul>
+                    </li>
+                
             </ul>
         </section>
 
@@ -601,6 +644,15 @@ numbers.scanLeft(0)(sum)</code></pre>
                             <header>
                                 <a href="../../categories/scala/">scala</a>
                                 <span style="float:right;">4</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/scala-streaming-akka/">scala, streaming, akka</a>
+                                <span style="float:right;">1</span>
                             </header>
                         </article>
                     </li>

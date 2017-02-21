@@ -173,6 +173,10 @@
 
                 
                     <li>
+                        <a href="../post/AkkaClient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
+                    </li>
+                
+                    <li>
                         <a href="../post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
                     </li>
                 
@@ -201,6 +205,61 @@
         
             
         
+
+        
+            <article class="post">
+    <header>
+    <div class="title">
+        
+            <h2><a href="../post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h2>
+        
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2017-02-21'>
+            February 21, 2017</time>
+        <span class="author">Jonathan Law</span>
+        
+        
+    </div>
+</header>
+
+    
+
+    <p>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple Akka Http client to read data from the Urban Observatory in Newcastle.</p>
+
+    <footer>
+        <ul class="actions">
+            <li><a href="../post/AkkaClient/" class="button big">Continue Reading</a></li>
+        </ul>
+        <ul class="stats">
+    
+        
+
+        
+        
+            <li>
+                
+                
+                    
+
+                    
+                        Categories
+                    
+                
+            </li>
+        
+    
+
+    
+    
+    </footer>
+</article>
 
         
             <article class="post">
@@ -297,63 +356,6 @@ Referential Transparency One of the most important properties of functional prog
     
 </ul>
 
-    </footer>
-</article>
-
-        
-            <article class="post">
-    <header>
-    <div class="title">
-        
-            <h2><a href="../post/KalmanFilter/">The Kalman Filter in Scala</a></h2>
-        
-        
-    </div>
-    <div class="meta">
-        
-            
-        
-
-        <time class="published"
-            datetime='2016-12-12'>
-            January 4, 2017</time>
-        <span class="author">Jonny Law</span>
-        
-        
-    </div>
-</header>
-
-    
-
-    <p>A Dynamic Linear Model (DLM) is a special type of state space model, where the state and observation equations are Normally distributed and linear. A general DLM can be written as follows:
-[\begin{aligned} y_t &amp;= F_t x_t + \nu_t, \qquad \nu_t \sim \mathcal{N}(0, V_t) \ x_t &amp;= G<em>tx</em>{t-1} + \omega_t \qquad \omega_t \sim \mathcal{N}(0, W_t), \end{aligned}]
-(y_t) represents the observation of the process at time (t), (x_t) is the value of the unobserved state at time (t).</p>
-
-    <footer>
-        <ul class="actions">
-            <li><a href="../post/KalmanFilter/" class="button big">Continue Reading</a></li>
-        </ul>
-        <ul class="stats">
-    
-        
-
-        
-        
-            <li>
-                
-                
-                    
-
-                    
-                        Categories
-                    
-                
-            </li>
-        
-    
-
-    
-    
     </footer>
 </article>
 
@@ -475,6 +477,20 @@ Referential Transparency One of the most important properties of functional prog
                     <li>
                         <article>
                             <header>
+                                <h3><a href="../post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-02-21'>
+                                    February 21, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
                                 <h3><a href="../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
                                 
                                     
@@ -530,6 +546,16 @@ Referential Transparency One of the most important properties of functional prog
                 
 
                 
+                    <li>
+                        <ul class="actions">
+                            <li><a href=
+                            
+                                /blog/
+                            
+                            class="button">View more posts</a></li>
+                        </ul>
+                    </li>
+                
             </ul>
         </section>
 
@@ -553,6 +579,15 @@ Referential Transparency One of the most important properties of functional prog
                             <header>
                                 <a href="../categories/scala/">scala</a>
                                 <span style="float:right;">4</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../categories/scala-streaming-akka/">scala, streaming, akka</a>
+                                <span style="float:right;">1</span>
                             </header>
                         </article>
                     </li>

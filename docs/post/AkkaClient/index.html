@@ -4,7 +4,7 @@
     <head>
         
             
-                <title>Probabilistic Programming in Scala</title>
+                <title>An Akka HTTP Client with JSON Parsing</title>
             
         
 
@@ -15,6 +15,8 @@
 
 
         
+            <meta name="author" content="Jonathan Law">
+        
         
             
                 <meta name="description" content="Bayesian Statistics and Functional Programming using Scala">
@@ -22,10 +24,20 @@
         
 
         
-        <meta property="og:title" content="Probabilistic Programming in Scala" />
-<meta property="og:description" content="Bayesian Statistics and Functional Programming using Scala" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="/" />
+
+  <meta name="twitter:card" content="summary"/>
+
+
+
+<meta name="twitter:title" content="An Akka HTTP Client with JSON Parsing"/>
+<meta name="twitter:description" content="There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple Akka Http client to read data from the Urban Observatory in Newcastle."/>
+
+
+
+        <meta property="og:title" content="An Akka HTTP Client with JSON Parsing" />
+<meta property="og:description" content="There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple Akka Http client to read data from the Urban Observatory in Newcastle." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/post/AkkaClient/" />
 
 
 <meta property="og:updated_time" content="2017-02-21T12:13:14-05:00"/>
@@ -38,10 +50,18 @@
 
 
 
-        
-<meta itemprop="name" content="Probabilistic Programming in Scala">
-<meta itemprop="description" content="Bayesian Statistics and Functional Programming using Scala">
 
+        
+<meta itemprop="name" content="An Akka HTTP Client with JSON Parsing">
+<meta itemprop="description" content="There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple Akka Http client to read data from the Urban Observatory in Newcastle.">
+
+
+<meta itemprop="dateModified" content="2017-02-21T12:13:14-05:00" />
+<meta itemprop="wordCount" content="1333">
+
+
+
+<meta itemprop="keywords" content="scala,scala, streaming, akka," />
 
         
 
@@ -54,11 +74,11 @@
 
         
         
-            <link rel="stylesheet" href="./css/google-font.css" />
-            <link rel="stylesheet" href="./css/font-awesome.min.css" />
-            <link rel="stylesheet" href="./css/main.css" />
-            <link rel="stylesheet" href="./css/add-on.css" />
-            <link rel="stylesheet" href="./css/monokai-sublime.css">
+            <link rel="stylesheet" href="../../css/google-font.css" />
+            <link rel="stylesheet" href="../../css/font-awesome.min.css" />
+            <link rel="stylesheet" href="../../css/main.css" />
+            <link rel="stylesheet" href="../../css/add-on.css" />
+            <link rel="stylesheet" href="../../css/monokai-sublime.css">
         
 
         
@@ -84,21 +104,21 @@
     
 <header id="header">
     
-        <h1><a href="./">Probabilistic Programming in Scala</i></a></h1>
+        <h2><a href="../../">Probabilistic Programming in Scala</i></a></h2>
     
 
     <nav class="links">
         <ul>
             
                 <li>
-                    <a href="./blog">
+                    <a href="../../blog">
                         
                             <i class="fa fa-newspaper-o">&nbsp;</i>Blog
                     </a>
                 </li>
             
                 <li>
-                    <a href="./about">
+                    <a href="../../about">
                         About
                     </a>
                 </li>
@@ -142,7 +162,7 @@
             <ul class="links">
                 
                     <li>
-                        <a href="./blog">
+                        <a href="../../blog">
                             <h3>
                                 
                                     <i class="fa fa-newspaper-o">&nbsp;</i>
@@ -153,7 +173,7 @@
                     </li>
                 
                     <li>
-                        <a href="./about">
+                        <a href="../../about">
                             <h3>
                                 
                                 About
@@ -176,23 +196,23 @@
 
                 
                     <li>
-                        <a href="./post/AkkaClient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
+                        <a href="../../post/AkkaClient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
                     </li>
                 
                     <li>
-                        <a href="./post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
+                        <a href="../../post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
                     </li>
                 
                     <li>
-                        <a href="./post/SeasonalDlm/"><p>Seasonal DLM</p></a>
+                        <a href="../../post/SeasonalDlm/"><p>Seasonal DLM</p></a>
                     </li>
                 
                     <li>
-                        <a href="./post/KalmanFilter/"><p>The Kalman Filter in Scala</p></a>
+                        <a href="../../post/KalmanFilter/"><p>The Kalman Filter in Scala</p></a>
                     </li>
                 
                     <li>
-                        <a href="./post/PracticalAkkaStreams/"><p>Practical Introduction to Akka Streaming</p></a>
+                        <a href="../../post/PracticalAkkaStreams/"><p>Practical Introduction to Akka Streaming</p></a>
                     </li>
                 
             </ul>
@@ -202,14 +222,27 @@
         
 </section>
 
+    <section id="share-menu">
+    <section id="social-share-nav">
+        <ul class="links">
+            <header>
+                <h3>Share this post <i class="fa fa-smile-o"></i></h3>
+            </header>
+            
+        </ul>
+    </section>
+</section>
+
     
     <div id="main">
         
-            <article class="post">
+        
+        <article class="post">
     <header>
     <div class="title">
         
-            <h2><a href="./post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h2>
+            <h1><a href="../../post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h1>
+            
         
         
     </div>
@@ -464,7 +497,7 @@ val res: Future[HttpResponse] =
 </article>
 <ul class="actions pagination">
     
-        <li><a href="./post/FailureInFunctionalProgramming/"
+        <li><a href="../../post/FailureInFunctionalProgramming/"
                 class="button big previous">Using Monads for Handling Failures and Exceptions</a></li>
     
 
@@ -494,19 +527,6 @@ val res: Future[HttpResponse] =
     
 
 
-
-            <section id="share-menu">
-    <section id="social-share-nav">
-        <ul class="links">
-            <header>
-                <h3>Share this post <i class="fa fa-smile-o"></i></h3>
-            </header>
-            
-        </ul>
-    </section>
-</section>
-
-        
     </div>
     
 <section id="sidebar">
@@ -516,7 +536,7 @@ val res: Future[HttpResponse] =
             
             
                 
-                    <a href="./" class="logo"><img src="./img/main/logo.jpg" alt="Jonny Law&#39;s Blog" /></a>
+                    <a href="../../" class="logo"><img src="../../img/main/logo.jpg" alt="Jonny Law&#39;s Blog" /></a>
                 
             
             
@@ -526,9 +546,6 @@ val res: Future[HttpResponse] =
                 </header>
             
             <ul class="icons">
-                
-                    <li><a href="./index.xml" type="application/rss+xml"
-                        target="_blank" title="RSS" class="fa fa-rss"></a></li>
                 
                 
                     
@@ -611,7 +628,7 @@ val res: Future[HttpResponse] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="./post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h3>
+                                <h3><a href="../../post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h3>
                                 
                                     
                                 
@@ -625,7 +642,7 @@ val res: Future[HttpResponse] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="./post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
+                                <h3><a href="../../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
                                 
                                     
                                 
@@ -639,7 +656,7 @@ val res: Future[HttpResponse] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="./post/SeasonalDlm/">Seasonal DLM</a></h3>
+                                <h3><a href="../../post/SeasonalDlm/">Seasonal DLM</a></h3>
                                 
                                     
                                 
@@ -653,7 +670,7 @@ val res: Future[HttpResponse] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="./post/KalmanFilter/">The Kalman Filter in Scala</a></h3>
+                                <h3><a href="../../post/KalmanFilter/">The Kalman Filter in Scala</a></h3>
                                 
                                     
                                 
@@ -667,7 +684,7 @@ val res: Future[HttpResponse] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="./post/PracticalAkkaStreams/">Practical Introduction to Akka Streaming</a></h3>
+                                <h3><a href="../../post/PracticalAkkaStreams/">Practical Introduction to Akka Streaming</a></h3>
                                 
                                     
                                 
@@ -700,7 +717,7 @@ val res: Future[HttpResponse] =
         <section id="categories">
             <ul class="posts">
                 <header>
-                    <h3><a href="./categories/">Categories</a></h3>
+                    <h3><a href="../../categories/">Categories</a></h3>
                 </header>
 
                 
@@ -711,7 +728,7 @@ val res: Future[HttpResponse] =
                     <li>
                         <article>
                             <header>
-                                <a href="./categories/scala/">scala</a>
+                                <a href="../../categories/scala/">scala</a>
                                 <span style="float:right;">4</span>
                             </header>
                         </article>
@@ -720,7 +737,7 @@ val res: Future[HttpResponse] =
                     <li>
                         <article>
                             <header>
-                                <a href="./categories/scala-streaming-akka/">scala, streaming, akka</a>
+                                <a href="../../categories/scala-streaming-akka/">scala, streaming, akka</a>
                                 <span style="float:right;">1</span>
                             </header>
                         </article>
@@ -736,9 +753,6 @@ val res: Future[HttpResponse] =
     
         <section id="footer">
             <ul class="icons">
-                
-                    <li><a href="./index.xml" type="application/rss+xml"
-                        target="_blank" title="RSS" class="fa fa-rss"></a></li>
                 
                 
                     
@@ -818,12 +832,12 @@ val res: Future[HttpResponse] =
 
         
         
-            <script src="./js/jquery.min.js"></script>
-            <script src="./js/skel.min.js"></script>
-            <script src="./js/util.js"></script>
-            <script src="./js/main.js"></script>
-            <script src="./js/backToTop.js"></script>
-            <script src="./js/highlight.pack.js"></script>
+            <script src="../../js/jquery.min.js"></script>
+            <script src="../../js/skel.min.js"></script>
+            <script src="../../js/util.js"></script>
+            <script src="../../js/main.js"></script>
+            <script src="../../js/backToTop.js"></script>
+            <script src="../../js/highlight.pack.js"></script>
         
 
         
