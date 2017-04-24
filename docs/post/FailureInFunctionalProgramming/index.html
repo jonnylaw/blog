@@ -10,7 +10,7 @@
 
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="generator" content="Hugo 0.18.1" />
+        <meta name="generator" content="Hugo 0.20.2" />
         
 
 
@@ -29,20 +29,23 @@
 
 
 
+<meta name="twitter:text:title" content="Using Monads for Handling Failures and Exceptions"/>
 <meta name="twitter:title" content="Using Monads for Handling Failures and Exceptions"/>
 <meta name="twitter:description" content="In this post I will give a practical introduction to some useful structures for handling failure in functional programming.
 Referential Transparency One of the most important properties of functional programming is referential transparency and programming with pure functions. This means we can substitute a pure function with its result, for intance if we have the function def f = 1 &#43; 2, we can replace every occurence of f with 3 and the final evaluation will remain unchanged"/>
-
 
 
         <meta property="og:title" content="Using Monads for Handling Failures and Exceptions" />
 <meta property="og:description" content="In this post I will give a practical introduction to some useful structures for handling failure in functional programming.
 Referential Transparency One of the most important properties of functional programming is referential transparency and programming with pure functions. This means we can substitute a pure function with its result, for intance if we have the function def f = 1 &#43; 2, we can replace every occurence of f with 3 and the final evaluation will remain unchanged" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/post/FailureInFunctionalProgramming/" />
+<meta property="og:url" content="/post/failureinfunctionalprogramming/" />
 
 
-<meta property="og:updated_time" content="2017-01-04T12:13:14-05:00"/>
+
+<meta property="article:published_time" content="2017-01-04T12:13:14-05:00"/>
+<meta property="article:modified_time" content="2017-01-04T12:13:14-05:00"/>
+
 
 
 
@@ -199,23 +202,23 @@ Referential Transparency One of the most important properties of functional prog
 
                 
                     <li>
-                        <a href="../../post/AkkaClient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
+                        <a href="../../post/breezemcmc/"><p>MCMC with Scala Breeze</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
+                        <a href="../../post/akkaclient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/SeasonalDlm/"><p>Seasonal DLM</p></a>
+                        <a href="../../post/failureinfunctionalprogramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/KalmanFilter/"><p>The Kalman Filter in Scala</p></a>
+                        <a href="../../post/seasonaldlm/"><p>Seasonal DLM</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/PracticalAkkaStreams/"><p>Practical Introduction to Akka Streaming</p></a>
+                        <a href="../../post/kalmanfilter/"><p>The Kalman Filter in Scala</p></a>
                     </li>
                 
             </ul>
@@ -244,7 +247,7 @@ Referential Transparency One of the most important properties of functional prog
     <header>
     <div class="title">
         
-            <h1><a href="../../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h1>
+            <h1><a href="../../post/failureinfunctionalprogramming/">Using Monads for Handling Failures and Exceptions</a></h1>
             
         
         
@@ -363,37 +366,17 @@ def sqrt_twice_trans(a: Double): OptionT[Try, Double] =
     </div>
 
     <footer>
-        <ul class="stats">
-    
         
-
-        
-        
-            <li>
-                
-                
-                    
-
-                    
-                        Categories
-                    
-                
-            </li>
-        
-    
-
-    
-    
     </footer>
 </article>
 <ul class="actions pagination">
     
-        <li><a href="../../post/SeasonalDlm/"
+        <li><a href="../../post/seasonaldlm/"
                 class="button big previous">Seasonal DLM</a></li>
     
 
     
-        <li><a href="../../post/AkkaClient/"
+        <li><a href="../../post/akkaclient/"
                 class="button big next">An Akka HTTP Client with JSON Parsing</a></li>
     
 </ul>
@@ -405,9 +388,9 @@ def sqrt_twice_trans(a: Double): OptionT[Try, Double] =
             <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'shortname';
-    var disqus_identifier = '\/post\/FailureInFunctionalProgramming\/';
+    var disqus_identifier = '\/post\/failureinfunctionalprogramming\/';
     var disqus_title = 'Using Monads for Handling Failures and Exceptions';
-    var disqus_url = '\/post\/FailureInFunctionalProgramming\/';
+    var disqus_url = '\/post\/failureinfunctionalprogramming\/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -522,7 +505,21 @@ def sqrt_twice_trans(a: Double): OptionT[Try, Double] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h3>
+                                <h3><a href="../../post/breezemcmc/">MCMC with Scala Breeze</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-04-23'>
+                                    April 23, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="../../post/akkaclient/">An Akka HTTP Client with JSON Parsing</a></h3>
                                 
                                     
                                 
@@ -536,7 +533,7 @@ def sqrt_twice_trans(a: Double): OptionT[Try, Double] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
+                                <h3><a href="../../post/failureinfunctionalprogramming/">Using Monads for Handling Failures and Exceptions</a></h3>
                                 
                                     
                                 
@@ -550,7 +547,7 @@ def sqrt_twice_trans(a: Double): OptionT[Try, Double] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/SeasonalDlm/">Seasonal DLM</a></h3>
+                                <h3><a href="../../post/seasonaldlm/">Seasonal DLM</a></h3>
                                 
                                     
                                 
@@ -564,27 +561,13 @@ def sqrt_twice_trans(a: Double): OptionT[Try, Double] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/KalmanFilter/">The Kalman Filter in Scala</a></h3>
+                                <h3><a href="../../post/kalmanfilter/">The Kalman Filter in Scala</a></h3>
                                 
                                     
                                 
                                 <time class="published" datetime=
                                     '2016-12-12'>
                                     December 12, 2016</time>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <h3><a href="../../post/PracticalAkkaStreams/">Practical Introduction to Akka Streaming</a></h3>
-                                
-                                    
-                                
-                                <time class="published" datetime=
-                                    '2016-12-01'>
-                                    December 1, 2016</time>
                             </header>
                         </article>
                     </li>

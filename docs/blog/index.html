@@ -18,7 +18,7 @@
 
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="generator" content="Hugo 0.18.1" />
+        <meta name="generator" content="Hugo 0.20.2" />
         
 
 
@@ -36,7 +36,9 @@
 <meta property="og:url" content="/blog/" />
 
 
+
 <meta property="og:updated_time" content="2016-12-12T12:13:14-05:00"/>
+
 
 
 
@@ -173,23 +175,23 @@
 
                 
                     <li>
-                        <a href="../post/AkkaClient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
+                        <a href="../post/breezemcmc/"><p>MCMC with Scala Breeze</p></a>
                     </li>
                 
                     <li>
-                        <a href="../post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
+                        <a href="../post/akkaclient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
                     </li>
                 
                     <li>
-                        <a href="../post/SeasonalDlm/"><p>Seasonal DLM</p></a>
+                        <a href="../post/failureinfunctionalprogramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
                     </li>
                 
                     <li>
-                        <a href="../post/KalmanFilter/"><p>The Kalman Filter in Scala</p></a>
+                        <a href="../post/seasonaldlm/"><p>Seasonal DLM</p></a>
                     </li>
                 
                     <li>
-                        <a href="../post/PracticalAkkaStreams/"><p>Practical Introduction to Akka Streaming</p></a>
+                        <a href="../post/kalmanfilter/"><p>The Kalman Filter in Scala</p></a>
                     </li>
                 
             </ul>
@@ -211,7 +213,48 @@
     <header>
     <div class="title">
         
-            <h2><a href="../post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h2>
+            <h2><a href="../post/breezemcmc/">MCMC with Scala Breeze</a></h2>
+        
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2017-04-23'>
+            April 23, 2017</time>
+        <span class="author">Jonathan Law</span>
+        
+        
+    </div>
+</header>
+
+    
+
+    <p>Bivariate Gaussian Model Scala Breeze is a numerical computing library, which also provides facilities for statistical computing. For instance, implementations of distributions and Markov Chain Monte Carlo for, typically used for Bayesian inference of intractable models. Today I am going to build a simple bivariate Gaussian model, simulate some realisations from the model and use the Breeze library to recover the mean of the bivariate Gaussian distribution and the variance.</p>
+
+    <footer>
+        <ul class="actions">
+            <li><a href="../post/breezemcmc/" class="button big">Continue Reading</a></li>
+        </ul>
+        <ul class="stats">
+    
+
+    
+    
+</ul>
+
+    </footer>
+</article>
+
+        
+            <article class="post">
+    <header>
+    <div class="title">
+        
+            <h2><a href="../post/akkaclient/">An Akka HTTP Client with JSON Parsing</a></h2>
         
         
     </div>
@@ -235,29 +278,9 @@
 
     <footer>
         <ul class="actions">
-            <li><a href="../post/AkkaClient/" class="button big">Continue Reading</a></li>
+            <li><a href="../post/akkaclient/" class="button big">Continue Reading</a></li>
         </ul>
-        <ul class="stats">
-    
         
-
-        
-        
-            <li>
-                
-                
-                    
-
-                    
-                        Categories
-                    
-                
-            </li>
-        
-    
-
-    
-    
     </footer>
 </article>
 
@@ -266,7 +289,7 @@
     <header>
     <div class="title">
         
-            <h2><a href="../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h2>
+            <h2><a href="../post/failureinfunctionalprogramming/">Using Monads for Handling Failures and Exceptions</a></h2>
         
         
     </div>
@@ -291,71 +314,9 @@ Referential Transparency One of the most important properties of functional prog
 
     <footer>
         <ul class="actions">
-            <li><a href="../post/FailureInFunctionalProgramming/" class="button big">Continue Reading</a></li>
+            <li><a href="../post/failureinfunctionalprogramming/" class="button big">Continue Reading</a></li>
         </ul>
-        <ul class="stats">
-    
         
-
-        
-        
-            <li>
-                
-                
-                    
-
-                    
-                        Categories
-                    
-                
-            </li>
-        
-    
-
-    
-    
-    </footer>
-</article>
-
-        
-            <article class="post">
-    <header>
-    <div class="title">
-        
-            <h2><a href="../post/SeasonalDlm/">Seasonal DLM</a></h2>
-        
-        
-    </div>
-    <div class="meta">
-        
-            
-        
-
-        <time class="published"
-            datetime='2016-12-13'>
-            December 13, 2016</time>
-        <span class="author">Jonny Law</span>
-        
-        
-    </div>
-</header>
-
-    
-
-    <p>The Seasonal DLM I introduced the class of state space models called DLMs in a previous post covering the Kalman Filter. The seasonal DLM is similar to the first order DLM, however it incorporates a deterministic transformation to the state, in order to capture cyclic trends. Remember a general DLM can be written as:
-[\begin{align} y_t &amp;= F_t x_t + \nu_t, \qquad \mathcal{N}(0, V_t), \ x_t &amp;= G<em>t x</em>{t-1} + \omega_t, \quad \mathcal{N}(0, W_t).</p>
-
-    <footer>
-        <ul class="actions">
-            <li><a href="../post/SeasonalDlm/" class="button big">Continue Reading</a></li>
-        </ul>
-        <ul class="stats">
-    
-
-    
-    
-</ul>
-
     </footer>
 </article>
 
@@ -477,7 +438,21 @@ Referential Transparency One of the most important properties of functional prog
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h3>
+                                <h3><a href="../post/breezemcmc/">MCMC with Scala Breeze</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-04-23'>
+                                    April 23, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="../post/akkaclient/">An Akka HTTP Client with JSON Parsing</a></h3>
                                 
                                     
                                 
@@ -491,7 +466,7 @@ Referential Transparency One of the most important properties of functional prog
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
+                                <h3><a href="../post/failureinfunctionalprogramming/">Using Monads for Handling Failures and Exceptions</a></h3>
                                 
                                     
                                 
@@ -505,7 +480,7 @@ Referential Transparency One of the most important properties of functional prog
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../post/SeasonalDlm/">Seasonal DLM</a></h3>
+                                <h3><a href="../post/seasonaldlm/">Seasonal DLM</a></h3>
                                 
                                     
                                 
@@ -519,27 +494,13 @@ Referential Transparency One of the most important properties of functional prog
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../post/KalmanFilter/">The Kalman Filter in Scala</a></h3>
+                                <h3><a href="../post/kalmanfilter/">The Kalman Filter in Scala</a></h3>
                                 
                                     
                                 
                                 <time class="published" datetime=
                                     '2016-12-12'>
                                     December 12, 2016</time>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <h3><a href="../post/PracticalAkkaStreams/">Practical Introduction to Akka Streaming</a></h3>
-                                
-                                    
-                                
-                                <time class="published" datetime=
-                                    '2016-12-01'>
-                                    December 1, 2016</time>
                             </header>
                         </article>
                     </li>

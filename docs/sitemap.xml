@@ -2,7 +2,12 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>/post/AkkaClient/</loc>
+    <loc>/post/breezemcmc/</loc>
+    <lastmod>2017-04-23T14:13:12-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/akkaclient/</loc>
     <lastmod>2017-02-21T12:13:14-05:00</lastmod>
   </url>
   
@@ -12,27 +17,27 @@
   </url>
   
   <url>
-    <loc>/post/FailureInFunctionalProgramming/</loc>
+    <loc>/post/failureinfunctionalprogramming/</loc>
     <lastmod>2017-01-04T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/SeasonalDlm/</loc>
+    <loc>/post/seasonaldlm/</loc>
     <lastmod>2016-12-13T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/blog/KalmanFilter/</loc>
+    <loc>/blog/kalmanfilter/</loc>
     <lastmod>2016-12-12T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/KalmanFilter/</loc>
+    <loc>/post/kalmanfilter/</loc>
     <lastmod>2016-12-12T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/PracticalAkkaStreams/</loc>
+    <loc>/post/practicalakkastreams/</loc>
     <lastmod>2016-12-01T12:13:14-05:00</lastmod>
   </url>
   
@@ -49,13 +54,13 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2017-02-21T12:13:14-05:00</lastmod>
+    <lastmod>2017-04-23T14:13:12-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/</loc>
-    <lastmod>2017-02-21T12:13:14-05:00</lastmod>
+    <lastmod>2017-04-23T14:13:12-05:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -68,6 +73,11 @@
   <url>
     <loc>/categories/scala-streaming-akka/</loc>
     <lastmod>2017-02-21T12:13:14-05:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
     <priority>0</priority>
   </url>
   

@@ -1,229 +1,23 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>scala-streaming-akka on Probabilistic Programming in Scala</title>
-    <link>/categories/scala-streaming-akka/index.xml</link>
-    <description>Recent content in scala-streaming-akka on Probabilistic Programming in Scala</description>
+    <title>Scala, streaming, akka on Probabilistic Programming in Scala</title>
+    <link>/categories/scala-streaming-akka/</link>
+    <description>Recent content in Scala, streaming, akka on Probabilistic Programming in Scala</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="/categories/scala-streaming-akka/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 21 Feb 2017 12:13:14 -0500</lastBuildDate>
+    
+	<atom:link href="/categories/scala-streaming-akka/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>An Akka HTTP Client with JSON Parsing</title>
-      <link>/post/AkkaClient/</link>
+      <link>/post/akkaclient/</link>
       <pubDate>Tue, 21 Feb 2017 12:13:14 -0500</pubDate>
       
-      <guid>/post/AkkaClient/</guid>
-      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE --&gt;
-
-&lt;p&gt;There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple &lt;a href=&#34;http://akka.io/&#34;&gt;Akka Http&lt;/a&gt; client to read data from the &lt;a href=&#34;http://uoweb1.ncl.ac.uk/&#34;&gt;Urban Observatory&lt;/a&gt; in Newcastle. If you just want to read the code, see this &lt;a href=&#34;https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622&#34;&gt;Gist&lt;/a&gt;.&lt;/p&gt;
-&lt;div id=&#34;exploring-the-api&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Exploring the API&lt;/h2&gt;
-&lt;p&gt;The Urban Observatory consists of a grid of sensors around the North East, measuring traffic, pollution and weather. The focus of this post will be getting sensor data from a single sensor, N05171T, a traffic sensor located near the Metro Centre on Hollinside road. The metadata from this sensor can be found by querying an API endpoint: &lt;a href=&#34;http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key&#34; class=&#34;uri&#34;&gt;http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key&lt;/a&gt;=&amp;amp;sensor_name=N05171T. Note that this requires authentication, using an API key. An API key can be requested using &lt;a href=&#34;http://uoweb1.ncl.ac.uk/api_page/key_form/&#34;&gt;this form&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;The result of this query is:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;## {
-##     &amp;quot;type&amp;quot;: &amp;quot;Traffic&amp;quot;,
-##     &amp;quot;geom&amp;quot;: {
-##         &amp;quot;type&amp;quot;: &amp;quot;LineString&amp;quot;,
-##         &amp;quot;coordinates&amp;quot;: [
-##             [
-##                 -1.674433347,
-##                 54.959041883
-##             ],
-##             [
-##                 -1.673947928,
-##                 54.959553799
-##             ]
-##         ]
-##     },
-##     &amp;quot;active&amp;quot;: &amp;quot;True&amp;quot;,
-##     &amp;quot;latest&amp;quot;: &amp;quot;2017-02-21T08:23:06&amp;quot;,
-##     &amp;quot;base_height&amp;quot;: null,
-##     &amp;quot;sensor_height&amp;quot;: null,
-##     &amp;quot;name&amp;quot;: &amp;quot;N05171T&amp;quot;,
-##     &amp;quot;source&amp;quot;: {
-##         &amp;quot;web_display_name&amp;quot;: &amp;quot;NE Travel Data API (Third Party)&amp;quot;,
-##         &amp;quot;third_party&amp;quot;: true,
-##         &amp;quot;db_name&amp;quot;: &amp;quot;Scoot Netravel Api&amp;quot;,
-##         &amp;quot;document&amp;quot;: &amp;quot;&amp;quot;,
-##         &amp;quot;fancy_name&amp;quot;: &amp;quot;NE Travel Data API&amp;quot;
-##     }
-## }
-## &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We can see a bit of information about the sensor, including its location, time of latest reading and whether the sensor is active.&lt;/p&gt;
-&lt;p&gt;In order to retrieve the actual data from the sensor, we query the url &lt;a href=&#34;http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json&#34; class=&#34;uri&#34;&gt;http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json&lt;/a&gt; with the following required fields:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;api_key&lt;/code&gt; your API key here&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sensor_name&lt;/code&gt; N05171T&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;start_time&lt;/code&gt; 20170201&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;end_time&lt;/code&gt; 20170202&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;This returns the following:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;## {
-##     &amp;quot;type&amp;quot;: &amp;quot;Traffic&amp;quot;,
-##     &amp;quot;geom&amp;quot;: {
-##         &amp;quot;type&amp;quot;: &amp;quot;LineString&amp;quot;,
-##         &amp;quot;coordinates&amp;quot;: [
-##             [
-##                 -1.674433347,
-##                 54.959041883
-##             ],
-##             [
-##                 -1.673947928,
-##                 54.959553799
-##             ]
-##         ]
-##     },
-##     &amp;quot;active&amp;quot;: &amp;quot;True&amp;quot;,
-##     &amp;quot;data&amp;quot;: {
-##         &amp;quot;Congestion&amp;quot;: {
-##             &amp;quot;data&amp;quot;: {
-##                 &amp;quot;2017-02-01 01:36:46&amp;quot;: 0.0
-##             },
-##             &amp;quot;meta&amp;quot;: {
-##                 &amp;quot;name&amp;quot;: &amp;quot;Congestion&amp;quot;,
-##                 &amp;quot;theme&amp;quot;: &amp;quot;Traffic&amp;quot;,
-##                 &amp;quot;units&amp;quot;: &amp;quot;%&amp;quot;
-##             }
-##         },
-##         &amp;quot;Traffic Flow&amp;quot;: {
-##             &amp;quot;data&amp;quot;: {
-##                 &amp;quot;2017-02-01 01:36:46&amp;quot;: 4.0
-##             },
-##             &amp;quot;meta&amp;quot;: {
-##                 &amp;quot;name&amp;quot;: &amp;quot;Traffic Flow&amp;quot;,
-##                 &amp;quot;theme&amp;quot;: &amp;quot;Traffic&amp;quot;,
-##                 &amp;quot;units&amp;quot;: &amp;quot;Passenger Car Units&amp;quot;
-##             }
-##         },
-##         &amp;quot;Average Speed&amp;quot;: {
-##             &amp;quot;data&amp;quot;: {
-##                 &amp;quot;2017-02-01 13:21:46&amp;quot;: 35.0
-##             },
-##             &amp;quot;meta&amp;quot;: {
-##                 &amp;quot;name&amp;quot;: &amp;quot;Average Speed&amp;quot;,
-##                 &amp;quot;theme&amp;quot;: &amp;quot;Traffic&amp;quot;,
-##                 &amp;quot;units&amp;quot;: &amp;quot;KmPH&amp;quot;
-##             }
-##         }
-##     },
-##     &amp;quot;latest&amp;quot;: &amp;quot;2017-02-21T08:33:06&amp;quot;,
-##     &amp;quot;base_height&amp;quot;: null,
-##     &amp;quot;sensor_height&amp;quot;: null,
-##     &amp;quot;name&amp;quot;: &amp;quot;N05171T&amp;quot;,
-##     &amp;quot;source&amp;quot;: {
-##         &amp;quot;web_display_name&amp;quot;: &amp;quot;NE Travel Data API (Third Party)&amp;quot;,
-##         &amp;quot;third_party&amp;quot;: true,
-##         &amp;quot;db_name&amp;quot;: &amp;quot;Scoot Netravel Api&amp;quot;,
-##         &amp;quot;document&amp;quot;: &amp;quot;&amp;quot;,
-##         &amp;quot;fancy_name&amp;quot;: &amp;quot;NE Travel Data API&amp;quot;
-##     }
-## }
-## &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;All but one of the readings have been stripped for each &lt;code&gt;data&lt;/code&gt; object to emphasize the structure of the JSON returned by the API. We can see that sensor N05171T records traffic flow, congestion, and average speed. We can provide a further (optional) field to the Urban Observatory API to limit the results to return only one these. Let’s consider the only the average speed, measures in kmph. This is an unusual unit for the UK, as road speed is measured in miles per hour.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;parsing-the-json-in-scala&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Parsing the JSON in Scala&lt;/h2&gt;
-&lt;p&gt;There are many JSON parsing libraries in Scala, including my favourite &lt;a href=&#34;https://circe.github.io/circe/&#34;&gt;Circe&lt;/a&gt; which is a Typelevel project, providing generic parsers for case classes without additional boilerplate. However, Spray JSON and Akka HTTP work well together, so that is what we will be using today. In order to complete this tutorial, you will need the Akka HTTP and Spray JSON dependencies in your &lt;code&gt;build.sbt&lt;/code&gt; file.&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;libraryDependencies ++=  Seq(
-  &amp;quot;com.typesafe.akka&amp;quot; %% &amp;quot;akka-stream&amp;quot; % &amp;quot;2.4.17&amp;quot;,
-  &amp;quot;com.typesafe.akka&amp;quot; %% &amp;quot;akka-http&amp;quot; % &amp;quot;10.0.3&amp;quot;,
-  &amp;quot;com.typesafe.akka&amp;quot; %% &amp;quot;akka-http-spray-json&amp;quot; % &amp;quot;10.0.0&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Firstly, we describe the data we are interested in, in a collection of case classes representing the JSON data:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;case class Sensor(name: String, data: SensorData)
-case class SensorData(averageSpeed: AverageSpeed)
-case class AverageSpeed(meta: Meta, data: Map[String, Double])
-case class Meta(units: String, theme: String, name: String)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We extract the sensor name, and associated data, without bothering with the additional top-level fields. The sensor data field contains only average speed, by appending &lt;code&gt;&amp;amp;variable=average speed&lt;/code&gt; to the end of the HTTP Get request.&lt;/p&gt;
-&lt;p&gt;Now we have a domain model for the sensor data, we must provide a way for Spray JSON to parse the JSON to the case classes:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import spray.json._
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-
-trait Protocols extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val metaFormat: RootJsonFormat[Meta] = 
-    jsonFormat(Meta.apply, &amp;quot;units&amp;quot;, &amp;quot;theme&amp;quot;, &amp;quot;name&amp;quot;)
-   implicit val averagespeedFormat: RootJsonFormat[AverageSpeed] = 
-    jsonFormat(AverageSpeed.apply, &amp;quot;meta&amp;quot;, &amp;quot;data&amp;quot;)
-   implicit val sensorDataFormat: RootJsonFormat[SensorData] = 
-    jsonFormat(SensorData.apply, &amp;quot;Average Speed&amp;quot;)
-  implicit val sensorFormat: RootJsonFormat[Sensor] = 
-    jsonFormat(Sensor.apply, &amp;quot;name&amp;quot;, &amp;quot;data&amp;quot;)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This trait can be &lt;a href=&#34;http://docs.scala-lang.org/tutorials/tour/mixin-class-composition.html&#34;&gt;mixed in&lt;/a&gt; when the time comes to parse the JSON data. Let’s first test the JSON parsing by directly reading in the JSON we get when running the request in a web browser:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;object TestJson extends App with Protocols {
-  val json_string = scala.io.Source.fromFile(&amp;quot;data/traffic_sensor.json&amp;quot;).getLines.mkString
-
-  json_string.
-    parseJson.
-    convertTo[List[Sensor]].
-    foreach(println)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;There’s a bit going on here, first we have a file which contains the JSON String, this could have been pasted in directly to Scala. Then the string is parsed, this is possible since the &lt;code&gt;TestJson&lt;/code&gt; object has the JSON &lt;code&gt;Protocols&lt;/code&gt; trait we defined earlier mixed in using &lt;code&gt;with&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;making-an-api-request-using-akka-http&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Making an API Request using Akka HTTP&lt;/h2&gt;
-&lt;p&gt;In order to make an API request using Akka HTTP, we utilise the high-level client API based on Scala futures:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import akka.actor.ActorSystem
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.Http
-import HttpMethods._
-import akka.stream.ActorMaterializer
-import Uri.Query
-import scala.concurrent.Future
-
-implicit val system = ActorSystem()
-implicit val materializer = ActorMaterializer()
-implicit val executionContext = system.dispatcher
-
-val uri = Uri(&amp;quot;http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json&amp;quot;)
-val api_key = // your api key here
-
-  val query: Query = Query(&amp;quot;api_key&amp;quot; -&amp;gt; api_key,
-    &amp;quot;sensor_name&amp;quot; -&amp;gt; &amp;quot;N05171T&amp;quot;,
-    &amp;quot;start_time&amp;quot; -&amp;gt; &amp;quot;20170201&amp;quot;,
-    &amp;quot;end_time&amp;quot; -&amp;gt; &amp;quot;20170202&amp;quot;,
-    &amp;quot;variable&amp;quot; -&amp;gt; &amp;quot;average speed&amp;quot;)
-
-val res: Future[HttpResponse] = 
-  Http().singleRequest(HttpRequest(GET, uri = uri.withQuery(query)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We have created a Query object, which is just a sequence of &lt;code&gt;(String, Sting)&lt;/code&gt;, denoted using the nicer arrow syntax. The request is initialised simply as a &lt;code&gt;singleRequest&lt;/code&gt; which retuns a &lt;code&gt;Future&lt;/code&gt; containing the &lt;code&gt;HttpResponse&lt;/code&gt;. The &lt;code&gt;HttpResponse&lt;/code&gt; object contains the status (200 OK, 404 Not Found etc.), and importantly the body content, called &lt;code&gt;HttpEntity&lt;/code&gt;, the &lt;code&gt;HttpEntity&lt;/code&gt; in this case is simply the JSON. In order to verify we are able to make a requst to the Urban Observatory, we can match on the result of the future using &lt;code&gt;andThen&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;res andThen {
-    case Success(response) =&amp;gt; println(response)
-    case Failure(ex) =&amp;gt; println(ex)
-  } onComplete {
-    _ =&amp;gt; system.terminate()
-  }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;code&gt;andThen&lt;/code&gt; expects a function from a &lt;code&gt;Try&lt;/code&gt;, an algebraic data type (ADT) which can be either &lt;code&gt;Success&lt;/code&gt; or &lt;code&gt;Failure&lt;/code&gt;. When the future completes, we shutdown the Actor System required by Akka HTTP. When you run this minimal example, you should receive a response similar to:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;HttpResponse(200 OK,List(Date: Tue, 21 Feb 2017 09:27:24 GMT, Server: Apache/2.4.7 (Ubuntu), Vary
-: Cookie, X-Frame-Options: SAMEORIGIN),HttpEntity.Chunked(application/json),HttpProtocol(HTTP/1.1
-))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The server has returned 200 OK, some headers and some response data. In order to access the response data, we must convert it to a string, first we access the &lt;code&gt;entity&lt;/code&gt; field of the &lt;code&gt;HttpResponse&lt;/code&gt;, the get the results as a &lt;code&gt;ByteString&lt;/code&gt; which can finally be parsed to a String:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val resp = response.
-  entity.
-  dataBytes.
-  map(_.utf8String)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This is an Akka Stream, containing the response from the server. In order to parse it into the sensor data, we map over the string using the JSON parsing function we have previously seen:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;resp.
-  map(_.parseJson.convertTo[List[Sensor]]).
-  runForeach(println)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This should print the parsed data to the console. There are a variety of other Akka &lt;code&gt;Sink&lt;/code&gt;s which can be used to consume the &lt;code&gt;HttpEntity&lt;/code&gt;, they can be found in the Akka docs &lt;a href=&#34;http://doc.akka.io/docs/akka/current/scala/stream/stages-overview.html&#34;&gt;overview of built in stages&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;A complete working example is available in this &lt;a href=&#34;https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622&#34;&gt;Gist&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-
-
-
-&lt;!-- BLOGDOWN-HEAD
-
-
-
-
-
-
-/BLOGDOWN-HEAD --&gt;
-</description>
+      <guid>/post/akkaclient/</guid>
+      <description>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple Akka Http client to read data from the Urban Observatory in Newcastle.</description>
     </item>
     
   </channel>

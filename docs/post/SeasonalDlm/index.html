@@ -10,7 +10,7 @@
 
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="generator" content="Hugo 0.18.1" />
+        <meta name="generator" content="Hugo 0.20.2" />
         
 
 
@@ -29,20 +29,23 @@
 
 
 
+<meta name="twitter:text:title" content="Seasonal DLM"/>
 <meta name="twitter:title" content="Seasonal DLM"/>
 <meta name="twitter:description" content="The Seasonal DLM I introduced the class of state space models called DLMs in a previous post covering the Kalman Filter. The seasonal DLM is similar to the first order DLM, however it incorporates a deterministic transformation to the state, in order to capture cyclic trends. Remember a general DLM can be written as:
 \[\begin{align} y_t &amp;= F_t x_t &#43; \nu_t, \qquad \mathcal{N}(0, V_t), \\ x_t &amp;= G_t x_{t-1} &#43; \omega_t, \quad \mathcal{N}(0, W_t)."/>
-
 
 
         <meta property="og:title" content="Seasonal DLM" />
 <meta property="og:description" content="The Seasonal DLM I introduced the class of state space models called DLMs in a previous post covering the Kalman Filter. The seasonal DLM is similar to the first order DLM, however it incorporates a deterministic transformation to the state, in order to capture cyclic trends. Remember a general DLM can be written as:
 \[\begin{align} y_t &amp;= F_t x_t &#43; \nu_t, \qquad \mathcal{N}(0, V_t), \\ x_t &amp;= G_t x_{t-1} &#43; \omega_t, \quad \mathcal{N}(0, W_t)." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/post/SeasonalDlm/" />
+<meta property="og:url" content="/post/seasonaldlm/" />
 
 
-<meta property="og:updated_time" content="2016-12-13T12:13:14-05:00"/>
+
+<meta property="article:published_time" content="2016-12-13T12:13:14-05:00"/>
+<meta property="article:modified_time" content="2016-12-13T12:13:14-05:00"/>
+
 
 
 
@@ -199,23 +202,23 @@
 
                 
                     <li>
-                        <a href="../../post/AkkaClient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
+                        <a href="../../post/breezemcmc/"><p>MCMC with Scala Breeze</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
+                        <a href="../../post/akkaclient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/SeasonalDlm/"><p>Seasonal DLM</p></a>
+                        <a href="../../post/failureinfunctionalprogramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/KalmanFilter/"><p>The Kalman Filter in Scala</p></a>
+                        <a href="../../post/seasonaldlm/"><p>Seasonal DLM</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/PracticalAkkaStreams/"><p>Practical Introduction to Akka Streaming</p></a>
+                        <a href="../../post/kalmanfilter/"><p>The Kalman Filter in Scala</p></a>
                     </li>
                 
             </ul>
@@ -244,7 +247,7 @@
     <header>
     <div class="title">
         
-            <h1><a href="../../post/SeasonalDlm/">Seasonal DLM</a></h1>
+            <h1><a href="../../post/seasonaldlm/">Seasonal DLM</a></h1>
             
         
         
@@ -366,12 +369,12 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
 </article>
 <ul class="actions pagination">
     
-        <li><a href="../../post/KalmanFilter/"
+        <li><a href="../../post/kalmanfilter/"
                 class="button big previous">The Kalman Filter in Scala</a></li>
     
 
     
-        <li><a href="../../post/FailureInFunctionalProgramming/"
+        <li><a href="../../post/failureinfunctionalprogramming/"
                 class="button big next">Using Monads for Handling Failures and Exceptions</a></li>
     
 </ul>
@@ -383,9 +386,9 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
             <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'shortname';
-    var disqus_identifier = '\/post\/SeasonalDlm\/';
+    var disqus_identifier = '\/post\/seasonaldlm\/';
     var disqus_title = 'Seasonal DLM';
-    var disqus_url = '\/post\/SeasonalDlm\/';
+    var disqus_url = '\/post\/seasonaldlm\/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -500,7 +503,21 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h3>
+                                <h3><a href="../../post/breezemcmc/">MCMC with Scala Breeze</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-04-23'>
+                                    April 23, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="../../post/akkaclient/">An Akka HTTP Client with JSON Parsing</a></h3>
                                 
                                     
                                 
@@ -514,7 +531,7 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
+                                <h3><a href="../../post/failureinfunctionalprogramming/">Using Monads for Handling Failures and Exceptions</a></h3>
                                 
                                     
                                 
@@ -528,7 +545,7 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/SeasonalDlm/">Seasonal DLM</a></h3>
+                                <h3><a href="../../post/seasonaldlm/">Seasonal DLM</a></h3>
                                 
                                     
                                 
@@ -542,27 +559,13 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/KalmanFilter/">The Kalman Filter in Scala</a></h3>
+                                <h3><a href="../../post/kalmanfilter/">The Kalman Filter in Scala</a></h3>
                                 
                                     
                                 
                                 <time class="published" datetime=
                                     '2016-12-12'>
                                     December 12, 2016</time>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <h3><a href="../../post/PracticalAkkaStreams/">Practical Introduction to Akka Streaming</a></h3>
-                                
-                                    
-                                
-                                <time class="published" datetime=
-                                    '2016-12-01'>
-                                    December 1, 2016</time>
                             </header>
                         </article>
                     </li>

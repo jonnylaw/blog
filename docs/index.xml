@@ -2,229 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Probabilistic Programming in Scala</title>
-    <link>/index.xml</link>
+    <link>/</link>
     <description>Recent content on Probabilistic Programming in Scala</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 21 Feb 2017 12:13:14 -0500</lastBuildDate>
-    <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 23 Apr 2017 14:13:12 -0500</lastBuildDate>
+    
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>MCMC with Scala Breeze</title>
+      <link>/post/breezemcmc/</link>
+      <pubDate>Sun, 23 Apr 2017 14:13:12 -0500</pubDate>
+      
+      <guid>/post/breezemcmc/</guid>
+      <description>Bivariate Gaussian Model Scala Breeze is a numerical computing library, which also provides facilities for statistical computing. For instance, implementations of distributions and Markov Chain Monte Carlo for, typically used for Bayesian inference of intractable models. Today I am going to build a simple bivariate Gaussian model, simulate some realisations from the model and use the Breeze library to recover the mean of the bivariate Gaussian distribution and the variance.</description>
+    </item>
     
     <item>
       <title>An Akka HTTP Client with JSON Parsing</title>
-      <link>/post/AkkaClient/</link>
+      <link>/post/akkaclient/</link>
       <pubDate>Tue, 21 Feb 2017 12:13:14 -0500</pubDate>
       
-      <guid>/post/AkkaClient/</guid>
-      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE --&gt;
-
-&lt;p&gt;There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple &lt;a href=&#34;http://akka.io/&#34;&gt;Akka Http&lt;/a&gt; client to read data from the &lt;a href=&#34;http://uoweb1.ncl.ac.uk/&#34;&gt;Urban Observatory&lt;/a&gt; in Newcastle. If you just want to read the code, see this &lt;a href=&#34;https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622&#34;&gt;Gist&lt;/a&gt;.&lt;/p&gt;
-&lt;div id=&#34;exploring-the-api&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Exploring the API&lt;/h2&gt;
-&lt;p&gt;The Urban Observatory consists of a grid of sensors around the North East, measuring traffic, pollution and weather. The focus of this post will be getting sensor data from a single sensor, N05171T, a traffic sensor located near the Metro Centre on Hollinside road. The metadata from this sensor can be found by querying an API endpoint: &lt;a href=&#34;http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key&#34; class=&#34;uri&#34;&gt;http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key&lt;/a&gt;=&amp;amp;sensor_name=N05171T. Note that this requires authentication, using an API key. An API key can be requested using &lt;a href=&#34;http://uoweb1.ncl.ac.uk/api_page/key_form/&#34;&gt;this form&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;The result of this query is:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;## {
-##     &amp;quot;type&amp;quot;: &amp;quot;Traffic&amp;quot;,
-##     &amp;quot;geom&amp;quot;: {
-##         &amp;quot;type&amp;quot;: &amp;quot;LineString&amp;quot;,
-##         &amp;quot;coordinates&amp;quot;: [
-##             [
-##                 -1.674433347,
-##                 54.959041883
-##             ],
-##             [
-##                 -1.673947928,
-##                 54.959553799
-##             ]
-##         ]
-##     },
-##     &amp;quot;active&amp;quot;: &amp;quot;True&amp;quot;,
-##     &amp;quot;latest&amp;quot;: &amp;quot;2017-02-21T08:23:06&amp;quot;,
-##     &amp;quot;base_height&amp;quot;: null,
-##     &amp;quot;sensor_height&amp;quot;: null,
-##     &amp;quot;name&amp;quot;: &amp;quot;N05171T&amp;quot;,
-##     &amp;quot;source&amp;quot;: {
-##         &amp;quot;web_display_name&amp;quot;: &amp;quot;NE Travel Data API (Third Party)&amp;quot;,
-##         &amp;quot;third_party&amp;quot;: true,
-##         &amp;quot;db_name&amp;quot;: &amp;quot;Scoot Netravel Api&amp;quot;,
-##         &amp;quot;document&amp;quot;: &amp;quot;&amp;quot;,
-##         &amp;quot;fancy_name&amp;quot;: &amp;quot;NE Travel Data API&amp;quot;
-##     }
-## }
-## &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We can see a bit of information about the sensor, including its location, time of latest reading and whether the sensor is active.&lt;/p&gt;
-&lt;p&gt;In order to retrieve the actual data from the sensor, we query the url &lt;a href=&#34;http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json&#34; class=&#34;uri&#34;&gt;http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json&lt;/a&gt; with the following required fields:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;api_key&lt;/code&gt; your API key here&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sensor_name&lt;/code&gt; N05171T&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;start_time&lt;/code&gt; 20170201&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;end_time&lt;/code&gt; 20170202&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;This returns the following:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;## {
-##     &amp;quot;type&amp;quot;: &amp;quot;Traffic&amp;quot;,
-##     &amp;quot;geom&amp;quot;: {
-##         &amp;quot;type&amp;quot;: &amp;quot;LineString&amp;quot;,
-##         &amp;quot;coordinates&amp;quot;: [
-##             [
-##                 -1.674433347,
-##                 54.959041883
-##             ],
-##             [
-##                 -1.673947928,
-##                 54.959553799
-##             ]
-##         ]
-##     },
-##     &amp;quot;active&amp;quot;: &amp;quot;True&amp;quot;,
-##     &amp;quot;data&amp;quot;: {
-##         &amp;quot;Congestion&amp;quot;: {
-##             &amp;quot;data&amp;quot;: {
-##                 &amp;quot;2017-02-01 01:36:46&amp;quot;: 0.0
-##             },
-##             &amp;quot;meta&amp;quot;: {
-##                 &amp;quot;name&amp;quot;: &amp;quot;Congestion&amp;quot;,
-##                 &amp;quot;theme&amp;quot;: &amp;quot;Traffic&amp;quot;,
-##                 &amp;quot;units&amp;quot;: &amp;quot;%&amp;quot;
-##             }
-##         },
-##         &amp;quot;Traffic Flow&amp;quot;: {
-##             &amp;quot;data&amp;quot;: {
-##                 &amp;quot;2017-02-01 01:36:46&amp;quot;: 4.0
-##             },
-##             &amp;quot;meta&amp;quot;: {
-##                 &amp;quot;name&amp;quot;: &amp;quot;Traffic Flow&amp;quot;,
-##                 &amp;quot;theme&amp;quot;: &amp;quot;Traffic&amp;quot;,
-##                 &amp;quot;units&amp;quot;: &amp;quot;Passenger Car Units&amp;quot;
-##             }
-##         },
-##         &amp;quot;Average Speed&amp;quot;: {
-##             &amp;quot;data&amp;quot;: {
-##                 &amp;quot;2017-02-01 13:21:46&amp;quot;: 35.0
-##             },
-##             &amp;quot;meta&amp;quot;: {
-##                 &amp;quot;name&amp;quot;: &amp;quot;Average Speed&amp;quot;,
-##                 &amp;quot;theme&amp;quot;: &amp;quot;Traffic&amp;quot;,
-##                 &amp;quot;units&amp;quot;: &amp;quot;KmPH&amp;quot;
-##             }
-##         }
-##     },
-##     &amp;quot;latest&amp;quot;: &amp;quot;2017-02-21T08:33:06&amp;quot;,
-##     &amp;quot;base_height&amp;quot;: null,
-##     &amp;quot;sensor_height&amp;quot;: null,
-##     &amp;quot;name&amp;quot;: &amp;quot;N05171T&amp;quot;,
-##     &amp;quot;source&amp;quot;: {
-##         &amp;quot;web_display_name&amp;quot;: &amp;quot;NE Travel Data API (Third Party)&amp;quot;,
-##         &amp;quot;third_party&amp;quot;: true,
-##         &amp;quot;db_name&amp;quot;: &amp;quot;Scoot Netravel Api&amp;quot;,
-##         &amp;quot;document&amp;quot;: &amp;quot;&amp;quot;,
-##         &amp;quot;fancy_name&amp;quot;: &amp;quot;NE Travel Data API&amp;quot;
-##     }
-## }
-## &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;All but one of the readings have been stripped for each &lt;code&gt;data&lt;/code&gt; object to emphasize the structure of the JSON returned by the API. We can see that sensor N05171T records traffic flow, congestion, and average speed. We can provide a further (optional) field to the Urban Observatory API to limit the results to return only one these. Let’s consider the only the average speed, measures in kmph. This is an unusual unit for the UK, as road speed is measured in miles per hour.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;parsing-the-json-in-scala&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Parsing the JSON in Scala&lt;/h2&gt;
-&lt;p&gt;There are many JSON parsing libraries in Scala, including my favourite &lt;a href=&#34;https://circe.github.io/circe/&#34;&gt;Circe&lt;/a&gt; which is a Typelevel project, providing generic parsers for case classes without additional boilerplate. However, Spray JSON and Akka HTTP work well together, so that is what we will be using today. In order to complete this tutorial, you will need the Akka HTTP and Spray JSON dependencies in your &lt;code&gt;build.sbt&lt;/code&gt; file.&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;libraryDependencies ++=  Seq(
-  &amp;quot;com.typesafe.akka&amp;quot; %% &amp;quot;akka-stream&amp;quot; % &amp;quot;2.4.17&amp;quot;,
-  &amp;quot;com.typesafe.akka&amp;quot; %% &amp;quot;akka-http&amp;quot; % &amp;quot;10.0.3&amp;quot;,
-  &amp;quot;com.typesafe.akka&amp;quot; %% &amp;quot;akka-http-spray-json&amp;quot; % &amp;quot;10.0.0&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Firstly, we describe the data we are interested in, in a collection of case classes representing the JSON data:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;case class Sensor(name: String, data: SensorData)
-case class SensorData(averageSpeed: AverageSpeed)
-case class AverageSpeed(meta: Meta, data: Map[String, Double])
-case class Meta(units: String, theme: String, name: String)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We extract the sensor name, and associated data, without bothering with the additional top-level fields. The sensor data field contains only average speed, by appending &lt;code&gt;&amp;amp;variable=average speed&lt;/code&gt; to the end of the HTTP Get request.&lt;/p&gt;
-&lt;p&gt;Now we have a domain model for the sensor data, we must provide a way for Spray JSON to parse the JSON to the case classes:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import spray.json._
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-
-trait Protocols extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val metaFormat: RootJsonFormat[Meta] = 
-    jsonFormat(Meta.apply, &amp;quot;units&amp;quot;, &amp;quot;theme&amp;quot;, &amp;quot;name&amp;quot;)
-   implicit val averagespeedFormat: RootJsonFormat[AverageSpeed] = 
-    jsonFormat(AverageSpeed.apply, &amp;quot;meta&amp;quot;, &amp;quot;data&amp;quot;)
-   implicit val sensorDataFormat: RootJsonFormat[SensorData] = 
-    jsonFormat(SensorData.apply, &amp;quot;Average Speed&amp;quot;)
-  implicit val sensorFormat: RootJsonFormat[Sensor] = 
-    jsonFormat(Sensor.apply, &amp;quot;name&amp;quot;, &amp;quot;data&amp;quot;)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This trait can be &lt;a href=&#34;http://docs.scala-lang.org/tutorials/tour/mixin-class-composition.html&#34;&gt;mixed in&lt;/a&gt; when the time comes to parse the JSON data. Let’s first test the JSON parsing by directly reading in the JSON we get when running the request in a web browser:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;object TestJson extends App with Protocols {
-  val json_string = scala.io.Source.fromFile(&amp;quot;data/traffic_sensor.json&amp;quot;).getLines.mkString
-
-  json_string.
-    parseJson.
-    convertTo[List[Sensor]].
-    foreach(println)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;There’s a bit going on here, first we have a file which contains the JSON String, this could have been pasted in directly to Scala. Then the string is parsed, this is possible since the &lt;code&gt;TestJson&lt;/code&gt; object has the JSON &lt;code&gt;Protocols&lt;/code&gt; trait we defined earlier mixed in using &lt;code&gt;with&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;making-an-api-request-using-akka-http&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Making an API Request using Akka HTTP&lt;/h2&gt;
-&lt;p&gt;In order to make an API request using Akka HTTP, we utilise the high-level client API based on Scala futures:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import akka.actor.ActorSystem
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.Http
-import HttpMethods._
-import akka.stream.ActorMaterializer
-import Uri.Query
-import scala.concurrent.Future
-
-implicit val system = ActorSystem()
-implicit val materializer = ActorMaterializer()
-implicit val executionContext = system.dispatcher
-
-val uri = Uri(&amp;quot;http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json&amp;quot;)
-val api_key = // your api key here
-
-  val query: Query = Query(&amp;quot;api_key&amp;quot; -&amp;gt; api_key,
-    &amp;quot;sensor_name&amp;quot; -&amp;gt; &amp;quot;N05171T&amp;quot;,
-    &amp;quot;start_time&amp;quot; -&amp;gt; &amp;quot;20170201&amp;quot;,
-    &amp;quot;end_time&amp;quot; -&amp;gt; &amp;quot;20170202&amp;quot;,
-    &amp;quot;variable&amp;quot; -&amp;gt; &amp;quot;average speed&amp;quot;)
-
-val res: Future[HttpResponse] = 
-  Http().singleRequest(HttpRequest(GET, uri = uri.withQuery(query)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We have created a Query object, which is just a sequence of &lt;code&gt;(String, Sting)&lt;/code&gt;, denoted using the nicer arrow syntax. The request is initialised simply as a &lt;code&gt;singleRequest&lt;/code&gt; which retuns a &lt;code&gt;Future&lt;/code&gt; containing the &lt;code&gt;HttpResponse&lt;/code&gt;. The &lt;code&gt;HttpResponse&lt;/code&gt; object contains the status (200 OK, 404 Not Found etc.), and importantly the body content, called &lt;code&gt;HttpEntity&lt;/code&gt;, the &lt;code&gt;HttpEntity&lt;/code&gt; in this case is simply the JSON. In order to verify we are able to make a requst to the Urban Observatory, we can match on the result of the future using &lt;code&gt;andThen&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;res andThen {
-    case Success(response) =&amp;gt; println(response)
-    case Failure(ex) =&amp;gt; println(ex)
-  } onComplete {
-    _ =&amp;gt; system.terminate()
-  }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;code&gt;andThen&lt;/code&gt; expects a function from a &lt;code&gt;Try&lt;/code&gt;, an algebraic data type (ADT) which can be either &lt;code&gt;Success&lt;/code&gt; or &lt;code&gt;Failure&lt;/code&gt;. When the future completes, we shutdown the Actor System required by Akka HTTP. When you run this minimal example, you should receive a response similar to:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;HttpResponse(200 OK,List(Date: Tue, 21 Feb 2017 09:27:24 GMT, Server: Apache/2.4.7 (Ubuntu), Vary
-: Cookie, X-Frame-Options: SAMEORIGIN),HttpEntity.Chunked(application/json),HttpProtocol(HTTP/1.1
-))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The server has returned 200 OK, some headers and some response data. In order to access the response data, we must convert it to a string, first we access the &lt;code&gt;entity&lt;/code&gt; field of the &lt;code&gt;HttpResponse&lt;/code&gt;, the get the results as a &lt;code&gt;ByteString&lt;/code&gt; which can finally be parsed to a String:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val resp = response.
-  entity.
-  dataBytes.
-  map(_.utf8String)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This is an Akka Stream, containing the response from the server. In order to parse it into the sensor data, we map over the string using the JSON parsing function we have previously seen:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;resp.
-  map(_.parseJson.convertTo[List[Sensor]]).
-  runForeach(println)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This should print the parsed data to the console. There are a variety of other Akka &lt;code&gt;Sink&lt;/code&gt;s which can be used to consume the &lt;code&gt;HttpEntity&lt;/code&gt;, they can be found in the Akka docs &lt;a href=&#34;http://doc.akka.io/docs/akka/current/scala/stream/stages-overview.html&#34;&gt;overview of built in stages&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;A complete working example is available in this &lt;a href=&#34;https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622&#34;&gt;Gist&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-
-
-
-&lt;!-- BLOGDOWN-HEAD
-
-
-
-
-
-
-/BLOGDOWN-HEAD --&gt;
-</description>
+      <guid>/post/akkaclient/</guid>
+      <description>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple Akka Http client to read data from the Urban Observatory in Newcastle.</description>
     </item>
     
     <item>
@@ -233,635 +35,60 @@ val res: Future[HttpResponse] =
       <pubDate>Thu, 02 Feb 2017 00:00:00 +0000</pubDate>
       
       <guid>/about/</guid>
-      <description>
-
-&lt;p&gt;Jonathan Law is a current PhD student on the &lt;a href=&#34;http://www.bigdata-cdt.ac.uk/&#34;&gt;Cloud Computing for Big Data CDT&lt;/a&gt;, funded by the &lt;a href=&#34;https://www.epsrc.ac.uk&#34;&gt;EPSRC&lt;/a&gt;. His primary research interest is in using functional programming for Bayesian Inference (often called probabilistic programming), using the language &lt;a href=&#34;http://www.scala-lang.org/&#34;&gt;Scala&lt;/a&gt;. Prior to embarking on the PhD, he worked in industry as an Insight Analyst, extracting value from large customer data sets.&lt;/p&gt;
-
-&lt;h2 id=&#34;selected-projects&#34;&gt;Selected Projects&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Composable POMP Models&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://git.io/statespace&#34;&gt;git.io/statespace&lt;/a&gt;
-&lt;em&gt;A library for online Bayesian filtering of univariate state space models, sometimes called POMP (Partially Observed Markov Process Models).&lt;/em&gt;&lt;/p&gt;
-</description>
+      <description>Jonathan Law is a current PhD student on the Cloud Computing for Big Data CDT, funded by the EPSRC. His primary research interest is in using functional programming for Bayesian Inference (often called probabilistic programming), using the language Scala. Prior to embarking on the PhD, he worked in industry as an Insight Analyst, extracting value from large customer data sets.
+Selected Projects Composable POMP Models
+git.io/statespace A library for online Bayesian filtering of univariate state space models, sometimes called POMP (Partially Observed Markov Process Models).</description>
     </item>
     
     <item>
       <title>Using Monads for Handling Failures and Exceptions</title>
-      <link>/post/FailureInFunctionalProgramming/</link>
+      <link>/post/failureinfunctionalprogramming/</link>
       <pubDate>Wed, 04 Jan 2017 12:13:14 -0500</pubDate>
       
-      <guid>/post/FailureInFunctionalProgramming/</guid>
-      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE --&gt;
-
-&lt;p&gt;In this post I will give a practical introduction to some useful structures for handling failure in functional programming.&lt;/p&gt;
-&lt;div id=&#34;referential-transparency&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Referential Transparency&lt;/h2&gt;
-&lt;p&gt;One of the most important properties of functional programming is referential transparency and programming with pure functions. This means we can substitute a pure function with its result, for intance if we have the function &lt;code&gt;def f = 1 + 2&lt;/code&gt;, we can replace every occurence of &lt;code&gt;f&lt;/code&gt; with &lt;code&gt;3&lt;/code&gt; and the final evaluation will remain unchanged&lt;/p&gt;
-&lt;p&gt;This simple idea can lead to difficulties when considering functions which involve side effects, such as reading from external sources or generating random numbers. One example of a side effect is an exception, an imperative programmer might write a function to calculate a square root as:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def unsafe_sqrt(a: Double): Double = {
-  if (a &amp;gt; 0) math.sqrt(a)
-  else throw new Exception(&amp;quot;Can&amp;#39;t calculate square root of negative number&amp;quot;)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This compiles fine, however if we wrote this function for an end user and they didn’t look at the implementation they might not know the function can possibly return an exception.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;try&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Try&lt;/h2&gt;
-&lt;p&gt;In order to make it clear that a function can fail, we can return a &lt;code&gt;Try&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def try_sqrt(a: Double): Try[Double] = {
-  if (a &amp;gt; 0) Success(math.sqrt(a))
-  else Failure(throw new Exception(&amp;quot;Can&amp;#39;t calculate square root of negative number&amp;quot;))
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, if someone were to use this function they would be forced to deal with the &lt;code&gt;Try&lt;/code&gt; return type and understand that the function can return an exception. Try is actually an algebraic datatype (ADT), an illustrative implementation is:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;sealed trait Try[+A]
-case class Success[+A](a: A) extends Try[A]
-case class Failure[+A](exception: Throwable) extends Try[A]&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This means that a &lt;code&gt;Try&lt;/code&gt; can either be a &lt;code&gt;Success&lt;/code&gt; or &lt;code&gt;Failure&lt;/code&gt;. Learn more about &lt;code&gt;Try&lt;/code&gt; in Daniel Westheide’s excellent &lt;a href=&#34;http://danielwestheide.com/blog/2012/12/26/the-neophytes-guide-to-scala-part-6-error-handling-with-try.html&#34;&gt;Neophyte’s Guide to Scala&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;option&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Option&lt;/h2&gt;
-&lt;p&gt;Another simple structure to represent computations which may fail is &lt;code&gt;Option&lt;/code&gt;, this is an algebraic datatype:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;sealed trait Option[+A]
-case class Some[+A](a: A) extends Option[A]
-case class None extends Option[Nothing]&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;In this case, option can either contain a value using the constructor &lt;code&gt;Some&lt;/code&gt;, or can represent the absense of a value using &lt;code&gt;None&lt;/code&gt;. This provides less information on failure that &lt;code&gt;Try&lt;/code&gt;, but nevertheless is sometimes useful. We can re-write the &lt;code&gt;sqrt&lt;/code&gt; function to return an optional value&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def option_sqrt(a: Double): Option[Double] = {
-  if (a &amp;gt; 0) Some(math.sqrt(a))
-  else None
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, when provide an incorrect argument to the function, we get &lt;code&gt;None&lt;/code&gt; as the result.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;chaining-computations&#34; class=&#34;section level1&#34;&gt;
-&lt;h1&gt;Chaining Computations&lt;/h1&gt;
-&lt;p&gt;In real world functional codebases we compose programs from many small functions. Let’s consider the problem of how to apply &lt;code&gt;def sqrt(a: Double): Option[Double]&lt;/code&gt; twice. A naive attempt would be to simply compose the functions as we would for the Scala math library:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def sqrt_twice = unsafe_sqrt _ compose unsafe_sqrt _&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The &lt;code&gt;_&lt;/code&gt; represents partial application of &lt;code&gt;unsafe_sqrt&lt;/code&gt;, if we try to compose the &lt;code&gt;option_sqrt&lt;/code&gt; function as in this example we will get a type mismatch. One application of &lt;code&gt;option_sqrt&lt;/code&gt; returns a typle &lt;code&gt;Option[Double]&lt;/code&gt;, but we need the type &lt;code&gt;Double&lt;/code&gt;. Luckily &lt;code&gt;Option&lt;/code&gt; has a function defined on it for composing operations like this:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def flatMap[A, B](a: Option[A])(f: A =&amp;gt; Option[B]): Option[B]&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We can now use &lt;code&gt;flatMap&lt;/code&gt; to compose &lt;code&gt;option_sqrt&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def sqrt_twice_option(x: Double): Option[Double] = 
-  option_sqrt(x) flatMap option_sqrt&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now we can calculate &lt;code&gt;sqrt_twice_option(81) = Some(3.0)&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;We can compose &lt;code&gt;try_sqrt&lt;/code&gt; in the same way:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def sqrt_twice_try(x: Double): Try[Double] = 
-  try_sqrt(81) flatMap try_sqrt&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, what if we want to compose &lt;code&gt;option_sqrt&lt;/code&gt; and &lt;code&gt;try_sqrt&lt;/code&gt;. This is not an easy problem in general, however the Scala standard library implements a &lt;code&gt;toOption&lt;/code&gt; method on &lt;code&gt;Try&lt;/code&gt; values. Hence we can just convert the output of &lt;code&gt;try_sqrt&lt;/code&gt; to an &lt;code&gt;Option&lt;/code&gt;, however we lose the text from the exception upon failure, which could illuminating in the event of a failure. Let’s consider a more general way to compose the two.&lt;/p&gt;
-&lt;div id=&#34;nested-maps&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Nested Maps&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;Option&lt;/code&gt; and &lt;code&gt;Try&lt;/code&gt; are both monads (strictly &lt;code&gt;Try&lt;/code&gt; is &lt;a href=&#34;https://issues.scala-lang.org/browse/SI-6284&#34;&gt;not a proper monad&lt;/a&gt;), which means they are equipped with two methods which satisfy the monad laws. The two methods defined for all monads are:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;trait Monad[A, M[_]] {
-  def flatMap[B](f: A =&amp;gt; M[B]): M[B]
-  def pure(a: A): M[A]
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We can define all the functions on &lt;code&gt;Try&lt;/code&gt; and &lt;code&gt;Option&lt;/code&gt; using these two functions, for instance &lt;code&gt;map&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def map[B](f: A =&amp;gt; B): M[B] = this.flatMap(a =&amp;gt; pure(f(a)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, we can use the &lt;code&gt;map&lt;/code&gt; function to compose &lt;code&gt;option_sqrt&lt;/code&gt; and &lt;code&gt;try_sqrt&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def sqrt_twice(a: Double): Try[Option[Double]] = try_sqrt(a) map option_sqrt&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;However, what if we want to apply another function to a value returned by this function:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def f(a: Double) = a + 1
-sqrt_twice(81) map (_.map(f))
-// Success(Some(4.0))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We get the correct value, but we have to apply &lt;code&gt;map&lt;/code&gt; twice, this seems cumbersome. There is a better way!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;monad-transformers&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Monad Transformers&lt;/h2&gt;
-&lt;p&gt;The functional programming library &lt;a href=&#34;http://typelevel.org/cats/&#34;&gt;cats&lt;/a&gt;, short for category, has some built in types for dealing with nesting in a more elegent way. The type &lt;code&gt;OptionT[F[_], A]&lt;/code&gt; can be used instead of &lt;code&gt;F[Option[A]]&lt;/code&gt;, our &lt;code&gt;F[_]&lt;/code&gt; type in this case is &lt;code&gt;Try[A]&lt;/code&gt;&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import cats.implicits._
-import cats.data.OptionT
-
-def sqrt_twice_trans(a: Double): OptionT[Try, Double] = 
-  OptionT.fromOption[Try](option_sqrt(a)) flatMap (b =&amp;gt; OptionT.liftF(try_sqrt(b))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;code&gt;OptionT&lt;/code&gt; provides the function &lt;code&gt;fromOption&lt;/code&gt; to transform the result of the &lt;code&gt;option_sqrt&lt;/code&gt; function into the &lt;code&gt;OptionT&lt;/code&gt; monad. The function &lt;code&gt;liftF&lt;/code&gt; is used to lift any monad, in this case &lt;code&gt;Try&lt;/code&gt; into the &lt;code&gt;OptionT&lt;/code&gt; monad. This compiles and we if we now try to apply the function &lt;code&gt;def f(a: Double) = a + 1&lt;/code&gt; to the result of this function we only need a single call to &lt;code&gt;map&lt;/code&gt;. This is because &lt;code&gt;OptionT&lt;/code&gt; is also a monad:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;sqrt_twice_trans(81) map f
-// OptionT(Success(Some(4.0)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This may seem like quite a lot of effort to remove a call to map, but removing unecessary duplication can help with readability of code, and enable bugs to be spotted earlier. The code has been assembled in a &lt;a href=&#34;https://gist.github.com/jonnylaw/99460d466c84d9b52b57010d28b6a4f6&#34;&gt;Github gist&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-
-
-
-&lt;!-- BLOGDOWN-HEAD
-
-
-
-
-
-
-/BLOGDOWN-HEAD --&gt;
-</description>
+      <guid>/post/failureinfunctionalprogramming/</guid>
+      <description>In this post I will give a practical introduction to some useful structures for handling failure in functional programming.
+Referential Transparency One of the most important properties of functional programming is referential transparency and programming with pure functions. This means we can substitute a pure function with its result, for intance if we have the function def f = 1 + 2, we can replace every occurence of f with 3 and the final evaluation will remain unchanged</description>
     </item>
     
     <item>
       <title>Seasonal DLM</title>
-      <link>/post/SeasonalDlm/</link>
+      <link>/post/seasonaldlm/</link>
       <pubDate>Tue, 13 Dec 2016 12:13:14 -0500</pubDate>
       
-      <guid>/post/SeasonalDlm/</guid>
-      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE --&gt;
-
-&lt;div id=&#34;the-seasonal-dlm&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;The Seasonal DLM&lt;/h2&gt;
-&lt;p&gt;I introduced the class of state space models called DLMs in a previous post covering the &lt;a href=&#34;KalmanFilter/&#34;&gt;Kalman Filter&lt;/a&gt;. The seasonal DLM is similar to the first order DLM, however it incorporates a deterministic transformation to the state, in order to capture cyclic trends. Remember a general DLM can be written as:&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[\begin{align}
-y_t &amp;amp;= F_t x_t + \nu_t, \qquad \mathcal{N}(0, V_t), \\
-x_t &amp;amp;= G_t x_{t-1} + \omega_t, \quad \mathcal{N}(0, W_t).
-\end{align}\]&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;In the fourier-form seasonal DLM, the state is transformed by a block diagonal matrix, &lt;span class=&#34;math inline&#34;&gt;\(G_t\)&lt;/span&gt;, containing rotation matrices. The rotation matrix is given by:&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[R = \begin{pmatrix}
-\cos(\omega) &amp;amp; -\sin(\omega) \\
-\sin(\omega) &amp;amp; \cos(\omega)
-\end{pmatrix},\]&lt;/span&gt; where &lt;span class=&#34;math inline&#34;&gt;\(\omega\)&lt;/span&gt; is the frequency of the seasonality. In practice, it is easier to specify the period of the seasonality, &lt;span class=&#34;math inline&#34;&gt;\(T\)&lt;/span&gt;, which is related to the frequency: &lt;span class=&#34;math inline&#34;&gt;\(\omega = 2 \pi/T\)&lt;/span&gt;. This means if we have data measured at hourly intervals and we believe the process has a daily cycle, then we will set &lt;span class=&#34;math inline&#34;&gt;\(T = 24\)&lt;/span&gt;.&lt;/p&gt;
-&lt;p&gt;In order to model higher harmonics of the seasonality, we combine rotation matrices together into a block diagonal matrix, to form the &lt;span class=&#34;math inline&#34;&gt;\(G\)&lt;/span&gt; matrix, for instance with 3 harmonics the system matrix is:&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[G = \begin{pmatrix}
-\cos(\omega) &amp;amp; -\sin(\omega) &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0\\
-\sin(\omega) &amp;amp; \cos(\omega) &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 \\
-0 &amp;amp; 0 &amp;amp; \cos(2\omega) &amp;amp; -\sin(2\omega) &amp;amp; 0&amp;amp; 0 \\
-0 &amp;amp; 0 &amp;amp; \sin(2\omega) &amp;amp; \cos(2\omega) &amp;amp; 0 &amp;amp; 0 \\
-0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; \cos(3\omega) &amp;amp; -\sin(3\omega) \\
-0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; \sin(3\omega) &amp;amp; \cos(3\omega) \\
-\end{pmatrix}.\]&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;In this case, the latent state, &lt;span class=&#34;math inline&#34;&gt;\(x_t\)&lt;/span&gt; is six-dimensional. This means system evolution variance-covariance matrix, &lt;span class=&#34;math inline&#34;&gt;\(W_t\)&lt;/span&gt; is a six by six matrix.&lt;/p&gt;
-&lt;p&gt;First we should make a trait in Scala representing a DLM, this allows us to specify methods on the &lt;code&gt;dlm&lt;/code&gt; object, independent of the concrete reasisation of the DLM. This means in the future we can create new DLMs, and not have to write functions to simulate from them again. The trait will be for a DLM with constant &lt;span class=&#34;math inline&#34;&gt;\(F\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(G\)&lt;/span&gt; matrices.&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import breeze.linalg._
-
-trait Dlm {
-  val f: DenseMatrix[Double]
-  val g: DenseMatrix[Double]
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Note that, for univariate observations &lt;span class=&#34;math inline&#34;&gt;\(F\)&lt;/span&gt; will be a row vector, the recommended way to specify row vectors using &lt;a href=&#34;https://github.com/scalanlp/breeze/&#34;&gt;Breeze&lt;/a&gt; is to use a matrix with a single row. The DLM also has associated parameters which we will assume are constant and model as a &lt;code&gt;case class&lt;/code&gt;, a &lt;code&gt;case class&lt;/code&gt; in Scala is a class with a default &lt;code&gt;apply&lt;/code&gt; method used to construct instances of the class. The &lt;code&gt;case class&lt;/code&gt; also has getter methods which can be used to access the values of the class.&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;case class Parameters(v: Double, w: DenseMatrix[Double], m0: DenseVector[Double], c0: DenseMatrix[Double])&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Then we can add a method to the &lt;code&gt;Dlm&lt;/code&gt; trait to simulate forward given a value of the &lt;code&gt;Parameters&lt;/code&gt;, firstly we will write a single step of the simulation:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;case class Data(time: Double, observation: Double, state: DenseVector[Double])
-
-def simStep(p: Parameters): Data =&amp;gt; Rand[Data] = d =&amp;gt; {
-    for {
-      w &amp;lt;- MultivariateGaussian(DenseVector.zeros(p.w.cols), p.w)
-      x1 = g * d.state + w
-      v &amp;lt;- Gaussian(0, p.v)
-      y = f.toDenseVector dot x1 + v
-    } yield Data(d.time + 1.0, y, x1)
-  }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This function contains a for comprehension, the &lt;code&gt;&amp;lt;-&lt;/code&gt; symbol represents either a &lt;code&gt;map&lt;/code&gt; or a &lt;code&gt;flatMap&lt;/code&gt;. Since the &lt;code&gt;w&lt;/code&gt; and &lt;code&gt;v&lt;/code&gt; are &lt;code&gt;Rand[Double]&lt;/code&gt; values, we need to access the value inside of the &lt;code&gt;Rand&lt;/code&gt; and perform a function on it, the for comprehension desugars to:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;MultivariateGaussian(DenseVector.zeros(p.w.cols), p.w).
-  flatMap(w =&amp;gt; {
-    val x1 = g * d.state + w
-    Gaussian(0, p.v).map(v =&amp;gt; {
-      val y = f.toDenseVector dot x1 + v
-      Data(d.time + 1.0, y, x1)
-    })}
-    )&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The desugared chain of &lt;code&gt;flatMap&lt;/code&gt; and &lt;code&gt;map&lt;/code&gt; evaluates to the same result, but the for comprehesion is more readable. The for comprehension provides a clean and elegent way to work within the context of a Monad, &lt;code&gt;Rand&lt;/code&gt; is an example of a Monad representing a distribution.&lt;/p&gt;
-&lt;p&gt;Now, we can use the &lt;code&gt;MarkovChain&lt;/code&gt; breeze object to simulate the full series:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def simMarkov(p: Parameters): Rand[Process[Data]] = {
-  for {
-    x0 &amp;lt;- MultivariateGaussian(p.m0, p.c0)
-    y0 &amp;lt;- Gaussian(f.toDenseVector dot x0, p.v)
-    init = Data(0.0, y0, x0)
-  } yield MarkovChain(init)(simStep(p))
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Note that the Markov chain is a &lt;code&gt;Rand[Process[Double]]&lt;/code&gt;, this is not the most elegant and I’m open to suggestions on a better way to formulate this. Once we have defined a Markov chain, we must draw from it which returns a &lt;code&gt;Process[Double]&lt;/code&gt;, the initial draw is to sample from the initial state distribution &lt;span class=&#34;math inline&#34;&gt;\(\mathcal{N}(m_0, C_0)\)&lt;/span&gt;. Next, we can sample from the &lt;code&gt;Process&lt;/code&gt; and plot it. A simulation from the seasonal DLM, with parameters &lt;span class=&#34;math inline&#34;&gt;\(V = 3\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(W = I_6\)&lt;/span&gt;, is given below:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/SeasonalDlm_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;/div&gt;
-
-
-&lt;!-- dynamically load mathjax for compatibility with self-contained --&gt;
-&lt;script&gt;
-  (function () {
-    var script = document.createElement(&#34;script&#34;);
-    script.type = &#34;text/javascript&#34;;
-    script.src  = &#34;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&#34;;
-    if (location.protocol !== &#34;file:&#34; &amp;&amp; /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, &#39;&#39;);
-    document.getElementsByTagName(&#34;head&#34;)[0].appendChild(script);
-  })();
-&lt;/script&gt;
-
-&lt;!-- BLOGDOWN-HEAD
-
-
-
-
-
-
-/BLOGDOWN-HEAD --&gt;
-</description>
+      <guid>/post/seasonaldlm/</guid>
+      <description>The Seasonal DLM I introduced the class of state space models called DLMs in a previous post covering the Kalman Filter. The seasonal DLM is similar to the first order DLM, however it incorporates a deterministic transformation to the state, in order to capture cyclic trends. Remember a general DLM can be written as:
+\[\begin{align} y_t &amp;amp;= F_t x_t + \nu_t, \qquad \mathcal{N}(0, V_t), \\ x_t &amp;amp;= G_t x_{t-1} + \omega_t, \quad \mathcal{N}(0, W_t).</description>
     </item>
     
     <item>
       <title>The Kalman Filter in Scala</title>
-      <link>/blog/KalmanFilter/</link>
+      <link>/blog/kalmanfilter/</link>
       <pubDate>Mon, 12 Dec 2016 12:13:14 -0500</pubDate>
       
-      <guid>/blog/KalmanFilter/</guid>
-      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE --&gt;
-
-&lt;p&gt;A Dynamic Linear Model (DLM) is a special type of state space model, where the state and observation equations are Normally distributed and linear. A general DLM can be written as follows:&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[\begin{aligned} y_t &amp;amp;= F_t x_t + \nu_t, \qquad \nu_t \sim \mathcal{N}(0, V_t) \\
-x_t &amp;amp;= G_tx_{t-1} + \omega_t \qquad \omega_t \sim \mathcal{N}(0, W_t), \end{aligned}\]&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(y_t\)&lt;/span&gt; represents the observation of the process at time &lt;span class=&#34;math inline&#34;&gt;\(t\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(x_t\)&lt;/span&gt; is the value of the unobserved state at time &lt;span class=&#34;math inline&#34;&gt;\(t\)&lt;/span&gt;. The observation error &lt;span class=&#34;math inline&#34;&gt;\(\nu_t\)&lt;/span&gt; and the system error &lt;span class=&#34;math inline&#34;&gt;\(\omega_t\)&lt;/span&gt; are independent and identically distributed (iid) Normal random variables. &lt;span class=&#34;math inline&#34;&gt;\(F_t\)&lt;/span&gt; is the observation matrix which transforms the state space to the observation, &lt;span class=&#34;math inline&#34;&gt;\(G_t\)&lt;/span&gt; is the state transition matrix.&lt;/p&gt;
-&lt;div id=&#34;forward-simulating-from-the-dlm&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Forward Simulating from the DLM&lt;/h2&gt;
-&lt;p&gt;A first order polynomial DLM with constant &lt;span class=&#34;math inline&#34;&gt;\(V\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(W\)&lt;/span&gt;, and &lt;span class=&#34;math inline&#34;&gt;\(F_t = 1\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(G_t = 1\)&lt;/span&gt;. can be simulated in scala as follows:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import breeze.stats.distributions.Gaussian
-
-case class Data(time: Time, observation: Observation, state: Option[State])
-case class Parameters(v: Double, w: Double, m0: Double, c0: Double)
-
-def simulate(p: Parameters): Stream[Data] = {
-val stateSpace = Stream.iterate(Gaussian(p.m0, sqrt(p.c0)).draw)(x =&amp;gt; Gaussian(x, sqrt(p.w)).draw)
-  stateSpace.zipWithIndex map { case (x, t) =&amp;gt;
-    Data(t, x + Gaussian(0, sqrt(p.v)).draw, Some(x)) 
-  }
-}
-
-val p = Parameters(3.0, 0.5, 0.0, 10.0)
-// simulate 16 different realisations of 100 observations, representing 16 stations
-val data = (1 to 16) map (id =&amp;gt; (id, simulate(p).take(100).toVector))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We use the built in streaming library’s &lt;code&gt;iterate&lt;/code&gt; function to specify the evolution of the latent state. The initial state &lt;span class=&#34;math inline&#34;&gt;\(x_0\)&lt;/span&gt; is a sample drawn from a normal distribution with mean &lt;span class=&#34;math inline&#34;&gt;\(m_0\)&lt;/span&gt; and variance &lt;span class=&#34;math inline&#34;&gt;\(C_0\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(x_t \sim \mathcal{N}(x_0 | m_0, C_0)\)&lt;/span&gt;. The &lt;a href=&#34;https://github.com/scalanlp/breeze/&#34;&gt;Breeze numerical computing library&lt;/a&gt; provides many statistical and mathematical functions is used. Subsequent states are generated by adding &lt;span class=&#34;math inline&#34;&gt;\(\mathcal{N}(0, W)\)&lt;/span&gt; to the previous state:&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[x_t = x_{t-1} + \omega, \qquad \omega \sim \mathcal{N}(0, V)\]&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;We then construct a &lt;code&gt;Stream&lt;/code&gt; of &lt;code&gt;Data&lt;/code&gt; objects. The &lt;code&gt;Data&lt;/code&gt; object has a timestamped observation and an optional state space. We construct the observation at time &lt;span class=&#34;math inline&#34;&gt;\(t\)&lt;/span&gt; by simply adding the observation noise to the state space &lt;span class=&#34;math inline&#34;&gt;\(y_t \sim \mathcal{N}(y_t | x_t, V)\)&lt;/span&gt;. The state is optional because we can’t observe the state of real data, only simulated data will have a known state.&lt;/p&gt;
-&lt;p&gt;A graph of the data from four “stations”, produced using &lt;a href=&#34;http://ggplot2.org&#34;&gt;ggplot2&lt;/a&gt; in R is shown in the figure below.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/blog/KalmanFilter_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;div id=&#34;an-aside-on-referential-transparency&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;An Aside on Referential Transparency&lt;/h3&gt;
-&lt;p&gt;Note that the function &lt;code&gt;simulate&lt;/code&gt; is not referentially transparent, meaning the function will return a different &lt;code&gt;Stream&lt;/code&gt; of data each time we run it. Referential transparency is important in functional programming, to allow us to easily reason about complex programs. The Breeze library implements another object for stateful random number generation, the &lt;code&gt;Process&lt;/code&gt; object. The &lt;code&gt;MarkovChain&lt;/code&gt; object can be used to construct a process without drawing explicitly from the distribution until we run the program. Firstly define a single step of the random walk:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import breeze.stats.distributions._
-
-def step_rw(p: Parameters): Double =&amp;gt; Rand[Double] = 
-  x =&amp;gt; Gaussian(x, p.w)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;If &lt;code&gt;step_rw&lt;/code&gt; is supplied with a set of &lt;code&gt;Parameters&lt;/code&gt;, it returns a function from the current state, which is assumed to be materialised, to the next state, which is a &lt;code&gt;Rand[Double]&lt;/code&gt;. The actual random number isn’t generated until we sample from distribution represented by &lt;code&gt;Rand&lt;/code&gt;. Next, we can construct a &lt;code&gt;MarkovChain&lt;/code&gt; using the transition kernel &lt;code&gt;stepRw&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val random_walk: Process[Double] = MarkovChain(0.0)(step_rw(p))
-random_walk.
-  steps.
-  take(100)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;the-kalman-filter&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;The Kalman Filter&lt;/h2&gt;
-&lt;p&gt;The Kalman Filter can be used to determine the posterior distribution of the state space given the current observation and the &lt;span class=&#34;math inline&#34;&gt;\(p(x_t|D_{t})\)&lt;/span&gt;, where &lt;span class=&#34;math inline&#34;&gt;\(D_t = \{Y_t, D_{t-1}\}\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(D_0\)&lt;/span&gt; is the initial information, comprising of the parameters mode parameters &lt;span class=&#34;math inline&#34;&gt;\(W_0\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(V_0\)&lt;/span&gt; and the initial state &lt;span class=&#34;math inline&#34;&gt;\(x_0 \sim N(m_0, C_0)\)&lt;/span&gt;. The full treatment of the Kalman Filter can be found in the excellent Bayesian Forecasting for Dynamic Models by West and Harrison.&lt;/p&gt;
-&lt;p&gt;I will present the filtering equations for the simple model in this post. Suppose we start with the posterior distribution of &lt;span class=&#34;math inline&#34;&gt;\(x_{t-1} \sim N(m_{t-1}, C_{t-1})\)&lt;/span&gt;. The first thing we need to do is advance the state, the equation to advance the state is a simple Markov transition &lt;span class=&#34;math inline&#34;&gt;\(x_t = x_{t-1} + \omega_t\)&lt;/span&gt;. We simply add the system variance, the system variance is drawn from a Normal distribution with zero mean and variance &lt;span class=&#34;math inline&#34;&gt;\(W\)&lt;/span&gt;. The &lt;a href=&#34;https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables&#34;&gt;sum of two Normal distributions is Normal&lt;/a&gt; with the mean and variance added, hence the prior for &lt;span class=&#34;math inline&#34;&gt;\((x_t | D_{t-1}) \sim N(m_{t-1}, C_{t-1} + W)\)&lt;/span&gt;.&lt;/p&gt;
-&lt;p&gt;Next we need to construct the observation, using the observation equation which is commonly called the one-step forecast for the series, &lt;span class=&#34;math inline&#34;&gt;\(y_t = x_t + \nu_t\)&lt;/span&gt;, since &lt;span class=&#34;math inline&#34;&gt;\(\nu_t\)&lt;/span&gt; is Normally distributed with zero mean and variance &lt;span class=&#34;math inline&#34;&gt;\(V\)&lt;/span&gt;, the distribution of the one step forecast is, &lt;span class=&#34;math inline&#34;&gt;\((y_t|D_{t-1}) \sim N(m_{t-1}, C_{t-1} + W + V)\)&lt;/span&gt;.&lt;/p&gt;
-&lt;p&gt;Now, we observe the true value of &lt;span class=&#34;math inline&#34;&gt;\(y_t\)&lt;/span&gt; and are able to construct the posterior distribution of &lt;span class=&#34;math inline&#34;&gt;\((x_t | D_t) \sim N(m_t, C_t)\)&lt;/span&gt;. &lt;span class=&#34;math inline&#34;&gt;\(m_t = m_{t-1} + A_t e_t\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(C_t = A_tV\)&lt;/span&gt;. &lt;span class=&#34;math inline&#34;&gt;\(A_t = \frac{C_{t-1} + W}{ C_{t-1} + W + V}\)&lt;/span&gt; is known as the regression coefficient, and &lt;span class=&#34;math inline&#34;&gt;\(e_t = Y_t - m_{t-1}\)&lt;/span&gt;. This result can be shown using properties of the multivariate normal distribution, and is presented in full in Bayesian Forecasting for Dynamic Models by West and Harrison.&lt;/p&gt;
-&lt;p&gt;We now have the equations required to program up the Kalman Filter using Scala.&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;case class FilterState(data: Data, p: Parameters)
-
-def filter(p: Parameters): (FilterState, Data) =&amp;gt; FilterState = (s, d) =&amp;gt; {
-  val r = s.p.c0 + p.w
-  val q = r + p.v
-  val e = d.observation - s.p.m0
-
-  // kalman gain
-  val k = r / q
-  val c1 = k * p.v
-  
-  // return the data with the expectation of the hidden state and the updated Parameters
-  FilterOut(Data(d.time, d.observation, Some(m1)), Parameters(p.v, p.w, m1, c1))
-} &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The function filter simply takes in &lt;code&gt;Parameters&lt;/code&gt; and one observation, represented by &lt;code&gt;Data&lt;/code&gt; and returns the updated parameters required for the next step of the filter. Now we need to write a function which filters a sequence of &lt;code&gt;Data&lt;/code&gt;, and returns a sequence consisting of the latent states, which we can do using the function &lt;code&gt;scanLeft&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;A simplified function signature of &lt;code&gt;scanLeft&lt;/code&gt; is given by: &lt;code&gt;scanLeft[A](l: List[A], z: A)(f: (A, A) =&amp;gt; A): List[A]&lt;/code&gt;. A list, &lt;code&gt;l&lt;/code&gt; with elements of type &lt;code&gt;A&lt;/code&gt; and an initial value, &lt;code&gt;z&lt;/code&gt; also of type &lt;code&gt;A&lt;/code&gt; if passed to a &lt;code&gt;Function2&lt;/code&gt; and accumulated into another list with elements of type &lt;code&gt;A&lt;/code&gt;. The function &lt;code&gt;f&lt;/code&gt; is applied to each element of the list pairwise, starting the the head of the lift and the zero element, &lt;code&gt;z&lt;/code&gt;. Consider calculating the &lt;code&gt;sum&lt;/code&gt; of a list of numbers:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val numbers = List(1,2,3,4,5)
-def sum(a: Int, b: Int): Int = a + b
-
-numbers.scanLeft(0)(sum)&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## cat: /release: No such file or directory
-## cat: /release: No such file or directory&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The first calculation is (0 + 1) = 1, which is then used as the first argument in the pairwise &lt;code&gt;sum&lt;/code&gt; function, then the second calculation is (1 + 2) = 3, the result of which is used again in the next application of &lt;code&gt;sum&lt;/code&gt;. Each intermediate step of the calculation is retained and appended to a list to be output when the list of number is exhausted, so we end up with a cumulative sum, &lt;code&gt;List(0, 1, 3, 6, 10, 15)&lt;/code&gt;. We can use &lt;code&gt;scanLeft&lt;/code&gt; and the &lt;code&gt;Function2&lt;/code&gt;, &lt;code&gt;filter&lt;/code&gt; to calculate and retain the latent states in a DLM:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def filterSeries(data: Seq[Data], initParams: Parameters): Seq[FilterOut] = {
-  val initFilter = FilterState(data.head, params, 0.0) // initialise the filter
-
-  data.
-    scanLeft(initFilter)(filter(initParams)).
-    drop(1)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, we can apply the filter to all the stations simultaneously:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;data.
-  groupBy{ case (id, _) =&amp;gt; id }. //groups by id
-  map{ case (id, idAndData) =&amp;gt;
-  (id, idAndData map (x =&amp;gt; x._2)) }. // changes into (id, data) pairs
-  map{ case (id, data) =&amp;gt;
-  (id, filterSeries(data.sortBy(_.time), p)) } // apply the filter to the sorted data&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We can now plot the results of the filtering using R and ggplot2, overlaid with 95% prediction intervals.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/blog/KalmanFilter_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;The full code is available in the &lt;a href=&#34;https://github.com/jonnylaw/blog/tree/master/dlm&#34;&gt;GitHub Repo&lt;/a&gt; associated with this blog.&lt;/p&gt;
-&lt;/div&gt;
-
-
-&lt;!-- dynamically load mathjax for compatibility with self-contained --&gt;
-&lt;script&gt;
-  (function () {
-    var script = document.createElement(&#34;script&#34;);
-    script.type = &#34;text/javascript&#34;;
-    script.src  = &#34;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&#34;;
-    if (location.protocol !== &#34;file:&#34; &amp;&amp; /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, &#39;&#39;);
-    document.getElementsByTagName(&#34;head&#34;)[0].appendChild(script);
-  })();
-&lt;/script&gt;
-
-&lt;!-- BLOGDOWN-HEAD
-
-
-
-
-
-
-/BLOGDOWN-HEAD --&gt;
-</description>
+      <guid>/blog/kalmanfilter/</guid>
+      <description>A Dynamic Linear Model (DLM) is a special type of state space model, where the state and observation equations are Normally distributed and linear. A general DLM can be written as follows:
+\[\begin{aligned} y_t &amp;amp;= F_t x_t + \nu_t, \qquad \nu_t \sim \mathcal{N}(0, V_t) \\ x_t &amp;amp;= G_tx_{t-1} + \omega_t \qquad \omega_t \sim \mathcal{N}(0, W_t), \end{aligned}\]
+\(y_t\) represents the observation of the process at time \(t\), \(x_t\) is the value of the unobserved state at time \(t\).</description>
     </item>
     
     <item>
       <title>The Kalman Filter in Scala</title>
-      <link>/post/KalmanFilter/</link>
+      <link>/post/kalmanfilter/</link>
       <pubDate>Mon, 12 Dec 2016 12:13:14 -0500</pubDate>
       
-      <guid>/post/KalmanFilter/</guid>
-      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE --&gt;
-
-&lt;p&gt;A Dynamic Linear Model (DLM) is a special type of state space model, where the state and observation equations are Normally distributed and linear. A general DLM can be written as follows:&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[\begin{aligned} y_t &amp;amp;= F_t x_t + \nu_t, \qquad \nu_t \sim \mathcal{N}(0, V_t) \\
-x_t &amp;amp;= G_tx_{t-1} + \omega_t \qquad \omega_t \sim \mathcal{N}(0, W_t), \end{aligned}\]&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(y_t\)&lt;/span&gt; represents the observation of the process at time &lt;span class=&#34;math inline&#34;&gt;\(t\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(x_t\)&lt;/span&gt; is the value of the unobserved state at time &lt;span class=&#34;math inline&#34;&gt;\(t\)&lt;/span&gt;. The observation error &lt;span class=&#34;math inline&#34;&gt;\(\nu_t\)&lt;/span&gt; and the system error &lt;span class=&#34;math inline&#34;&gt;\(\omega_t\)&lt;/span&gt; are independent and identically distributed (iid) Normal random variables. &lt;span class=&#34;math inline&#34;&gt;\(F_t\)&lt;/span&gt; is the observation matrix which transforms the state space to the observation, &lt;span class=&#34;math inline&#34;&gt;\(G_t\)&lt;/span&gt; is the state transition matrix.&lt;/p&gt;
-&lt;div id=&#34;forward-simulating-from-the-dlm&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Forward Simulating from the DLM&lt;/h2&gt;
-&lt;p&gt;A first order polynomial DLM with constant &lt;span class=&#34;math inline&#34;&gt;\(V\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(W\)&lt;/span&gt;, and &lt;span class=&#34;math inline&#34;&gt;\(F_t = 1\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(G_t = 1\)&lt;/span&gt;. can be simulated in scala as follows:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import breeze.stats.distributions.Gaussian
-
-case class Data(time: Time, observation: Observation, state: Option[State])
-case class Parameters(v: Double, w: Double, m0: Double, c0: Double)
-
-def simulate(p: Parameters): Stream[Data] = {
-val stateSpace = Stream.iterate(Gaussian(p.m0, sqrt(p.c0)).draw)(x =&amp;gt; Gaussian(x, sqrt(p.w)).draw)
-  stateSpace.zipWithIndex map { case (x, t) =&amp;gt;
-    Data(t, x + Gaussian(0, sqrt(p.v)).draw, Some(x)) 
-  }
-}
-
-val p = Parameters(3.0, 0.5, 0.0, 10.0)
-// simulate 16 different realisations of 100 observations, representing 16 stations
-val data = (1 to 16) map (id =&amp;gt; (id, simulate(p).take(100).toVector))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We use the built in streaming library’s &lt;code&gt;iterate&lt;/code&gt; function to specify the evolution of the latent state. The initial state &lt;span class=&#34;math inline&#34;&gt;\(x_0\)&lt;/span&gt; is a sample drawn from a normal distribution with mean &lt;span class=&#34;math inline&#34;&gt;\(m_0\)&lt;/span&gt; and variance &lt;span class=&#34;math inline&#34;&gt;\(C_0\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(x_t \sim \mathcal{N}(x_0 | m_0, C_0)\)&lt;/span&gt;. The &lt;a href=&#34;https://github.com/scalanlp/breeze/&#34;&gt;Breeze numerical computing library&lt;/a&gt; provides many statistical and mathematical functions is used. Subsequent states are generated by adding &lt;span class=&#34;math inline&#34;&gt;\(\mathcal{N}(0, W)\)&lt;/span&gt; to the previous state:&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[x_t = x_{t-1} + \omega, \qquad \omega \sim \mathcal{N}(0, V)\]&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;We then construct a &lt;code&gt;Stream&lt;/code&gt; of &lt;code&gt;Data&lt;/code&gt; objects. The &lt;code&gt;Data&lt;/code&gt; object has a timestamped observation and an optional state space. We construct the observation at time &lt;span class=&#34;math inline&#34;&gt;\(t\)&lt;/span&gt; by simply adding the observation noise to the state space &lt;span class=&#34;math inline&#34;&gt;\(y_t \sim \mathcal{N}(y_t | x_t, V)\)&lt;/span&gt;. The state is optional because we can’t observe the state of real data, only simulated data will have a known state.&lt;/p&gt;
-&lt;p&gt;A graph of the data from four “stations”, produced using &lt;a href=&#34;http://ggplot2.org&#34;&gt;ggplot2&lt;/a&gt; in R is shown in the figure below.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/KalmanFilter_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;div id=&#34;an-aside-on-referential-transparency&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;An Aside on Referential Transparency&lt;/h3&gt;
-&lt;p&gt;Note that the function &lt;code&gt;simulate&lt;/code&gt; is not referentially transparent, meaning the function will return a different &lt;code&gt;Stream&lt;/code&gt; of data each time we run it. Referential transparency is important in functional programming, to allow us to easily reason about complex programs. The Breeze library implements another object for stateful random number generation, the &lt;code&gt;Process&lt;/code&gt; object. The &lt;code&gt;MarkovChain&lt;/code&gt; object can be used to construct a process without drawing explicitly from the distribution until we run the program. Firstly define a single step of the random walk:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import breeze.stats.distributions._
-
-def step_rw(p: Parameters): Double =&amp;gt; Rand[Double] = 
-  x =&amp;gt; Gaussian(x, p.w)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;If &lt;code&gt;step_rw&lt;/code&gt; is supplied with a set of &lt;code&gt;Parameters&lt;/code&gt;, it returns a function from the current state, which is assumed to be materialised, to the next state, which is a &lt;code&gt;Rand[Double]&lt;/code&gt;. The actual random number isn’t generated until we sample from distribution represented by &lt;code&gt;Rand&lt;/code&gt;. Next, we can construct a &lt;code&gt;MarkovChain&lt;/code&gt; using the transition kernel &lt;code&gt;stepRw&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val random_walk: Process[Double] = MarkovChain(0.0)(step_rw(p))
-random_walk.
-  steps.
-  take(100)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;the-kalman-filter&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;The Kalman Filter&lt;/h2&gt;
-&lt;p&gt;The Kalman Filter can be used to determine the posterior distribution of the state space given the current observation and the &lt;span class=&#34;math inline&#34;&gt;\(p(x_t|D_{t})\)&lt;/span&gt;, where &lt;span class=&#34;math inline&#34;&gt;\(D_t = \{Y_t, D_{t-1}\}\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(D_0\)&lt;/span&gt; is the initial information, comprising of the parameters mode parameters &lt;span class=&#34;math inline&#34;&gt;\(W_0\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(V_0\)&lt;/span&gt; and the initial state &lt;span class=&#34;math inline&#34;&gt;\(x_0 \sim N(m_0, C_0)\)&lt;/span&gt;. The full treatment of the Kalman Filter can be found in the excellent Bayesian Forecasting for Dynamic Models by West and Harrison.&lt;/p&gt;
-&lt;p&gt;I will present the filtering equations for the simple model in this post. Suppose we start with the posterior distribution of &lt;span class=&#34;math inline&#34;&gt;\(x_{t-1} \sim N(m_{t-1}, C_{t-1})\)&lt;/span&gt;. The first thing we need to do is advance the state, the equation to advance the state is a simple Markov transition &lt;span class=&#34;math inline&#34;&gt;\(x_t = x_{t-1} + \omega_t\)&lt;/span&gt;. We simply add the system variance, the system variance is drawn from a Normal distribution with zero mean and variance &lt;span class=&#34;math inline&#34;&gt;\(W\)&lt;/span&gt;. The &lt;a href=&#34;https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables&#34;&gt;sum of two Normal distributions is Normal&lt;/a&gt; with the mean and variance added, hence the prior for &lt;span class=&#34;math inline&#34;&gt;\((x_t | D_{t-1}) \sim N(m_{t-1}, C_{t-1} + W)\)&lt;/span&gt;.&lt;/p&gt;
-&lt;p&gt;Next we need to construct the observation, using the observation equation which is commonly called the one-step forecast for the series, &lt;span class=&#34;math inline&#34;&gt;\(y_t = x_t + \nu_t\)&lt;/span&gt;, since &lt;span class=&#34;math inline&#34;&gt;\(\nu_t\)&lt;/span&gt; is Normally distributed with zero mean and variance &lt;span class=&#34;math inline&#34;&gt;\(V\)&lt;/span&gt;, the distribution of the one step forecast is, &lt;span class=&#34;math inline&#34;&gt;\((y_t|D_{t-1}) \sim N(m_{t-1}, C_{t-1} + W + V)\)&lt;/span&gt;.&lt;/p&gt;
-&lt;p&gt;Now, we observe the true value of &lt;span class=&#34;math inline&#34;&gt;\(y_t\)&lt;/span&gt; and are able to construct the posterior distribution of &lt;span class=&#34;math inline&#34;&gt;\((x_t | D_t) \sim N(m_t, C_t)\)&lt;/span&gt;. &lt;span class=&#34;math inline&#34;&gt;\(m_t = m_{t-1} + A_t e_t\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(C_t = A_tV\)&lt;/span&gt;. &lt;span class=&#34;math inline&#34;&gt;\(A_t = \frac{C_{t-1} + W}{ C_{t-1} + W + V}\)&lt;/span&gt; is known as the regression coefficient, and &lt;span class=&#34;math inline&#34;&gt;\(e_t = Y_t - m_{t-1}\)&lt;/span&gt;. This result can be shown using properties of the multivariate normal distribution, and is presented in full in Bayesian Forecasting for Dynamic Models by West and Harrison.&lt;/p&gt;
-&lt;p&gt;We now have the equations required to program up the Kalman Filter using Scala.&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;case class FilterState(data: Data, p: Parameters)
-
-def filter(p: Parameters): (FilterState, Data) =&amp;gt; FilterState = (s, d) =&amp;gt; {
-  val r = s.p.c0 + p.w
-  val q = r + p.v
-  val e = d.observation - s.p.m0
-
-  // kalman gain
-  val k = r / q
-  val c1 = k * p.v
-  
-  // return the data with the expectation of the hidden state and the updated Parameters
-  FilterOut(Data(d.time, d.observation, Some(m1)), Parameters(p.v, p.w, m1, c1))
-} &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The function filter simply takes in &lt;code&gt;Parameters&lt;/code&gt; and one observation, represented by &lt;code&gt;Data&lt;/code&gt; and returns the updated parameters required for the next step of the filter. Now we need to write a function which filters a sequence of &lt;code&gt;Data&lt;/code&gt;, and returns a sequence consisting of the latent states, which we can do using the function &lt;code&gt;scanLeft&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;A simplified function signature of &lt;code&gt;scanLeft&lt;/code&gt; is given by: &lt;code&gt;scanLeft[A](l: List[A], z: A)(f: (A, A) =&amp;gt; A): List[A]&lt;/code&gt;. A list, &lt;code&gt;l&lt;/code&gt; with elements of type &lt;code&gt;A&lt;/code&gt; and an initial value, &lt;code&gt;z&lt;/code&gt; also of type &lt;code&gt;A&lt;/code&gt; if passed to a &lt;code&gt;Function2&lt;/code&gt; and accumulated into another list with elements of type &lt;code&gt;A&lt;/code&gt;. The function &lt;code&gt;f&lt;/code&gt; is applied to each element of the list pairwise, starting the the head of the lift and the zero element, &lt;code&gt;z&lt;/code&gt;. Consider calculating the &lt;code&gt;sum&lt;/code&gt; of a list of numbers:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val numbers = List(1,2,3,4,5)
-def sum(a: Int, b: Int): Int = a + b
-
-numbers.scanLeft(0)(sum)&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## cat: /release: No such file or directory&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The first calculation is (0 + 1) = 1, which is then used as the first argument in the pairwise &lt;code&gt;sum&lt;/code&gt; function, then the second calculation is (1 + 2) = 3, the result of which is used again in the next application of &lt;code&gt;sum&lt;/code&gt;. Each intermediate step of the calculation is retained and appended to a list to be output when the list of number is exhausted, so we end up with a cumulative sum, &lt;code&gt;List(0, 1, 3, 6, 10, 15)&lt;/code&gt;. We can use &lt;code&gt;scanLeft&lt;/code&gt; and the &lt;code&gt;Function2&lt;/code&gt;, &lt;code&gt;filter&lt;/code&gt; to calculate and retain the latent states in a DLM:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;def filterSeries(data: Seq[Data], initParams: Parameters): Seq[FilterOut] = {
-  val initFilter = FilterState(data.head, params, 0.0) // initialise the filter
-
-  data.
-    scanLeft(initFilter)(filter(initParams)).
-    drop(1)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, we can apply the filter to all the stations simultaneously:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;data.
-  groupBy{ case (id, _) =&amp;gt; id }. //groups by id
-  map{ case (id, idAndData) =&amp;gt;
-  (id, idAndData map (x =&amp;gt; x._2)) }. // changes into (id, data) pairs
-  map{ case (id, data) =&amp;gt;
-  (id, filterSeries(data.sortBy(_.time), p)) } // apply the filter to the sorted data&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We can now plot the results of the filtering using R and ggplot2, overlaid with 95% prediction intervals.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/KalmanFilter_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;The full code is available in the &lt;a href=&#34;https://github.com/jonnylaw/blog/tree/master/dlm&#34;&gt;GitHub Repo&lt;/a&gt; associated with this blog.&lt;/p&gt;
-&lt;/div&gt;
-
-
-&lt;!-- dynamically load mathjax for compatibility with self-contained --&gt;
-&lt;script&gt;
-  (function () {
-    var script = document.createElement(&#34;script&#34;);
-    script.type = &#34;text/javascript&#34;;
-    script.src  = &#34;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&#34;;
-    if (location.protocol !== &#34;file:&#34; &amp;&amp; /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, &#39;&#39;);
-    document.getElementsByTagName(&#34;head&#34;)[0].appendChild(script);
-  })();
-&lt;/script&gt;
-
-&lt;!-- BLOGDOWN-HEAD
-
-
-
-
-
-
-/BLOGDOWN-HEAD --&gt;
-</description>
+      <guid>/post/kalmanfilter/</guid>
+      <description>A Dynamic Linear Model (DLM) is a special type of state space model, where the state and observation equations are Normally distributed and linear. A general DLM can be written as follows:
+\[\begin{aligned} y_t &amp;amp;= F_t x_t + \nu_t, \qquad \nu_t \sim \mathcal{N}(0, V_t) \\ x_t &amp;amp;= G_tx_{t-1} + \omega_t \qquad \omega_t \sim \mathcal{N}(0, W_t), \end{aligned}\]
+\(y_t\) represents the observation of the process at time \(t\), \(x_t\) is the value of the unobserved state at time \(t\).</description>
     </item>
     
     <item>
       <title>Practical Introduction to Akka Streaming</title>
-      <link>/post/PracticalAkkaStreams/</link>
+      <link>/post/practicalakkastreams/</link>
       <pubDate>Thu, 01 Dec 2016 12:13:14 -0500</pubDate>
       
-      <guid>/post/PracticalAkkaStreams/</guid>
-      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE --&gt;
-
-&lt;p&gt;&lt;a href=&#34;%22http://akka.io%22&#34;&gt;Akka Streaming&lt;/a&gt; is a streaming IO engine used to build high performance, fault tolerant and scalable streaming data services. In this post I will describe how you can implement some of the features included in Akka Streaming using only simple streams of integers and strings, although the true power of Akka streams only becomes apparent when we are consuming data from real sources such as Websockets, databases and files. Akka is available in Java and Scala, but I will be focusing on the Scala API in this post.&lt;/p&gt;
-&lt;div id=&#34;building-a-new-sbt-project&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Building a new SBT Project&lt;/h2&gt;
-&lt;p&gt;&lt;a href=&#34;http://www.scala-sbt.org/&#34;&gt;Simple Build Tool&lt;/a&gt; is the most used build tool of Scala developers, despite the name it is incredibly powerful with many advanced features. In this post, we will be using SBT to manage the dependency on Akka. Firstly we must specify the following directory structure:&lt;/p&gt;
-&lt;pre class=&#34;bash&#34;&gt;&lt;code&gt;.
-├── build.sbt
-└── src
-    └── main
-        └── scala
-
-3 directories, 1 file&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The file build.sbt will contain the information required by SBT to download the Akka Stream dependencies. The &lt;code&gt;.scala&lt;/code&gt; source code will live in the &lt;code&gt;scala&lt;/code&gt; directory.&lt;/p&gt;
-&lt;div id=&#34;dependencies-in-sbt&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Dependencies in SBT&lt;/h3&gt;
-&lt;p&gt;First, we need to to specify some library dependencies in the file &lt;code&gt;build.sbt&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;name := &amp;quot;Akka-Stream-Example&amp;quot;
-version := &amp;quot;1.0&amp;quot;
-
-scalaVersion := &amp;quot;2.11.8&amp;quot;
-
-libraryDependencies += &amp;quot;com.typesafe.akka&amp;quot; %% &amp;quot;akka-stream&amp;quot; % &amp;quot;2.4.14&amp;quot;&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, in the terminal, navigate to the root directory of the project and run &lt;code&gt;sbt&lt;/code&gt;. The dependencies will be downloaded automatically, and available to use in any source files.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;source&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Source&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;Source&lt;/code&gt; represents the start of an Akka stream, there are many methods for constructing streams from &lt;code&gt;Source&lt;/code&gt;. For now, we will define a ticking stream of integers and investigate how we can transform and output this stream using &lt;code&gt;Flow&lt;/code&gt;s and &lt;code&gt;Sink&lt;/code&gt;s respectively. Here is a &lt;code&gt;Source&lt;/code&gt; which outputs a steady stream of 1s every second&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl._
-
-object Streaming {
-  implicit val system = ActorSystem(&amp;quot;Streaming&amp;quot;)
-  implicit val executor = system.dispatcher
-  implicit val materializer = ActorMaterializer()
-
-  val in = Source.tick(1.second, 1.second, 1)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;div id=&#34;flow&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Flow&lt;/h2&gt;
-&lt;p&gt;A &lt;code&gt;Flow&lt;/code&gt; is a data processing stage. We will define a data flow which takes in an integer, then doubles it.&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val doubleFlow = Flow[Int].map(a =&amp;gt; a * 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This &lt;code&gt;Flow&lt;/code&gt; is reusable and can be joined on to any stream which emits an &lt;code&gt;Int&lt;/code&gt;. The &lt;code&gt;map&lt;/code&gt; function is an example of a higher-order function; a higher-order function accepts a function as an argument. The &lt;code&gt;map&lt;/code&gt; function here is used to access the value held inside of the &lt;code&gt;Flow&lt;/code&gt;, in this case an &lt;code&gt;Int&lt;/code&gt;. The function passed as the argument to &lt;code&gt;map&lt;/code&gt; is an anonymous (or lambda) function, it says we take the &lt;code&gt;Int&lt;/code&gt; and multiply it by two, a type annotation is not needed on the value &lt;code&gt;a&lt;/code&gt; as the compiler infers the type to be &lt;code&gt;Int&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;sink&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Sink&lt;/h2&gt;
-&lt;p&gt;A &lt;code&gt;Sink&lt;/code&gt; is an endpoint to a stream, we can use it to print to the console, write to a database or another external service. However only when the stream is materialized is the side effect in the &lt;code&gt;Sink&lt;/code&gt; performed. Let’s define a simple sink which prints each element out on a new line&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val out = Sink.foreach(println)&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;div id=&#34;putting-it-all-together&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Putting it all together&lt;/h2&gt;
-&lt;p&gt;Now we want to get our stream printing to the console, we must define a main method for the &lt;code&gt;Streaming&lt;/code&gt; object connecting the &lt;code&gt;Source&lt;/code&gt; to the &lt;code&gt;Flow&lt;/code&gt; and finally to the &lt;code&gt;Sink&lt;/code&gt;.&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Sink, Flow, Source}
-import scala.concurrent.duration._
-
-object Streaming {
-  implicit val system = ActorSystem(&amp;quot;Streaming&amp;quot;)
-  implicit val executor = system.dispatcher
-  implicit val materializer = ActorMaterializer()
-
-  val in = Source.tick(1.second, 1.second, 1)
-  val double_flow = Flow[Int].map(a =&amp;gt; a * 2)
-  val print_sink = Sink.foreach(println)
-
-  def main(args: Array[String]) {
-      in.
-        via(double_flow).
-        take(10).
-        runWith(print_sink).
-        onComplete(_ =&amp;gt; system.terminate)
-  }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;You can now run this code block using by executing &lt;code&gt;sbt run&lt;/code&gt; from the terminal, in the project directory root (where &lt;code&gt;build.sbt&lt;/code&gt; lives). We should get a stream of twos emitting once every second. The function &lt;code&gt;take&lt;/code&gt; will limit the amount of twos printed to the console and once the stream is exhausted the Akka system is shutdown using the function &lt;code&gt;onComplete&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;graph-dsl&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Graph DSL&lt;/h2&gt;
-&lt;p&gt;Akka Streaming provides a domain specific language (DSL) to express stream processing pipelines using a graph. Here is another way to define the main method using a &lt;code&gt;RunnableGraph&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val graph = RunnableGraph.fromGraph(GraphDSL.create() { implicit builder =&amp;gt;
-
-  in ~&amp;gt; double_flow ~&amp;gt; Flow[Int].take(10) ~&amp;gt; print_sink
-
-  ClosedShape
-})
-  
-graph.run()&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The graph DSL requires a bit of work, namely defining a runnable graph and specifying that the graph is closed. This is because we can define partial graphs (a graph which isn’t connected to a &lt;code&gt;Source&lt;/code&gt;, &lt;code&gt;Sink&lt;/code&gt; or both) which compose with other graphs, handy if you want to reuse a block of processing.&lt;/p&gt;
-&lt;p&gt;In order to specify a partial graph with no connections, we use &lt;code&gt;FlowShape(inlet, outlet)&lt;/code&gt;. Let’s define a partial graph which takes in one stream a integers, splits them on a condition, performs some processing then sends them out:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val partial_graph = Flow.fromGraph(GraphDSL.create() { implicit builder =&amp;gt;
-    val broadcast = builder.add(Broadcast[Int](2))
-    val zip = builder.add(Zip[Int, Int]())
-
-    broadcast.out(0) ~&amp;gt; Flow[Int].filter(_ % 2 == 0) ~&amp;gt; Flow[Int].map(_ / 2) ~&amp;gt; zip.in0
-    broadcast.out(1) ~&amp;gt; Flow[Int].filter(_ % 2 != 0) ~&amp;gt; Flow[Int].map(_ * 2) ~&amp;gt; zip.in1
-
-    FlowShape(broadcast.in, zip.out)
-  })&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This &lt;code&gt;FlowShape&lt;/code&gt; is expecting a &lt;code&gt;Source&lt;/code&gt; containing integers, in the first line of processing it checks if the items are even, then divides them by two. The second line of processing doubles all the even numbers. The two streams are then recombined using a zip. In order to materialize data through this processing stage, a &lt;code&gt;Source&lt;/code&gt; of integers and a &lt;code&gt;Sink&lt;/code&gt; must be connected.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;merging-a-stream&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Merging a stream&lt;/h2&gt;
-&lt;p&gt;If we have two streams containing the same datatype, then we can merge these two streams into one:&lt;/p&gt;
-&lt;p&gt;Let’s reuse our stream of ones and merge it into the stream of twos we already have:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val merge_graph = RunnableGraph.fromGraph(GraphDSL.create() { implicit builder =&amp;gt;
-  val merge = builder.add(Merge[Int](2))
-  
-  in ~&amp;gt; double_flow ~&amp;gt; merge ~&amp;gt; print_sink
-                in ~&amp;gt; merge
-  ClosedShape
-})&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We add a &lt;code&gt;Merge&lt;/code&gt; to the graph builder, &lt;code&gt;Merge&lt;/code&gt; requires we specify the type of the stream elements we are merging and the number of stream sources we are merging. We then alter the stream processing flow to include a stream of ones and perform the merge.&lt;/p&gt;
-&lt;p&gt;In this case, if the stream of ones was publishing at a higher frequency than the other stream, we would have a stream with more ones than twos. ie:&lt;/p&gt;
-&lt;p&gt;1 1 1 2 1 1 1 2 …&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;zipping-a-stream&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Zipping a Stream&lt;/h2&gt;
-&lt;p&gt;We can zip a stream just as we can zip collections in Scala. This results in a tuple, which can have heterogeneous types. Zip requires that both streams have an element available, so if one stream is publishing at a quicker rate than the others there will be buffering of those elements.&lt;/p&gt;
-&lt;p&gt;To illustrate this, we will build a continuous stream of natural numbers using the &lt;code&gt;unfold&lt;/code&gt; function:&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val naturalNumbers = Source.unfold(1)(a =&amp;gt; Some(a + 1, a))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;code&gt;unfold&lt;/code&gt; is the dual of &lt;code&gt;fold&lt;/code&gt; and is an &lt;a href=&#34;https://en.wikipedia.org/wiki/Anamorphism&#34;&gt;Anamorphism&lt;/a&gt;. &lt;code&gt;unfold&lt;/code&gt; starts with a &lt;code&gt;seed&lt;/code&gt; value and applies a function to produce the next value in the stream, the result of this function evaluation is sent to the next evaluation and so on. Using &lt;code&gt;unfold&lt;/code&gt; is a simple way to define a stream which depends on the previous value.&lt;/p&gt;
-&lt;p&gt;Now if we zip together a continuous source of ones which publishes every ten seconds, &lt;code&gt;Zip&lt;/code&gt; will wait for both streams to have an element before publishing the tuple of both streams, guaranteeing order.&lt;/p&gt;
-&lt;pre class=&#34;scala&#34;&gt;&lt;code&gt;val in = Source.tick(1.second, 10.seconds, 1)
-
-val zipStream = RunnableGraph.fromGraph(FlowGraph.create() { implicit builder =&amp;amp;amp;amp;gt;
-    val zip = builder.add(Zip[Int, Int])
-    naturalNumbers ~&amp;gt; zip.in0
-    in ~&amp;gt; zip.in1
-    zip.out ~&amp;gt; out
-
-    ClosedShape
-  })
-
-  def main(args: Array[String]): Unit = {
-    zipStream.run(materializer)
-  }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The output from this stream is: (1,1) (2,1) (3,1) …&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;summary&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Summary&lt;/h2&gt;
-&lt;p&gt;We have covered a few ways to express simple streams using Akka Streaming. The real power of Akka streaming is when it is combined with file or connection handling. Streaming libraries can be used to process extremely large, or unbounded, data files using a bounded amount of computational power. This is useful when dealing with infinite sources of data, such as streaming data from Twitter.&lt;/p&gt;
-&lt;/div&gt;
-
-
-
-&lt;!-- BLOGDOWN-HEAD
-
-
-
-
-
-
-/BLOGDOWN-HEAD --&gt;
-</description>
+      <guid>/post/practicalakkastreams/</guid>
+      <description>Akka Streaming is a streaming IO engine used to build high performance, fault tolerant and scalable streaming data services. In this post I will describe how you can implement some of the features included in Akka Streaming using only simple streams of integers and strings, although the true power of Akka streams only becomes apparent when we are consuming data from real sources such as Websockets, databases and files. Akka is available in Java and Scala, but I will be focusing on the Scala API in this post.</description>
     </item>
     
   </channel>

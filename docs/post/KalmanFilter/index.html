@@ -10,7 +10,7 @@
 
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="generator" content="Hugo 0.18.1" />
+        <meta name="generator" content="Hugo 0.20.2" />
         
 
 
@@ -29,11 +29,11 @@
 
 
 
+<meta name="twitter:text:title" content="The Kalman Filter in Scala"/>
 <meta name="twitter:title" content="The Kalman Filter in Scala"/>
 <meta name="twitter:description" content="A Dynamic Linear Model (DLM) is a special type of state space model, where the state and observation equations are Normally distributed and linear. A general DLM can be written as follows:
 \[\begin{aligned} y_t &amp;= F_t x_t &#43; \nu_t, \qquad \nu_t \sim \mathcal{N}(0, V_t) \\ x_t &amp;= G_tx_{t-1} &#43; \omega_t \qquad \omega_t \sim \mathcal{N}(0, W_t), \end{aligned}\]
 \(y_t\) represents the observation of the process at time \(t\), \(x_t\) is the value of the unobserved state at time \(t\)."/>
-
 
 
         <meta property="og:title" content="The Kalman Filter in Scala" />
@@ -41,10 +41,13 @@
 \[\begin{aligned} y_t &amp;= F_t x_t &#43; \nu_t, \qquad \nu_t \sim \mathcal{N}(0, V_t) \\ x_t &amp;= G_tx_{t-1} &#43; \omega_t \qquad \omega_t \sim \mathcal{N}(0, W_t), \end{aligned}\]
 \(y_t\) represents the observation of the process at time \(t\), \(x_t\) is the value of the unobserved state at time \(t\)." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/post/KalmanFilter/" />
+<meta property="og:url" content="/post/kalmanfilter/" />
 
 
-<meta property="og:updated_time" content="2016-12-12T12:13:14-05:00"/>
+
+<meta property="article:published_time" content="2016-12-12T12:13:14-05:00"/>
+<meta property="article:modified_time" content="2016-12-12T12:13:14-05:00"/>
+
 
 
 
@@ -202,23 +205,23 @@
 
                 
                     <li>
-                        <a href="../../post/AkkaClient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
+                        <a href="../../post/breezemcmc/"><p>MCMC with Scala Breeze</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
+                        <a href="../../post/akkaclient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/SeasonalDlm/"><p>Seasonal DLM</p></a>
+                        <a href="../../post/failureinfunctionalprogramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/KalmanFilter/"><p>The Kalman Filter in Scala</p></a>
+                        <a href="../../post/seasonaldlm/"><p>Seasonal DLM</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/PracticalAkkaStreams/"><p>Practical Introduction to Akka Streaming</p></a>
+                        <a href="../../post/kalmanfilter/"><p>The Kalman Filter in Scala</p></a>
                     </li>
                 
             </ul>
@@ -247,7 +250,7 @@
     <header>
     <div class="title">
         
-            <h1><a href="../../post/KalmanFilter/">The Kalman Filter in Scala</a></h1>
+            <h1><a href="../../post/kalmanfilter/">The Kalman Filter in Scala</a></h1>
             
         
         
@@ -383,37 +386,17 @@ numbers.scanLeft(0)(sum)</code></pre>
     </div>
 
     <footer>
-        <ul class="stats">
-    
         
-
-        
-        
-            <li>
-                
-                
-                    
-
-                    
-                        Categories
-                    
-                
-            </li>
-        
-    
-
-    
-    
     </footer>
 </article>
 <ul class="actions pagination">
     
-        <li><a href="../../post/PracticalAkkaStreams/"
+        <li><a href="../../post/practicalakkastreams/"
                 class="button big previous">Practical Introduction to Akka Streaming</a></li>
     
 
     
-        <li><a href="../../post/SeasonalDlm/"
+        <li><a href="../../post/seasonaldlm/"
                 class="button big next">Seasonal DLM</a></li>
     
 </ul>
@@ -425,9 +408,9 @@ numbers.scanLeft(0)(sum)</code></pre>
             <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'shortname';
-    var disqus_identifier = '\/post\/KalmanFilter\/';
+    var disqus_identifier = '\/post\/kalmanfilter\/';
     var disqus_title = 'The Kalman Filter in Scala';
-    var disqus_url = '\/post\/KalmanFilter\/';
+    var disqus_url = '\/post\/kalmanfilter\/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -542,7 +525,21 @@ numbers.scanLeft(0)(sum)</code></pre>
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h3>
+                                <h3><a href="../../post/breezemcmc/">MCMC with Scala Breeze</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-04-23'>
+                                    April 23, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="../../post/akkaclient/">An Akka HTTP Client with JSON Parsing</a></h3>
                                 
                                     
                                 
@@ -556,7 +553,7 @@ numbers.scanLeft(0)(sum)</code></pre>
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
+                                <h3><a href="../../post/failureinfunctionalprogramming/">Using Monads for Handling Failures and Exceptions</a></h3>
                                 
                                     
                                 
@@ -570,7 +567,7 @@ numbers.scanLeft(0)(sum)</code></pre>
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/SeasonalDlm/">Seasonal DLM</a></h3>
+                                <h3><a href="../../post/seasonaldlm/">Seasonal DLM</a></h3>
                                 
                                     
                                 
@@ -584,27 +581,13 @@ numbers.scanLeft(0)(sum)</code></pre>
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/KalmanFilter/">The Kalman Filter in Scala</a></h3>
+                                <h3><a href="../../post/kalmanfilter/">The Kalman Filter in Scala</a></h3>
                                 
                                     
                                 
                                 <time class="published" datetime=
                                     '2016-12-12'>
                                     December 12, 2016</time>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <h3><a href="../../post/PracticalAkkaStreams/">Practical Introduction to Akka Streaming</a></h3>
-                                
-                                    
-                                
-                                <time class="published" datetime=
-                                    '2016-12-01'>
-                                    December 1, 2016</time>
                             </header>
                         </article>
                     </li>

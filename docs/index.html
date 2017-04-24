@@ -10,7 +10,7 @@
 
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="generator" content="Hugo 0.18.1" />
+        <meta name="generator" content="Hugo 0.20.2" />
         
 
 
@@ -28,7 +28,9 @@
 <meta property="og:url" content="/" />
 
 
-<meta property="og:updated_time" content="2017-02-21T12:13:14-05:00"/>
+
+<meta property="og:updated_time" content="2017-04-23T14:13:12-05:00"/>
+
 
 
 
@@ -176,23 +178,23 @@
 
                 
                     <li>
-                        <a href="./post/AkkaClient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
+                        <a href="./post/breezemcmc/"><p>MCMC with Scala Breeze</p></a>
                     </li>
                 
                     <li>
-                        <a href="./post/FailureInFunctionalProgramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
+                        <a href="./post/akkaclient/"><p>An Akka HTTP Client with JSON Parsing</p></a>
                     </li>
                 
                     <li>
-                        <a href="./post/SeasonalDlm/"><p>Seasonal DLM</p></a>
+                        <a href="./post/failureinfunctionalprogramming/"><p>Using Monads for Handling Failures and Exceptions</p></a>
                     </li>
                 
                     <li>
-                        <a href="./post/KalmanFilter/"><p>The Kalman Filter in Scala</p></a>
+                        <a href="./post/seasonaldlm/"><p>Seasonal DLM</p></a>
                     </li>
                 
                     <li>
-                        <a href="./post/PracticalAkkaStreams/"><p>Practical Introduction to Akka Streaming</p></a>
+                        <a href="./post/kalmanfilter/"><p>The Kalman Filter in Scala</p></a>
                     </li>
                 
             </ul>
@@ -209,7 +211,7 @@
     <header>
     <div class="title">
         
-            <h2><a href="./post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h2>
+            <h2><a href="./post/breezemcmc/">MCMC with Scala Breeze</a></h2>
         
         
     </div>
@@ -219,8 +221,8 @@
         
 
         <time class="published"
-            datetime='2017-02-21'>
-            February 21, 2017</time>
+            datetime='2017-04-23'>
+            April 23, 2017</time>
         <span class="author">Jonathan Law</span>
         
         
@@ -238,202 +240,70 @@
     <div id="content">
 
 
-<p>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple <a href="http://akka.io/">Akka Http</a> client to read data from the <a href="http://uoweb1.ncl.ac.uk/">Urban Observatory</a> in Newcastle. If you just want to read the code, see this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
-<div id="exploring-the-api" class="section level2">
-<h2>Exploring the API</h2>
-<p>The Urban Observatory consists of a grid of sensors around the North East, measuring traffic, pollution and weather. The focus of this post will be getting sensor data from a single sensor, N05171T, a traffic sensor located near the Metro Centre on Hollinside road. The metadata from this sensor can be found by querying an API endpoint: <a href="http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key" class="uri">http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key</a>=&amp;sensor_name=N05171T. Note that this requires authentication, using an API key. An API key can be requested using <a href="http://uoweb1.ncl.ac.uk/api_page/key_form/">this form</a>.</p>
-<p>The result of this query is:</p>
-<pre><code>## {
-##     &quot;type&quot;: &quot;Traffic&quot;,
-##     &quot;geom&quot;: {
-##         &quot;type&quot;: &quot;LineString&quot;,
-##         &quot;coordinates&quot;: [
-##             [
-##                 -1.674433347,
-##                 54.959041883
-##             ],
-##             [
-##                 -1.673947928,
-##                 54.959553799
-##             ]
-##         ]
-##     },
-##     &quot;active&quot;: &quot;True&quot;,
-##     &quot;latest&quot;: &quot;2017-02-21T08:23:06&quot;,
-##     &quot;base_height&quot;: null,
-##     &quot;sensor_height&quot;: null,
-##     &quot;name&quot;: &quot;N05171T&quot;,
-##     &quot;source&quot;: {
-##         &quot;web_display_name&quot;: &quot;NE Travel Data API (Third Party)&quot;,
-##         &quot;third_party&quot;: true,
-##         &quot;db_name&quot;: &quot;Scoot Netravel Api&quot;,
-##         &quot;document&quot;: &quot;&quot;,
-##         &quot;fancy_name&quot;: &quot;NE Travel Data API&quot;
-##     }
-## }
-## </code></pre>
-<p>We can see a bit of information about the sensor, including its location, time of latest reading and whether the sensor is active.</p>
-<p>In order to retrieve the actual data from the sensor, we query the url <a href="http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json" class="uri">http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json</a> with the following required fields:</p>
-<ul>
-<li><code>api_key</code> your API key here</li>
-<li><code>sensor_name</code> N05171T</li>
-<li><code>start_time</code> 20170201</li>
-<li><code>end_time</code> 20170202</li>
-</ul>
-<p>This returns the following:</p>
-<pre><code>## {
-##     &quot;type&quot;: &quot;Traffic&quot;,
-##     &quot;geom&quot;: {
-##         &quot;type&quot;: &quot;LineString&quot;,
-##         &quot;coordinates&quot;: [
-##             [
-##                 -1.674433347,
-##                 54.959041883
-##             ],
-##             [
-##                 -1.673947928,
-##                 54.959553799
-##             ]
-##         ]
-##     },
-##     &quot;active&quot;: &quot;True&quot;,
-##     &quot;data&quot;: {
-##         &quot;Congestion&quot;: {
-##             &quot;data&quot;: {
-##                 &quot;2017-02-01 01:36:46&quot;: 0.0
-##             },
-##             &quot;meta&quot;: {
-##                 &quot;name&quot;: &quot;Congestion&quot;,
-##                 &quot;theme&quot;: &quot;Traffic&quot;,
-##                 &quot;units&quot;: &quot;%&quot;
-##             }
-##         },
-##         &quot;Traffic Flow&quot;: {
-##             &quot;data&quot;: {
-##                 &quot;2017-02-01 01:36:46&quot;: 4.0
-##             },
-##             &quot;meta&quot;: {
-##                 &quot;name&quot;: &quot;Traffic Flow&quot;,
-##                 &quot;theme&quot;: &quot;Traffic&quot;,
-##                 &quot;units&quot;: &quot;Passenger Car Units&quot;
-##             }
-##         },
-##         &quot;Average Speed&quot;: {
-##             &quot;data&quot;: {
-##                 &quot;2017-02-01 13:21:46&quot;: 35.0
-##             },
-##             &quot;meta&quot;: {
-##                 &quot;name&quot;: &quot;Average Speed&quot;,
-##                 &quot;theme&quot;: &quot;Traffic&quot;,
-##                 &quot;units&quot;: &quot;KmPH&quot;
-##             }
-##         }
-##     },
-##     &quot;latest&quot;: &quot;2017-02-21T08:33:06&quot;,
-##     &quot;base_height&quot;: null,
-##     &quot;sensor_height&quot;: null,
-##     &quot;name&quot;: &quot;N05171T&quot;,
-##     &quot;source&quot;: {
-##         &quot;web_display_name&quot;: &quot;NE Travel Data API (Third Party)&quot;,
-##         &quot;third_party&quot;: true,
-##         &quot;db_name&quot;: &quot;Scoot Netravel Api&quot;,
-##         &quot;document&quot;: &quot;&quot;,
-##         &quot;fancy_name&quot;: &quot;NE Travel Data API&quot;
-##     }
-## }
-## </code></pre>
-<p>All but one of the readings have been stripped for each <code>data</code> object to emphasize the structure of the JSON returned by the API. We can see that sensor N05171T records traffic flow, congestion, and average speed. We can provide a further (optional) field to the Urban Observatory API to limit the results to return only one these. Let’s consider the only the average speed, measures in kmph. This is an unusual unit for the UK, as road speed is measured in miles per hour.</p>
-</div>
-<div id="parsing-the-json-in-scala" class="section level2">
-<h2>Parsing the JSON in Scala</h2>
-<p>There are many JSON parsing libraries in Scala, including my favourite <a href="https://circe.github.io/circe/">Circe</a> which is a Typelevel project, providing generic parsers for case classes without additional boilerplate. However, Spray JSON and Akka HTTP work well together, so that is what we will be using today. In order to complete this tutorial, you will need the Akka HTTP and Spray JSON dependencies in your <code>build.sbt</code> file.</p>
-<pre class="scala"><code>libraryDependencies ++=  Seq(
-  &quot;com.typesafe.akka&quot; %% &quot;akka-stream&quot; % &quot;2.4.17&quot;,
-  &quot;com.typesafe.akka&quot; %% &quot;akka-http&quot; % &quot;10.0.3&quot;,
-  &quot;com.typesafe.akka&quot; %% &quot;akka-http-spray-json&quot; % &quot;10.0.0&quot;)</code></pre>
-<p>Firstly, we describe the data we are interested in, in a collection of case classes representing the JSON data:</p>
-<pre class="scala"><code>case class Sensor(name: String, data: SensorData)
-case class SensorData(averageSpeed: AverageSpeed)
-case class AverageSpeed(meta: Meta, data: Map[String, Double])
-case class Meta(units: String, theme: String, name: String)</code></pre>
-<p>We extract the sensor name, and associated data, without bothering with the additional top-level fields. The sensor data field contains only average speed, by appending <code>&amp;variable=average speed</code> to the end of the HTTP Get request.</p>
-<p>Now we have a domain model for the sensor data, we must provide a way for Spray JSON to parse the JSON to the case classes:</p>
-<pre class="scala"><code>import spray.json._
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+<div id="bivariate-gaussian-model" class="section level1">
+<h1>Bivariate Gaussian Model</h1>
+<p><a href="https://github.com/scalanlp/breeze">Scala Breeze</a> is a numerical computing library, which also provides facilities for statistical computing. For instance, implementations of distributions and Markov Chain Monte Carlo for, typically used for Bayesian inference of intractable models. Today I am going to build a simple bivariate Gaussian model, simulate some realisations from the model and use the Breeze library to recover the mean of the bivariate Gaussian distribution and the variance.</p>
+<p>The model is given by:</p>
+<p><span class="math display">\[ \begin{pmatrix}X_1 \\ X_2\end{pmatrix} \sim \textrm{MVN}
+  \begin{pmatrix}
+    \begin{pmatrix}\mu_1 \\ \mu_2 \end{pmatrix}, 
+    \begin{pmatrix} \sigma &amp; 0 \\ 0 &amp; \sigma \end{pmatrix} 
+  \end{pmatrix} \]</span></p>
+<p>The model has three parameters, the mean of each variable and the variance which is shared. <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> are independent and hence can be simulated from separate univariate Gaussian distributions:</p>
+<pre class="scala"><code>import breeze.stats.distributions._
+import breeze.linalg._
 
-trait Protocols extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val metaFormat: RootJsonFormat[Meta] = 
-    jsonFormat(Meta.apply, &quot;units&quot;, &quot;theme&quot;, &quot;name&quot;)
-   implicit val averagespeedFormat: RootJsonFormat[AverageSpeed] = 
-    jsonFormat(AverageSpeed.apply, &quot;meta&quot;, &quot;data&quot;)
-   implicit val sensorDataFormat: RootJsonFormat[SensorData] = 
-    jsonFormat(SensorData.apply, &quot;Average Speed&quot;)
-  implicit val sensorFormat: RootJsonFormat[Sensor] = 
-    jsonFormat(Sensor.apply, &quot;name&quot;, &quot;data&quot;)
+case class Parameters(mu: DenseVector[Double], sigma: Double)
+
+def model(params: Parameters) = 
+  MultivariateGaussian(params.mu, diag(DenseVector.fill(2)(params.sigma)))</code></pre>
+<p>A simulation from the bivariate Gaussian model is plotted below, the mean for x is 2.0, the mean for y is 3.0 and the variance for each dimension is 0.5.</p>
+<pre class="scala"><code>val p = Parameters(DenseVector(2.0, 3.0), 0.5)
+val data = model(p).sample(100)</code></pre>
+<p><img src="figures/bivariate-normal-plot-1.png" width="672" /></p>
+<p>It is simple to write a function to calculate the log-likelihood of this model:</p>
+<pre class="scala"><code>def likelihood(points: Seq[DenseVector[Double]])(p: Parameters) =
+    points.map { point =&gt; 
+      MultivariateGaussian(p.mu, diag(DenseVector.fill(2)(p.sigma))).logPdf(point)
+    }.reduce((x, y) =&gt; x + y)</code></pre>
+<p>We take a sequence of observations, called <code>points</code>, since we know each point is simulated independently from the same distribution, then we simple <code>map</code> over the sequence of points the likelihood using the supplied value of the <code>Parameters</code>. The <code>reduce</code> operation then applies a pairwise function to each element of the list, in this case addition to get the value of the log-likelihood.</p>
+<p>For a full Bayesian Inference, we must specify a prior distribution on the parameters, let’s choose a Multivariate Gaussian Distribution on the mean and a Gaussian distribution on the precision (the inverse of the variance). The Gamma distribution in Breeze is parameterised in terms of shape and scale, the mean of the Gamma distribution with shape 1/2 and scale 2 is <span class="math inline">\(1 = 1/\sigma\)</span>:</p>
+<pre class="scala"><code>def prior(p: Parameters) = {
+  MultivariateGaussian(DenseVector(2.0, 3.0), diag(DenseVector.fill(2)(3.0))).logPdf(p.mu) +
+    Gamma(shape = 0.5, scale = 2.0).logPdf(1/p.sigma)
 }</code></pre>
-<p>This trait can be <a href="http://docs.scala-lang.org/tutorials/tour/mixin-class-composition.html">mixed in</a> when the time comes to parse the JSON data. Let’s first test the JSON parsing by directly reading in the JSON we get when running the request in a web browser:</p>
-<pre class="scala"><code>object TestJson extends App with Protocols {
-  val json_string = scala.io.Source.fromFile(&quot;data/traffic_sensor.json&quot;).getLines.mkString
+<p>The likelihood and the prior must be combined in order to determine the posterior:</p>
+<p><span class="math display">\[ p(\theta | x) \propto p(x | \theta) p(\theta) \]</span></p>
+<pre class="scala"><code>def logMeasure = (p: Parameters) =&gt; likelihood(data)(p) + prior(p)</code></pre>
+<p>The MCMC method we will be using is the Metropolis-Hastings algorithm with a symmetric random walk proposal. First, we propose a new value of the parameters, <span class="math inline">\(\theta^*\)</span> from the parameter proposal distribution, then we accept them with probability <span class="math inline">\(\min(1, A)\)</span>, where <span class="math inline">\(A\)</span> is:</p>
+<p><span class="math display">\[A = \frac{p(x|\theta^*)p(\theta^*)}{p(x|\theta)p(\theta)}\]</span></p>
+<p>So if the likelihood multiplied by the prior is larger at the proposed value of the parameters than the previous value, we always accept, otherwise, we may reject. In this way, we can explore the parameter space. In a well tuned sampler, the algorithm will not accept every proposed value of the parameters, otherwise we are NOT exploring the whole of the parameter posterior, just areas of high posterior density. In this case we can increase the variance of the proposal distribution to get the acceptance rate down to approximately 30-40%. The proposal function is:</p>
+<pre class="scala"><code>import breeze.numerics.exp
 
-  json_string.
-    parseJson.
-    convertTo[List[Sensor]].
-    foreach(println)
-}</code></pre>
-<p>There’s a bit going on here, first we have a file which contains the JSON String, this could have been pasted in directly to Scala. Then the string is parsed, this is possible since the <code>TestJson</code> object has the JSON <code>Protocols</code> trait we defined earlier mixed in using <code>with</code>.</p>
-</div>
-<div id="making-an-api-request-using-akka-http" class="section level2">
-<h2>Making an API Request using Akka HTTP</h2>
-<p>In order to make an API request using Akka HTTP, we utilise the high-level client API based on Scala futures:</p>
-<pre class="scala"><code>import akka.actor.ActorSystem
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.Http
-import HttpMethods._
-import akka.stream.ActorMaterializer
-import Uri.Query
-import scala.concurrent.Future
-
-implicit val system = ActorSystem()
-implicit val materializer = ActorMaterializer()
-implicit val executionContext = system.dispatcher
-
-val uri = Uri(&quot;http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json&quot;)
-val api_key = // your api key here
-
-  val query: Query = Query(&quot;api_key&quot; -&gt; api_key,
-    &quot;sensor_name&quot; -&gt; &quot;N05171T&quot;,
-    &quot;start_time&quot; -&gt; &quot;20170201&quot;,
-    &quot;end_time&quot; -&gt; &quot;20170202&quot;,
-    &quot;variable&quot; -&gt; &quot;average speed&quot;)
-
-val res: Future[HttpResponse] = 
-  Http().singleRequest(HttpRequest(GET, uri = uri.withQuery(query)))</code></pre>
-<p>We have created a Query object, which is just a sequence of <code>(String, Sting)</code>, denoted using the nicer arrow syntax. The request is initialised simply as a <code>singleRequest</code> which retuns a <code>Future</code> containing the <code>HttpResponse</code>. The <code>HttpResponse</code> object contains the status (200 OK, 404 Not Found etc.), and importantly the body content, called <code>HttpEntity</code>, the <code>HttpEntity</code> in this case is simply the JSON. In order to verify we are able to make a requst to the Urban Observatory, we can match on the result of the future using <code>andThen</code>:</p>
-<pre class="scala"><code>res andThen {
-    case Success(response) =&gt; println(response)
-    case Failure(ex) =&gt; println(ex)
-  } onComplete {
-    _ =&gt; system.terminate()
-  }</code></pre>
-<p><code>andThen</code> expects a function from a <code>Try</code>, an algebraic data type (ADT) which can be either <code>Success</code> or <code>Failure</code>. When the future completes, we shutdown the Actor System required by Akka HTTP. When you run this minimal example, you should receive a response similar to:</p>
-<pre><code>HttpResponse(200 OK,List(Date: Tue, 21 Feb 2017 09:27:24 GMT, Server: Apache/2.4.7 (Ubuntu), Vary
-: Cookie, X-Frame-Options: SAMEORIGIN),HttpEntity.Chunked(application/json),HttpProtocol(HTTP/1.1
-))</code></pre>
-<p>The server has returned 200 OK, some headers and some response data. In order to access the response data, we must convert it to a string, first we access the <code>entity</code> field of the <code>HttpResponse</code>, the get the results as a <code>ByteString</code> which can finally be parsed to a String:</p>
-<pre class="scala"><code>val resp = response.
-  entity.
-  dataBytes.
-  map(_.utf8String)</code></pre>
-<p>This is an Akka Stream, containing the response from the server. In order to parse it into the sensor data, we map over the string using the JSON parsing function we have previously seen:</p>
-<pre class="scala"><code>resp.
-  map(_.parseJson.convertTo[List[Sensor]]).
-  runForeach(println)</code></pre>
-<p>This should print the parsed data to the console. There are a variety of other Akka <code>Sink</code>s which can be used to consume the <code>HttpEntity</code>, they can be found in the Akka docs <a href="http://doc.akka.io/docs/akka/current/scala/stream/stages-overview.html">overview of built in stages</a>.</p>
-<p>A complete working example is available in this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
+def propose(scale: Double)(p: Parameters) = 
+  for {
+    innov &lt;- MultivariateGaussian(DenseVector.fill(3)(0.0), diag(DenseVector.fill(3)(scale)))
+    mu = p.mu + innov(0 to 1)
+    sigma = p.sigma * exp(innov(2))
+  } yield Parameters(mu, sigma)</code></pre>
+<p>Here, the value of sigma is proposed on the log-scale, since sigma is expected to be positive. Now, we have all we need to build the sampler using breeze:</p>
+<pre class="scala"><code>MarkovChain.metropolis(p, propose(0.05))(logMeasure)</code></pre>
+<p><img src="figures/bivariate-normal-parameters-1.png" width="672" /></p>
+<p>The full code required to run the MCMC in Breeze can be found in this <a href="https://gist.github.com/jonnylaw/b75147d08ea89ec1b78fa94d5a4d2f7d">gist</a>. Note that Breeze is a required dependency.</p>
 </div>
 
 
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 
 
     </div>
@@ -441,31 +311,17 @@ val res: Future[HttpResponse] =
     <footer>
         <ul class="stats">
     
-        
-
-        
-        
-            <li>
-                
-                
-                    
-
-                    
-                        Categories
-                    
-                
-            </li>
-        
-    
 
     
     
+</ul>
+
     </footer>
 </article>
 <ul class="actions pagination">
     
-        <li><a href="./post/FailureInFunctionalProgramming/"
-                class="button big previous">Using Monads for Handling Failures and Exceptions</a></li>
+        <li><a href="./post/akkaclient/"
+                class="button big previous">An Akka HTTP Client with JSON Parsing</a></li>
     
 
     
@@ -478,9 +334,9 @@ val res: Future[HttpResponse] =
             <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'shortname';
-    var disqus_identifier = '\/post\/AkkaClient\/';
-    var disqus_title = 'An Akka HTTP Client with JSON Parsing';
-    var disqus_url = '\/post\/AkkaClient\/';
+    var disqus_identifier = '\/post\/breezemcmc\/';
+    var disqus_title = 'MCMC with Scala Breeze';
+    var disqus_url = '\/post\/breezemcmc\/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -611,7 +467,21 @@ val res: Future[HttpResponse] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="./post/AkkaClient/">An Akka HTTP Client with JSON Parsing</a></h3>
+                                <h3><a href="./post/breezemcmc/">MCMC with Scala Breeze</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-04-23'>
+                                    April 23, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="./post/akkaclient/">An Akka HTTP Client with JSON Parsing</a></h3>
                                 
                                     
                                 
@@ -625,7 +495,7 @@ val res: Future[HttpResponse] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="./post/FailureInFunctionalProgramming/">Using Monads for Handling Failures and Exceptions</a></h3>
+                                <h3><a href="./post/failureinfunctionalprogramming/">Using Monads for Handling Failures and Exceptions</a></h3>
                                 
                                     
                                 
@@ -639,7 +509,7 @@ val res: Future[HttpResponse] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="./post/SeasonalDlm/">Seasonal DLM</a></h3>
+                                <h3><a href="./post/seasonaldlm/">Seasonal DLM</a></h3>
                                 
                                     
                                 
@@ -653,27 +523,13 @@ val res: Future[HttpResponse] =
                     <li>
                         <article>
                             <header>
-                                <h3><a href="./post/KalmanFilter/">The Kalman Filter in Scala</a></h3>
+                                <h3><a href="./post/kalmanfilter/">The Kalman Filter in Scala</a></h3>
                                 
                                     
                                 
                                 <time class="published" datetime=
                                     '2016-12-12'>
                                     December 12, 2016</time>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <h3><a href="./post/PracticalAkkaStreams/">Practical Introduction to Akka Streaming</a></h3>
-                                
-                                    
-                                
-                                <time class="published" datetime=
-                                    '2016-12-01'>
-                                    December 1, 2016</time>
                             </header>
                         </article>
                     </li>
