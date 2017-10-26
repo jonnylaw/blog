@@ -118,6 +118,7 @@ Here are the results for the women's division one, two and three:
 ```{r final_results_division_one, echo=FALSE, results='asis'}
 actual_time_results(womens_results, counters = 4) %>% 
   filter(division == 1) %>%
+  ungroup() %>%
   select(position, club, total_points, counters) %>%
   knitr::kable(align = "c", caption = "Senior Women's Division One")
 ```
@@ -125,6 +126,7 @@ actual_time_results(womens_results, counters = 4) %>%
 ```{r division_two_women, echo=FALSE, results='asis'}
 actual_time_results(womens_results, counters = 4) %>% 
   filter(division == 2) %>%
+  ungroup() %>%
   select(position, club, total_points, counters) %>%
   knitr::kable(align = "c", caption = "Senior Women's Division One")
 ```
@@ -132,6 +134,7 @@ actual_time_results(womens_results, counters = 4) %>%
 ```{r division_three_women, echo=FALSE, results='asis'}
 actual_time_results(womens_results, counters = 4) %>% 
   filter(division == 3) %>%
+  ungroup() %>%
   select(position, club, total_points, counters) %>%
   knitr::kable(align = "c", caption = "Senior Women's Division One")
 ```
@@ -152,6 +155,7 @@ mens_results = clean_results(mens_results_raw)
 ```{r division_one_men, echo=FALSE, results='asis'}
 actual_time_results(results = mens_results, counters = 6) %>% 
   filter(division == 1) %>%
+  ungroup() %>%
   select(position, club, total_points, counters) %>%
   knitr::kable(align = "c", caption = "Senior Men's Division One")
 ```
@@ -159,6 +163,7 @@ actual_time_results(results = mens_results, counters = 6) %>%
 ```{r division_two_men, echo=FALSE, results='asis'}
 actual_time_results(results = mens_results, counters = 6) %>% 
   filter(division == 2) %>%
+  ungroup() %>%
   select(position, club, total_points, counters) %>%
   knitr::kable(align = "c", caption = "Senior Men's Division Two")
 ```
@@ -166,6 +171,7 @@ actual_time_results(results = mens_results, counters = 6) %>%
 ```{r division_three_men, echo=FALSE, results='asis'}
 actual_time_results(results = mens_results, counters = 6) %>% 
   filter(division == 3) %>%
+  ungroup() %>%
   select(position, club, total_points, counters) %>%
   knitr::kable(align = "c", caption = "Senior Men's Division Three")
 ```
