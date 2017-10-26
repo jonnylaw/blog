@@ -12,7 +12,6 @@
 *.pptx
 *.nav
 *.snm
-*.csv
 .Rhistory
 
 # LaTeX output files

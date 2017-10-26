@@ -3,71 +3,88 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/blog/2017/04/23/mcmc-with-scala-breeze/</loc>
+    <loc>https://jonnylaw.github.io/blog/2017/10/26/harrier-league-cross-country/</loc>
+    <lastmod>2017-10-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://jonnylaw.github.io/blog/2017/04/23/mcmc-with-scala-breeze/</loc>
     <lastmod>2017-04-23T14:13:12-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/blog/2017/02/21/an-akka-http-client-with-json-parsing/</loc>
+    <loc>https://jonnylaw.github.io/blog/2017/02/21/an-akka-http-client-with-json-parsing/</loc>
     <lastmod>2017-02-21T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/blog/about/</loc>
+    <loc>https://jonnylaw.github.io/blog/about/</loc>
     <lastmod>2017-02-02T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/blog/2017/01/04/using-monads-for-handling-failures-and-exceptions/</loc>
+    <loc>https://jonnylaw.github.io/blog/2017/01/04/using-monads-for-handling-failures-and-exceptions/</loc>
     <lastmod>2017-01-04T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/blog/2016/12/13/seasonal-dlm/</loc>
+    <loc>https://jonnylaw.github.io/blog/2016/12/13/seasonal-dlm/</loc>
     <lastmod>2016-12-13T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/blog/2016/12/12/the-kalman-filter-in-scala/</loc>
+    <loc>https://jonnylaw.github.io/blog/2016/12/12/the-kalman-filter-in-scala/</loc>
     <lastmod>2016-12-12T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/blog/2016/12/01/practical-introduction-to-akka-streaming/</loc>
+    <loc>https://jonnylaw.github.io/blog/2016/12/01/practical-introduction-to-akka-streaming/</loc>
     <lastmod>2016-12-01T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/blog/categories/</loc>
+    <loc>https://jonnylaw.github.io/blog/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/blog/post/</loc>
-    <lastmod>2017-04-23T14:13:12-05:00</lastmod>
+    <loc>https://jonnylaw.github.io/blog/post/</loc>
+    <lastmod>2017-10-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/blog/</loc>
-    <lastmod>2017-04-23T14:13:12-05:00</lastmod>
+    <loc>https://jonnylaw.github.io/blog/</loc>
+    <lastmod>2017-10-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/blog/categories/scala/</loc>
+    <loc>https://jonnylaw.github.io/blog/categories/r/</loc>
+    <lastmod>2017-10-26T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://jonnylaw.github.io/blog/categories/running/</loc>
+    <lastmod>2017-10-26T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://jonnylaw.github.io/blog/categories/scala/</loc>
     <lastmod>2017-01-04T12:13:14-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/blog/categories/scala-streaming-akka/</loc>
+    <loc>https://jonnylaw.github.io/blog/categories/scala-streaming-akka/</loc>
     <lastmod>2017-02-21T12:13:14-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/blog/tags/</loc>
+    <loc>https://jonnylaw.github.io/blog/tags/</loc>
     <priority>0</priority>
   </url>
   

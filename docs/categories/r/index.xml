@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>R on Probabilistic Programming in Scala</title>
+    <link>https://jonnylaw.github.io/blog/categories/r/</link>
+    <description>Recent content in R on Probabilistic Programming in Scala</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 26 Oct 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://jonnylaw.github.io/blog/categories/r/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Harrier League Cross Country</title>
+      <link>https://jonnylaw.github.io/blog/2017/10/26/harrier-league-cross-country/</link>
+      <pubDate>Thu, 26 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://jonnylaw.github.io/blog/2017/10/26/harrier-league-cross-country/</guid>
+      <description>The Harrier League is a cross country running league with seven fixtures across the North East of England in the 2017/18 season across the winter months from September ’17 until March ‘18.
+The Harrier League is unique to other cross country fixtures because the senior runners are divided up into slow, medium and fast packs. In the senior men’s race, the slow runners start first followed 2 minutes 30 seconds later by the medium pack runners, then a further 2 minutes 30 seconds by the fast pack runners.</description>
+    </item>
+    
+  </channel>
+</rss>

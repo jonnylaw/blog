@@ -2,29 +2,47 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on Probabilistic Programming in Scala</title>
-    <link>/blog/categories/</link>
+    <link>https://jonnylaw.github.io/blog/categories/</link>
     <description>Recent content in Categories on Probabilistic Programming in Scala</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     
-	<atom:link href="/blog/categories/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://jonnylaw.github.io/blog/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>R</title>
+      <link>https://jonnylaw.github.io/blog/categories/r/</link>
+      <pubDate>Thu, 26 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://jonnylaw.github.io/blog/categories/r/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Running</title>
+      <link>https://jonnylaw.github.io/blog/categories/running/</link>
+      <pubDate>Thu, 26 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://jonnylaw.github.io/blog/categories/running/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Scala</title>
-      <link>/blog/categories/scala/</link>
+      <link>https://jonnylaw.github.io/blog/categories/scala/</link>
       <pubDate>Wed, 04 Jan 2017 12:13:14 -0500</pubDate>
       
-      <guid>/blog/categories/scala/</guid>
+      <guid>https://jonnylaw.github.io/blog/categories/scala/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Scala Streaming Akka</title>
-      <link>/blog/categories/scala-streaming-akka/</link>
+      <link>https://jonnylaw.github.io/blog/categories/scala-streaming-akka/</link>
       <pubDate>Tue, 21 Feb 2017 12:13:14 -0500</pubDate>
       
-      <guid>/blog/categories/scala-streaming-akka/</guid>
+      <guid>https://jonnylaw.github.io/blog/categories/scala-streaming-akka/</guid>
       <description></description>
     </item>
     
