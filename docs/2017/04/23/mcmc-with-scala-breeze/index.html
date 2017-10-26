@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.30.2" />
+
+
+<title>MCMC with Scala Breeze - Probabilistic Programming in Scala</title>
+<meta property="og:title" content="MCMC with Scala Breeze - Probabilistic Programming in Scala">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/tomorrow-night-eighties.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/blog/css/fonts.css" media="all">
+<link rel="stylesheet" href="/blog/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/blog/" class="nav-logo">
+    <img src="/blog/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/blog/about/">About</a></li>
+    
+    <li><a href="/blog/">Blog</a></li>
+    
+    <li><a href="https://github.com/jonnylaw">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/lawsy">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">3 min read</span>
+    
+
+    <h1 class="article-title">MCMC with Scala Breeze</h1>
+
+    
+    <span class="article-date">2017/04/23</span>
+    
+
+    <div class="article-content">
+      <div id="bivariate-gaussian-model" class="section level1">
+<h1>Bivariate Gaussian Model</h1>
+<p><a href="https://github.com/scalanlp/breeze">Scala Breeze</a> is a numerical computing library, which also provides facilities for statistical computing. For instance, implementations of distributions and Markov Chain Monte Carlo for, typically used for Bayesian inference of intractable models. Today I am going to build a simple bivariate Gaussian model, simulate some realisations from the model and use the Breeze library to recover the mean of the bivariate Gaussian distribution and the variance.</p>
+<p>The model is given by:</p>
+<p><span class="math display">\[ \begin{pmatrix}X_1 \\ X_2\end{pmatrix} \sim \textrm{MVN}
+  \begin{pmatrix}
+    \begin{pmatrix}\mu_1 \\ \mu_2 \end{pmatrix}, 
+    \begin{pmatrix} \sigma &amp; 0 \\ 0 &amp; \sigma \end{pmatrix} 
+  \end{pmatrix} \]</span></p>
+<p>The model has three parameters, the mean of each variable and the variance which is shared. <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> are independent and hence can be simulated from separate univariate Gaussian distributions:</p>
+<pre class="scala"><code>import breeze.stats.distributions._
+import breeze.linalg._
+
+case class Parameters(mu: DenseVector[Double], sigma: Double)
+
+def model(params: Parameters) = 
+  MultivariateGaussian(params.mu, diag(DenseVector.fill(2)(params.sigma)))</code></pre>
+<p>A simulation from the bivariate Gaussian model is plotted below, the mean for x is 2.0, the mean for y is 3.0 and the variance for each dimension is 0.5.</p>
+<pre class="scala"><code>val p = Parameters(DenseVector(2.0, 3.0), 0.5)
+val data = model(p).sample(100)</code></pre>
+<p><img src="/blog/post/BreezeMcmc_files/figure-html/bivariate-normal-plot-1.png" width="672" /></p>
+<p>It is simple to write a function to calculate the log-likelihood of this model:</p>
+<pre class="scala"><code>def likelihood(points: Seq[DenseVector[Double]])(p: Parameters) =
+    points.map { point =&gt; 
+      MultivariateGaussian(p.mu, diag(DenseVector.fill(2)(p.sigma))).logPdf(point)
+    }.reduce((x, y) =&gt; x + y)</code></pre>
+<p>We take a sequence of observations, called <code>points</code>, since we know each point is simulated independently from the same distribution, then we simple <code>map</code> over the sequence of points the likelihood using the supplied value of the <code>Parameters</code>. The <code>reduce</code> operation then applies a pairwise function to each element of the list, in this case addition to get the value of the log-likelihood.</p>
+<p>For a full Bayesian Inference, we must specify a prior distribution on the parameters, let’s choose a Multivariate Gaussian Distribution on the mean and a Gaussian distribution on the precision (the inverse of the variance). The Gamma distribution in Breeze is parameterised in terms of shape and scale, the mean of the Gamma distribution with shape 1/2 and scale 2 is <span class="math inline">\(1 = 1/\sigma\)</span>:</p>
+<pre class="scala"><code>def prior(p: Parameters) = {
+  MultivariateGaussian(DenseVector(2.0, 3.0), diag(DenseVector.fill(2)(3.0))).logPdf(p.mu) +
+    Gamma(shape = 0.5, scale = 2.0).logPdf(1/p.sigma)
+}</code></pre>
+<p>The likelihood and the prior must be combined in order to determine the posterior:</p>
+<p><span class="math display">\[ p(\theta | x) \propto p(x | \theta) p(\theta) \]</span></p>
+<pre class="scala"><code>def logMeasure = (p: Parameters) =&gt; likelihood(data)(p) + prior(p)</code></pre>
+<p>The MCMC method we will be using is the Metropolis-Hastings algorithm with a symmetric random walk proposal. First, we propose a new value of the parameters, <span class="math inline">\(\theta^*\)</span> from the parameter proposal distribution, then we accept them with probability <span class="math inline">\(\min(1, A)\)</span>, where <span class="math inline">\(A\)</span> is:</p>
+<p><span class="math display">\[A = \frac{p(x|\theta^*)p(\theta^*)}{p(x|\theta)p(\theta)}\]</span></p>
+<p>So if the likelihood multiplied by the prior is larger at the proposed value of the parameters than the previous value, we always accept, otherwise, we may reject. In this way, we can explore the parameter space. In a well tuned sampler, the algorithm will not accept every proposed value of the parameters, otherwise we are NOT exploring the whole of the parameter posterior, just areas of high posterior density. In this case we can increase the variance of the proposal distribution to get the acceptance rate down to approximately 30-40%. The proposal function is:</p>
+<pre class="scala"><code>import breeze.numerics.exp
+
+def propose(scale: Double)(p: Parameters) = 
+  for {
+    innov &lt;- MultivariateGaussian(DenseVector.fill(3)(0.0), diag(DenseVector.fill(3)(scale)))
+    mu = p.mu + innov(0 to 1)
+    sigma = p.sigma * exp(innov(2))
+  } yield Parameters(mu, sigma)</code></pre>
+<p>Here, the value of sigma is proposed on the log-scale, since sigma is expected to be positive. Now, we have all we need to build the sampler using breeze:</p>
+<pre class="scala"><code>MarkovChain.metropolis(p, propose(0.05))(logMeasure)</code></pre>
+<p><img src="/blog/post/BreezeMcmc_files/figure-html/bivariate-normal-parameters-1.png" width="672" /></p>
+<p>The full code required to run the MCMC in Breeze can be found in this <a href="https://gist.github.com/jonnylaw/b75147d08ea89ec1b78fa94d5a4d2f7d">gist</a>. Note that Breeze is a required dependency.</p>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/blog/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/blog/images/hugo-logo.png" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/scala.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/blog/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

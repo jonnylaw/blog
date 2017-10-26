@@ -27,7 +27,7 @@ def model(params: Parameters) =
 <p>A simulation from the bivariate Gaussian model is plotted below, the mean for x is 2.0, the mean for y is 3.0 and the variance for each dimension is 0.5.</p>
 <pre class="scala"><code>val p = Parameters(DenseVector(2.0, 3.0), 0.5)
 val data = model(p).sample(100)</code></pre>
-<p><img src="/post/BreezeMcmc_files/figure-html/bivariate-normal-plot-1.png" width="672" /></p>
+<p><img src="/blog/post/BreezeMcmc_files/figure-html/bivariate-normal-plot-1.png" width="672" /></p>
 <p>It is simple to write a function to calculate the log-likelihood of this model:</p>
 <pre class="scala"><code>def likelihood(points: Seq[DenseVector[Double]])(p: Parameters) =
     points.map { point =&gt; 
@@ -55,6 +55,6 @@ def propose(scale: Double)(p: Parameters) =
   } yield Parameters(mu, sigma)</code></pre>
 <p>Here, the value of sigma is proposed on the log-scale, since sigma is expected to be positive. Now, we have all we need to build the sampler using breeze:</p>
 <pre class="scala"><code>MarkovChain.metropolis(p, propose(0.05))(logMeasure)</code></pre>
-<p><img src="/post/BreezeMcmc_files/figure-html/bivariate-normal-parameters-1.png" width="672" /></p>
+<p><img src="/blog/post/BreezeMcmc_files/figure-html/bivariate-normal-parameters-1.png" width="672" /></p>
 <p>The full code required to run the MCMC in Breeze can be found in this <a href="https://gist.github.com/jonnylaw/b75147d08ea89ec1b78fa94d5a4d2f7d">gist</a>. Note that Breeze is a required dependency.</p>
 </div>

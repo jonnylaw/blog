@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.30.2" />
+
+
+<title>Practical Introduction to Akka Streaming - Probabilistic Programming in Scala</title>
+<meta property="og:title" content="Practical Introduction to Akka Streaming - Probabilistic Programming in Scala">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/tomorrow-night-eighties.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/blog/css/fonts.css" media="all">
+<link rel="stylesheet" href="/blog/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/blog/" class="nav-logo">
+    <img src="/blog/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/blog/about/">About</a></li>
+    
+    <li><a href="/blog/">Blog</a></li>
+    
+    <li><a href="https://github.com/jonnylaw">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/lawsy">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">7 min read</span>
+    
+
+    <h1 class="article-title">Practical Introduction to Akka Streaming</h1>
+
+    
+    <span class="article-date">2016/12/01</span>
+    
+
+    <div class="article-content">
+      <p><a href="%22http://akka.io%22">Akka Streaming</a> is a streaming IO engine used to build high performance, fault tolerant and scalable streaming data services. In this post I will describe how you can implement some of the features included in Akka Streaming using only simple streams of integers and strings, although the true power of Akka streams only becomes apparent when we are consuming data from real sources such as Websockets, databases and files. Akka is available in Java and Scala, but I will be focusing on the Scala API in this post.</p>
+<div id="building-a-new-sbt-project" class="section level2">
+<h2>Building a new SBT Project</h2>
+<p><a href="http://www.scala-sbt.org/">Simple Build Tool</a> is the most used build tool of Scala developers, despite the name it is incredibly powerful with many advanced features. In this post, we will be using SBT to manage the dependency on Akka. Firstly we must specify the following directory structure:</p>
+<pre class="bash"><code>.
+├── build.sbt
+└── src
+    └── main
+        └── scala
+
+3 directories, 1 file</code></pre>
+<p>The file build.sbt will contain the information required by SBT to download the Akka Stream dependencies. The <code>.scala</code> source code will live in the <code>scala</code> directory.</p>
+<div id="dependencies-in-sbt" class="section level3">
+<h3>Dependencies in SBT</h3>
+<p>First, we need to to specify some library dependencies in the file <code>build.sbt</code>:</p>
+<pre class="scala"><code>name := &quot;Akka-Stream-Example&quot;
+version := &quot;1.0&quot;
+
+scalaVersion := &quot;2.11.8&quot;
+
+libraryDependencies += &quot;com.typesafe.akka&quot; %% &quot;akka-stream&quot; % &quot;2.4.14&quot;</code></pre>
+<p>Now, in the terminal, navigate to the root directory of the project and run <code>sbt</code>. The dependencies will be downloaded automatically, and available to use in any source files.</p>
+</div>
+</div>
+<div id="source" class="section level2">
+<h2>Source</h2>
+<p><code>Source</code> represents the start of an Akka stream, there are many methods for constructing streams from <code>Source</code>. For now, we will define a ticking stream of integers and investigate how we can transform and output this stream using <code>Flow</code>s and <code>Sink</code>s respectively. Here is a <code>Source</code> which outputs a steady stream of 1s every second</p>
+<pre class="scala"><code>import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl._
+
+object Streaming {
+  implicit val system = ActorSystem(&quot;Streaming&quot;)
+  implicit val executor = system.dispatcher
+  implicit val materializer = ActorMaterializer()
+
+  val in = Source.tick(1.second, 1.second, 1)
+}</code></pre>
+</div>
+<div id="flow" class="section level2">
+<h2>Flow</h2>
+<p>A <code>Flow</code> is a data processing stage. We will define a data flow which takes in an integer, then doubles it.</p>
+<pre class="scala"><code>val doubleFlow = Flow[Int].map(a =&gt; a * 2)</code></pre>
+<p>This <code>Flow</code> is reusable and can be joined on to any stream which emits an <code>Int</code>. The <code>map</code> function is an example of a higher-order function; a higher-order function accepts a function as an argument. The <code>map</code> function here is used to access the value held inside of the <code>Flow</code>, in this case an <code>Int</code>. The function passed as the argument to <code>map</code> is an anonymous (or lambda) function, it says we take the <code>Int</code> and multiply it by two, a type annotation is not needed on the value <code>a</code> as the compiler infers the type to be <code>Int</code>.</p>
+</div>
+<div id="sink" class="section level2">
+<h2>Sink</h2>
+<p>A <code>Sink</code> is an endpoint to a stream, we can use it to print to the console, write to a database or another external service. However only when the stream is materialized is the side effect in the <code>Sink</code> performed. Let’s define a simple sink which prints each element out on a new line</p>
+<pre class="scala"><code>val out = Sink.foreach(println)</code></pre>
+</div>
+<div id="putting-it-all-together" class="section level2">
+<h2>Putting it all together</h2>
+<p>Now we want to get our stream printing to the console, we must define a main method for the <code>Streaming</code> object connecting the <code>Source</code> to the <code>Flow</code> and finally to the <code>Sink</code>.</p>
+<pre class="scala"><code>import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{Sink, Flow, Source}
+import scala.concurrent.duration._
+
+object Streaming {
+  implicit val system = ActorSystem(&quot;Streaming&quot;)
+  implicit val executor = system.dispatcher
+  implicit val materializer = ActorMaterializer()
+
+  val in = Source.tick(1.second, 1.second, 1)
+  val double_flow = Flow[Int].map(a =&gt; a * 2)
+  val print_sink = Sink.foreach(println)
+
+  def main(args: Array[String]) {
+      in.
+        via(double_flow).
+        take(10).
+        runWith(print_sink).
+        onComplete(_ =&gt; system.terminate)
+  }
+}</code></pre>
+<p>You can now run this code block using by executing <code>sbt run</code> from the terminal, in the project directory root (where <code>build.sbt</code> lives). We should get a stream of twos emitting once every second. The function <code>take</code> will limit the amount of twos printed to the console and once the stream is exhausted the Akka system is shutdown using the function <code>onComplete</code>.</p>
+</div>
+<div id="graph-dsl" class="section level2">
+<h2>Graph DSL</h2>
+<p>Akka Streaming provides a domain specific language (DSL) to express stream processing pipelines using a graph. Here is another way to define the main method using a <code>RunnableGraph</code>:</p>
+<pre class="scala"><code>val graph = RunnableGraph.fromGraph(GraphDSL.create() { implicit builder =&gt;
+
+  in ~&gt; double_flow ~&gt; Flow[Int].take(10) ~&gt; print_sink
+
+  ClosedShape
+})
+  
+graph.run()</code></pre>
+<p>The graph DSL requires a bit of work, namely defining a runnable graph and specifying that the graph is closed. This is because we can define partial graphs (a graph which isn’t connected to a <code>Source</code>, <code>Sink</code> or both) which compose with other graphs, handy if you want to reuse a block of processing.</p>
+<p>In order to specify a partial graph with no connections, we use <code>FlowShape(inlet, outlet)</code>. Let’s define a partial graph which takes in one stream a integers, splits them on a condition, performs some processing then sends them out:</p>
+<pre class="scala"><code>val partial_graph = Flow.fromGraph(GraphDSL.create() { implicit builder =&gt;
+    val broadcast = builder.add(Broadcast[Int](2))
+    val zip = builder.add(Zip[Int, Int]())
+
+    broadcast.out(0) ~&gt; Flow[Int].filter(_ % 2 == 0) ~&gt; Flow[Int].map(_ / 2) ~&gt; zip.in0
+    broadcast.out(1) ~&gt; Flow[Int].filter(_ % 2 != 0) ~&gt; Flow[Int].map(_ * 2) ~&gt; zip.in1
+
+    FlowShape(broadcast.in, zip.out)
+  })</code></pre>
+<p>This <code>FlowShape</code> is expecting a <code>Source</code> containing integers, in the first line of processing it checks if the items are even, then divides them by two. The second line of processing doubles all the even numbers. The two streams are then recombined using a zip. In order to materialize data through this processing stage, a <code>Source</code> of integers and a <code>Sink</code> must be connected.</p>
+</div>
+<div id="merging-a-stream" class="section level2">
+<h2>Merging a stream</h2>
+<p>If we have two streams containing the same datatype, then we can merge these two streams into one:</p>
+<p>Let’s reuse our stream of ones and merge it into the stream of twos we already have:</p>
+<pre class="scala"><code>val merge_graph = RunnableGraph.fromGraph(GraphDSL.create() { implicit builder =&gt;
+  val merge = builder.add(Merge[Int](2))
+  
+  in ~&gt; double_flow ~&gt; merge ~&gt; print_sink
+                in ~&gt; merge
+  ClosedShape
+})</code></pre>
+<p>We add a <code>Merge</code> to the graph builder, <code>Merge</code> requires we specify the type of the stream elements we are merging and the number of stream sources we are merging. We then alter the stream processing flow to include a stream of ones and perform the merge.</p>
+<p>In this case, if the stream of ones was publishing at a higher frequency than the other stream, we would have a stream with more ones than twos. ie:</p>
+<p>1 1 1 2 1 1 1 2 …</p>
+</div>
+<div id="zipping-a-stream" class="section level2">
+<h2>Zipping a Stream</h2>
+<p>We can zip a stream just as we can zip collections in Scala. This results in a tuple, which can have heterogeneous types. Zip requires that both streams have an element available, so if one stream is publishing at a quicker rate than the others there will be buffering of those elements.</p>
+<p>To illustrate this, we will build a continuous stream of natural numbers using the <code>unfold</code> function:</p>
+<pre class="scala"><code>val naturalNumbers = Source.unfold(1)(a =&gt; Some(a + 1, a))</code></pre>
+<p><code>unfold</code> is the dual of <code>fold</code> and is an <a href="https://en.wikipedia.org/wiki/Anamorphism">Anamorphism</a>. <code>unfold</code> starts with a <code>seed</code> value and applies a function to produce the next value in the stream, the result of this function evaluation is sent to the next evaluation and so on. Using <code>unfold</code> is a simple way to define a stream which depends on the previous value.</p>
+<p>Now if we zip together a continuous source of ones which publishes every ten seconds, <code>Zip</code> will wait for both streams to have an element before publishing the tuple of both streams, guaranteeing order.</p>
+<pre class="scala"><code>val in = Source.tick(1.second, 10.seconds, 1)
+
+val zipStream = RunnableGraph.fromGraph(FlowGraph.create() { implicit builder =&amp;amp;amp;gt;
+    val zip = builder.add(Zip[Int, Int])
+    naturalNumbers ~&gt; zip.in0
+    in ~&gt; zip.in1
+    zip.out ~&gt; out
+
+    ClosedShape
+  })
+
+  def main(args: Array[String]): Unit = {
+    zipStream.run(materializer)
+  }</code></pre>
+<p>The output from this stream is: (1,1) (2,1) (3,1) …</p>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>We have covered a few ways to express simple streams using Akka Streaming. The real power of Akka streaming is when it is combined with file or connection handling. Streaming libraries can be used to process extremely large, or unbounded, data files using a bounded amount of computational power. This is useful when dealing with infinite sources of data, such as streaming data from Twitter.</p>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/blog/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/blog/images/hugo-logo.png" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/scala.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+
+    
+  </body>
+</html>
+

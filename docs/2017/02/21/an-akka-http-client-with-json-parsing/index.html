@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.30.2" />
+
+
+<title>An Akka HTTP Client with JSON Parsing - Probabilistic Programming in Scala</title>
+<meta property="og:title" content="An Akka HTTP Client with JSON Parsing - Probabilistic Programming in Scala">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/tomorrow-night-eighties.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/blog/css/fonts.css" media="all">
+<link rel="stylesheet" href="/blog/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/blog/" class="nav-logo">
+    <img src="/blog/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/blog/about/">About</a></li>
+    
+    <li><a href="/blog/">Blog</a></li>
+    
+    <li><a href="https://github.com/jonnylaw">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/lawsy">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">7 min read</span>
+    
+
+    <h1 class="article-title">An Akka HTTP Client with JSON Parsing</h1>
+
+    
+    <span class="article-date">2017/02/21</span>
+    
+
+    <div class="article-content">
+      <p>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple <a href="http://akka.io/">Akka Http</a> client to read data from the <a href="http://uoweb1.ncl.ac.uk/">Urban Observatory</a> in Newcastle. If you just want to read the code, see this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
+<div id="exploring-the-api" class="section level2">
+<h2>Exploring the API</h2>
+<p>The Urban Observatory consists of a grid of sensors around the North East, measuring traffic, pollution and weather. The focus of this post will be getting sensor data from a single sensor, N05171T, a traffic sensor located near the Metro Centre on Hollinside road. The metadata from this sensor can be found by querying an API endpoint: <a href="http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key" class="uri">http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key</a>=&amp;sensor_name=N05171T. Note that this requires authentication, using an API key. An API key can be requested using <a href="http://uoweb1.ncl.ac.uk/api_page/key_form/">this form</a>.</p>
+<p>The result of this query is:</p>
+<pre><code>## {
+##     &quot;type&quot;: &quot;Traffic&quot;,
+##     &quot;geom&quot;: {
+##         &quot;type&quot;: &quot;LineString&quot;,
+##         &quot;coordinates&quot;: [
+##             [
+##                 -1.674433347,
+##                 54.959041883
+##             ],
+##             [
+##                 -1.673947928,
+##                 54.959553799
+##             ]
+##         ]
+##     },
+##     &quot;active&quot;: &quot;True&quot;,
+##     &quot;latest&quot;: &quot;2017-02-21T08:23:06&quot;,
+##     &quot;base_height&quot;: null,
+##     &quot;sensor_height&quot;: null,
+##     &quot;name&quot;: &quot;N05171T&quot;,
+##     &quot;source&quot;: {
+##         &quot;web_display_name&quot;: &quot;NE Travel Data API (Third Party)&quot;,
+##         &quot;third_party&quot;: true,
+##         &quot;db_name&quot;: &quot;Scoot Netravel Api&quot;,
+##         &quot;document&quot;: &quot;&quot;,
+##         &quot;fancy_name&quot;: &quot;NE Travel Data API&quot;
+##     }
+## }
+## </code></pre>
+<p>We can see a bit of information about the sensor, including its location, time of latest reading and whether the sensor is active.</p>
+<p>In order to retrieve the actual data from the sensor, we query the url <a href="http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json" class="uri">http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json</a> with the following required fields:</p>
+<ul>
+<li><code>api_key</code> your API key here</li>
+<li><code>sensor_name</code> N05171T</li>
+<li><code>start_time</code> 20170201</li>
+<li><code>end_time</code> 20170202</li>
+</ul>
+<p>This returns the following:</p>
+<pre><code>## {
+##     &quot;type&quot;: &quot;Traffic&quot;,
+##     &quot;geom&quot;: {
+##         &quot;type&quot;: &quot;LineString&quot;,
+##         &quot;coordinates&quot;: [
+##             [
+##                 -1.674433347,
+##                 54.959041883
+##             ],
+##             [
+##                 -1.673947928,
+##                 54.959553799
+##             ]
+##         ]
+##     },
+##     &quot;active&quot;: &quot;True&quot;,
+##     &quot;data&quot;: {
+##         &quot;Congestion&quot;: {
+##             &quot;data&quot;: {
+##                 &quot;2017-02-01 01:36:46&quot;: 0.0
+##             },
+##             &quot;meta&quot;: {
+##                 &quot;name&quot;: &quot;Congestion&quot;,
+##                 &quot;theme&quot;: &quot;Traffic&quot;,
+##                 &quot;units&quot;: &quot;%&quot;
+##             }
+##         },
+##         &quot;Traffic Flow&quot;: {
+##             &quot;data&quot;: {
+##                 &quot;2017-02-01 01:36:46&quot;: 4.0
+##             },
+##             &quot;meta&quot;: {
+##                 &quot;name&quot;: &quot;Traffic Flow&quot;,
+##                 &quot;theme&quot;: &quot;Traffic&quot;,
+##                 &quot;units&quot;: &quot;Passenger Car Units&quot;
+##             }
+##         },
+##         &quot;Average Speed&quot;: {
+##             &quot;data&quot;: {
+##                 &quot;2017-02-01 13:21:46&quot;: 35.0
+##             },
+##             &quot;meta&quot;: {
+##                 &quot;name&quot;: &quot;Average Speed&quot;,
+##                 &quot;theme&quot;: &quot;Traffic&quot;,
+##                 &quot;units&quot;: &quot;KmPH&quot;
+##             }
+##         }
+##     },
+##     &quot;latest&quot;: &quot;2017-02-21T08:33:06&quot;,
+##     &quot;base_height&quot;: null,
+##     &quot;sensor_height&quot;: null,
+##     &quot;name&quot;: &quot;N05171T&quot;,
+##     &quot;source&quot;: {
+##         &quot;web_display_name&quot;: &quot;NE Travel Data API (Third Party)&quot;,
+##         &quot;third_party&quot;: true,
+##         &quot;db_name&quot;: &quot;Scoot Netravel Api&quot;,
+##         &quot;document&quot;: &quot;&quot;,
+##         &quot;fancy_name&quot;: &quot;NE Travel Data API&quot;
+##     }
+## }
+## </code></pre>
+<p>All but one of the readings have been stripped for each <code>data</code> object to emphasize the structure of the JSON returned by the API. We can see that sensor N05171T records traffic flow, congestion, and average speed. We can provide a further (optional) field to the Urban Observatory API to limit the results to return only one these. Let’s consider the only the average speed, measures in kmph. This is an unusual unit for the UK, as road speed is measured in miles per hour.</p>
+</div>
+<div id="parsing-the-json-in-scala" class="section level2">
+<h2>Parsing the JSON in Scala</h2>
+<p>There are many JSON parsing libraries in Scala, including my favourite <a href="https://circe.github.io/circe/">Circe</a> which is a Typelevel project, providing generic parsers for case classes without additional boilerplate. However, Spray JSON and Akka HTTP work well together, so that is what we will be using today. In order to complete this tutorial, you will need the Akka HTTP and Spray JSON dependencies in your <code>build.sbt</code> file.</p>
+<pre class="scala"><code>libraryDependencies ++=  Seq(
+  &quot;com.typesafe.akka&quot; %% &quot;akka-stream&quot; % &quot;2.4.17&quot;,
+  &quot;com.typesafe.akka&quot; %% &quot;akka-http&quot; % &quot;10.0.3&quot;,
+  &quot;com.typesafe.akka&quot; %% &quot;akka-http-spray-json&quot; % &quot;10.0.0&quot;)</code></pre>
+<p>Firstly, we describe the data we are interested in, in a collection of case classes representing the JSON data:</p>
+<pre class="scala"><code>case class Sensor(name: String, data: SensorData)
+case class SensorData(averageSpeed: AverageSpeed)
+case class AverageSpeed(meta: Meta, data: Map[String, Double])
+case class Meta(units: String, theme: String, name: String)</code></pre>
+<p>We extract the sensor name, and associated data, without bothering with the additional top-level fields. The sensor data field contains only average speed, by appending <code>&amp;variable=average speed</code> to the end of the HTTP Get request.</p>
+<p>Now we have a domain model for the sensor data, we must provide a way for Spray JSON to parse the JSON to the case classes:</p>
+<pre class="scala"><code>import spray.json._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+
+trait Protocols extends SprayJsonSupport with DefaultJsonProtocol {
+  implicit val metaFormat: RootJsonFormat[Meta] = 
+    jsonFormat(Meta.apply, &quot;units&quot;, &quot;theme&quot;, &quot;name&quot;)
+   implicit val averagespeedFormat: RootJsonFormat[AverageSpeed] = 
+    jsonFormat(AverageSpeed.apply, &quot;meta&quot;, &quot;data&quot;)
+   implicit val sensorDataFormat: RootJsonFormat[SensorData] = 
+    jsonFormat(SensorData.apply, &quot;Average Speed&quot;)
+  implicit val sensorFormat: RootJsonFormat[Sensor] = 
+    jsonFormat(Sensor.apply, &quot;name&quot;, &quot;data&quot;)
+}</code></pre>
+<p>This trait can be <a href="http://docs.scala-lang.org/tutorials/tour/mixin-class-composition.html">mixed in</a> when the time comes to parse the JSON data. Let’s first test the JSON parsing by directly reading in the JSON we get when running the request in a web browser:</p>
+<pre class="scala"><code>object TestJson extends App with Protocols {
+  val json_string = scala.io.Source.fromFile(&quot;data/traffic_sensor.json&quot;).getLines.mkString
+
+  json_string.
+    parseJson.
+    convertTo[List[Sensor]].
+    foreach(println)
+}</code></pre>
+<p>There’s a bit going on here, first we have a file which contains the JSON String, this could have been pasted in directly to Scala. Then the string is parsed, this is possible since the <code>TestJson</code> object has the JSON <code>Protocols</code> trait we defined earlier mixed in using <code>with</code>.</p>
+</div>
+<div id="making-an-api-request-using-akka-http" class="section level2">
+<h2>Making an API Request using Akka HTTP</h2>
+<p>In order to make an API request using Akka HTTP, we utilise the high-level client API based on Scala futures:</p>
+<pre class="scala"><code>import akka.actor.ActorSystem
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.Http
+import HttpMethods._
+import akka.stream.ActorMaterializer
+import Uri.Query
+import scala.concurrent.Future
+
+implicit val system = ActorSystem()
+implicit val materializer = ActorMaterializer()
+implicit val executionContext = system.dispatcher
+
+val uri = Uri(&quot;http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json&quot;)
+val api_key = // your api key here
+
+  val query: Query = Query(&quot;api_key&quot; -&gt; api_key,
+    &quot;sensor_name&quot; -&gt; &quot;N05171T&quot;,
+    &quot;start_time&quot; -&gt; &quot;20170201&quot;,
+    &quot;end_time&quot; -&gt; &quot;20170202&quot;,
+    &quot;variable&quot; -&gt; &quot;average speed&quot;)
+
+val res: Future[HttpResponse] = 
+  Http().singleRequest(HttpRequest(GET, uri = uri.withQuery(query)))</code></pre>
+<p>We have created a Query object, which is just a sequence of <code>(String, Sting)</code>, denoted using the nicer arrow syntax. The request is initialised simply as a <code>singleRequest</code> which retuns a <code>Future</code> containing the <code>HttpResponse</code>. The <code>HttpResponse</code> object contains the status (200 OK, 404 Not Found etc.), and importantly the body content, called <code>HttpEntity</code>, the <code>HttpEntity</code> in this case is simply the JSON. In order to verify we are able to make a requst to the Urban Observatory, we can match on the result of the future using <code>andThen</code>:</p>
+<pre class="scala"><code>res andThen {
+    case Success(response) =&gt; println(response)
+    case Failure(ex) =&gt; println(ex)
+  } onComplete {
+    _ =&gt; system.terminate()
+  }</code></pre>
+<p><code>andThen</code> expects a function from a <code>Try</code>, an algebraic data type (ADT) which can be either <code>Success</code> or <code>Failure</code>. When the future completes, we shutdown the Actor System required by Akka HTTP. When you run this minimal example, you should receive a response similar to:</p>
+<pre><code>HttpResponse(200 OK,List(Date: Tue, 21 Feb 2017 09:27:24 GMT, Server: Apache/2.4.7 (Ubuntu), Vary
+: Cookie, X-Frame-Options: SAMEORIGIN),HttpEntity.Chunked(application/json),HttpProtocol(HTTP/1.1
+))</code></pre>
+<p>The server has returned 200 OK, some headers and some response data. In order to access the response data, we must convert it to a string, first we access the <code>entity</code> field of the <code>HttpResponse</code>, the get the results as a <code>ByteString</code> which can finally be parsed to a String:</p>
+<pre class="scala"><code>val resp = response.
+  entity.
+  dataBytes.
+  map(_.utf8String)</code></pre>
+<p>This is an Akka Stream, containing the response from the server. In order to parse it into the sensor data, we map over the string using the JSON parsing function we have previously seen:</p>
+<pre class="scala"><code>resp.
+  map(_.parseJson.convertTo[List[Sensor]]).
+  runForeach(println)</code></pre>
+<p>This should print the parsed data to the console. There are a variety of other Akka <code>Sink</code>s which can be used to consume the <code>HttpEntity</code>, they can be found in the Akka docs <a href="http://doc.akka.io/docs/akka/current/scala/stream/stages-overview.html">overview of built in stages</a>.</p>
+<p>A complete working example is available in this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/blog/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/blog/images/hugo-logo.png" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/scala.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+
+    
+  </body>
+</html>
+

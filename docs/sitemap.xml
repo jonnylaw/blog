@@ -1,72 +1,73 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/post/breezemcmc/</loc>
+    <loc>/blog/2017/04/23/mcmc-with-scala-breeze/</loc>
     <lastmod>2017-04-23T14:13:12-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/akkaclient/</loc>
+    <loc>/blog/2017/02/21/an-akka-http-client-with-json-parsing/</loc>
     <lastmod>2017-02-21T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/about/</loc>
+    <loc>/blog/about/</loc>
     <lastmod>2017-02-02T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/failureinfunctionalprogramming/</loc>
+    <loc>/blog/2017/01/04/using-monads-for-handling-failures-and-exceptions/</loc>
     <lastmod>2017-01-04T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/seasonaldlm/</loc>
+    <loc>/blog/2016/12/13/seasonal-dlm/</loc>
     <lastmod>2016-12-13T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/kalmanfilter/</loc>
+    <loc>/blog/2016/12/12/the-kalman-filter-in-scala/</loc>
     <lastmod>2016-12-12T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/practicalakkastreams/</loc>
+    <loc>/blog/2016/12/01/practical-introduction-to-akka-streaming/</loc>
     <lastmod>2016-12-01T12:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/</loc>
+    <loc>/blog/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/post/</loc>
+    <loc>/blog/post/</loc>
     <lastmod>2017-04-23T14:13:12-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/</loc>
+    <loc>/blog/</loc>
     <lastmod>2017-04-23T14:13:12-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/scala/</loc>
+    <loc>/blog/categories/scala/</loc>
     <lastmod>2017-01-04T12:13:14-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/scala-streaming-akka/</loc>
+    <loc>/blog/categories/scala-streaming-akka/</loc>
     <lastmod>2017-02-21T12:13:14-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/</loc>
+    <loc>/blog/tags/</loc>
     <priority>0</priority>
   </url>
   

@@ -2,39 +2,39 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Probabilistic Programming in Scala</title>
-    <link>/</link>
+    <link>/blog/</link>
     <description>Recent content on Probabilistic Programming in Scala</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 23 Apr 2017 14:13:12 -0500</lastBuildDate>
     
-	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>MCMC with Scala Breeze</title>
-      <link>/post/breezemcmc/</link>
+      <link>/blog/2017/04/23/mcmc-with-scala-breeze/</link>
       <pubDate>Sun, 23 Apr 2017 14:13:12 -0500</pubDate>
       
-      <guid>/post/breezemcmc/</guid>
+      <guid>/blog/2017/04/23/mcmc-with-scala-breeze/</guid>
       <description>Bivariate Gaussian Model Scala Breeze is a numerical computing library, which also provides facilities for statistical computing. For instance, implementations of distributions and Markov Chain Monte Carlo for, typically used for Bayesian inference of intractable models. Today I am going to build a simple bivariate Gaussian model, simulate some realisations from the model and use the Breeze library to recover the mean of the bivariate Gaussian distribution and the variance.</description>
     </item>
     
     <item>
       <title>An Akka HTTP Client with JSON Parsing</title>
-      <link>/post/akkaclient/</link>
+      <link>/blog/2017/02/21/an-akka-http-client-with-json-parsing/</link>
       <pubDate>Tue, 21 Feb 2017 12:13:14 -0500</pubDate>
       
-      <guid>/post/akkaclient/</guid>
+      <guid>/blog/2017/02/21/an-akka-http-client-with-json-parsing/</guid>
       <description>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple Akka Http client to read data from the Urban Observatory in Newcastle.</description>
     </item>
     
     <item>
       <title>About Me</title>
-      <link>/about/</link>
+      <link>/blog/about/</link>
       <pubDate>Thu, 02 Feb 2017 00:00:00 +0000</pubDate>
       
-      <guid>/about/</guid>
+      <guid>/blog/about/</guid>
       <description>Jonathan Law is a current PhD student on the Cloud Computing for Big Data CDT, funded by the EPSRC. His primary research interest is in using functional programming for Bayesian Inference (often called probabilistic programming), using the language Scala. Prior to embarking on the PhD, he worked in industry as an Insight Analyst, extracting value from large customer data sets.
 Selected Projects Composable POMP Models
 git.io/statespace A library for online Bayesian filtering of univariate state space models, sometimes called POMP (Partially Observed Markov Process Models).</description>
@@ -42,30 +42,30 @@ git.io/statespace A library for online Bayesian filtering of univariate state sp
     
     <item>
       <title>Using Monads for Handling Failures and Exceptions</title>
-      <link>/post/failureinfunctionalprogramming/</link>
+      <link>/blog/2017/01/04/using-monads-for-handling-failures-and-exceptions/</link>
       <pubDate>Wed, 04 Jan 2017 12:13:14 -0500</pubDate>
       
-      <guid>/post/failureinfunctionalprogramming/</guid>
+      <guid>/blog/2017/01/04/using-monads-for-handling-failures-and-exceptions/</guid>
       <description>In this post I will give a practical introduction to some useful structures for handling failure in functional programming.
 Referential Transparency One of the most important properties of functional programming is referential transparency and programming with pure functions. This means we can substitute a pure function with its result, for intance if we have the function def f = 1 + 2, we can replace every occurence of f with 3 and the final evaluation will remain unchanged</description>
     </item>
     
     <item>
       <title>Seasonal DLM</title>
-      <link>/post/seasonaldlm/</link>
+      <link>/blog/2016/12/13/seasonal-dlm/</link>
       <pubDate>Tue, 13 Dec 2016 12:13:14 -0500</pubDate>
       
-      <guid>/post/seasonaldlm/</guid>
+      <guid>/blog/2016/12/13/seasonal-dlm/</guid>
       <description>The Seasonal DLM I introduced the class of state space models called DLMs in a previous post covering the Kalman Filter. The seasonal DLM is similar to the first order DLM, however it incorporates a deterministic transformation to the state, in order to capture cyclic trends. Remember a general DLM can be written as:
 \[\begin{align} y_t &amp;amp;= F_t x_t + \nu_t, \qquad \mathcal{N}(0, V_t), \\ x_t &amp;amp;= G_t x_{t-1} + \omega_t, \quad \mathcal{N}(0, W_t).</description>
     </item>
     
     <item>
       <title>The Kalman Filter in Scala</title>
-      <link>/post/kalmanfilter/</link>
+      <link>/blog/2016/12/12/the-kalman-filter-in-scala/</link>
       <pubDate>Mon, 12 Dec 2016 12:13:14 -0500</pubDate>
       
-      <guid>/post/kalmanfilter/</guid>
+      <guid>/blog/2016/12/12/the-kalman-filter-in-scala/</guid>
       <description>A Dynamic Linear Model (DLM) is a special type of state space model, where the state and observation equations are Normally distributed and linear. A general DLM can be written as follows:
 \[\begin{aligned} y_t &amp;amp;= F_t x_t + \nu_t, \qquad \nu_t \sim \mathcal{N}(0, V_t) \\ x_t &amp;amp;= G_tx_{t-1} + \omega_t \qquad \omega_t \sim \mathcal{N}(0, W_t), \end{aligned}\]
 \(y_t\) represents the observation of the process at time \(t\), \(x_t\) is the value of the unobserved state at time \(t\).</description>
@@ -73,10 +73,10 @@ Referential Transparency One of the most important properties of functional prog
     
     <item>
       <title>Practical Introduction to Akka Streaming</title>
-      <link>/post/practicalakkastreams/</link>
+      <link>/blog/2016/12/01/practical-introduction-to-akka-streaming/</link>
       <pubDate>Thu, 01 Dec 2016 12:13:14 -0500</pubDate>
       
-      <guid>/post/practicalakkastreams/</guid>
+      <guid>/blog/2016/12/01/practical-introduction-to-akka-streaming/</guid>
       <description>Akka Streaming is a streaming IO engine used to build high performance, fault tolerant and scalable streaming data services. In this post I will describe how you can implement some of the features included in Akka Streaming using only simple streams of integers and strings, although the true power of Akka streams only becomes apparent when we are consuming data from real sources such as Websockets, databases and files. Akka is available in Java and Scala, but I will be focusing on the Scala API in this post.</description>
     </item>
     

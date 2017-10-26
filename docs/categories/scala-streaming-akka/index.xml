@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Scala, streaming, akka on Probabilistic Programming in Scala</title>
-    <link>/categories/scala-streaming-akka/</link>
-    <description>Recent content in Scala, streaming, akka on Probabilistic Programming in Scala</description>
+    <title>Scala Streaming Akka on Probabilistic Programming in Scala</title>
+    <link>/blog/categories/scala-streaming-akka/</link>
+    <description>Recent content in Scala Streaming Akka on Probabilistic Programming in Scala</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 21 Feb 2017 12:13:14 -0500</lastBuildDate>
     
-	<atom:link href="/categories/scala-streaming-akka/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/blog/categories/scala-streaming-akka/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>An Akka HTTP Client with JSON Parsing</title>
-      <link>/post/akkaclient/</link>
+      <link>/blog/2017/02/21/an-akka-http-client-with-json-parsing/</link>
       <pubDate>Tue, 21 Feb 2017 12:13:14 -0500</pubDate>
       
-      <guid>/post/akkaclient/</guid>
+      <guid>/blog/2017/02/21/an-akka-http-client-with-json-parsing/</guid>
       <description>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple Akka Http client to read data from the Urban Observatory in Newcastle.</description>
     </item>
     
