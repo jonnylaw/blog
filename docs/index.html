@@ -70,12 +70,6 @@
         
             
         
-
-
-
-
-
-
     </head>
     <body>
 
@@ -238,9 +232,7 @@
     
 
     <div id="content">
-
-
-<div id="bivariate-gaussian-model" class="section level1">
+        <div id="bivariate-gaussian-model" class="section level1">
 <h1>Bivariate Gaussian Model</h1>
 <p><a href="https://github.com/scalanlp/breeze">Scala Breeze</a> is a numerical computing library, which also provides facilities for statistical computing. For instance, implementations of distributions and Markov Chain Monte Carlo for, typically used for Bayesian inference of intractable models. Today I am going to build a simple bivariate Gaussian model, simulate some realisations from the model and use the Breeze library to recover the mean of the bivariate Gaussian distribution and the variance.</p>
 <p>The model is given by:</p>
@@ -260,7 +252,7 @@ def model(params: Parameters) =
 <p>A simulation from the bivariate Gaussian model is plotted below, the mean for x is 2.0, the mean for y is 3.0 and the variance for each dimension is 0.5.</p>
 <pre class="scala"><code>val p = Parameters(DenseVector(2.0, 3.0), 0.5)
 val data = model(p).sample(100)</code></pre>
-<p><img src="figures/bivariate-normal-plot-1.png" width="672" /></p>
+<p><img src="./post/BreezeMcmc_files/figure-html/bivariate-normal-plot-1.png" width="672" /></p>
 <p>It is simple to write a function to calculate the log-likelihood of this model:</p>
 <pre class="scala"><code>def likelihood(points: Seq[DenseVector[Double]])(p: Parameters) =
     points.map { point =&gt; 
@@ -288,23 +280,9 @@ def propose(scale: Double)(p: Parameters) =
   } yield Parameters(mu, sigma)</code></pre>
 <p>Here, the value of sigma is proposed on the log-scale, since sigma is expected to be positive. Now, we have all we need to build the sampler using breeze:</p>
 <pre class="scala"><code>MarkovChain.metropolis(p, propose(0.05))(logMeasure)</code></pre>
-<p><img src="figures/bivariate-normal-parameters-1.png" width="672" /></p>
+<p><img src="./post/BreezeMcmc_files/figure-html/bivariate-normal-parameters-1.png" width="672" /></p>
 <p>The full code required to run the MCMC in Breeze can be found in this <a href="https://gist.github.com/jonnylaw/b75147d08ea89ec1b78fa94d5a4d2f7d">gist</a>. Note that Breeze is a required dependency.</p>
 </div>
-
-
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
-
 
     </div>
 
@@ -568,7 +546,7 @@ def propose(scale: Double)(p: Parameters) =
                         <article>
                             <header>
                                 <a href="./categories/scala/">scala</a>
-                                <span style="float:right;">4</span>
+                                <span style="float:right;">3</span>
                             </header>
                         </article>
                     </li>

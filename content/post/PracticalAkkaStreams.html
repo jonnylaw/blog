@@ -6,9 +6,6 @@ categories: scala
 ---
 
 
-<!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE -->
 
 <p><a href="%22http://akka.io%22">Akka Streaming</a> is a streaming IO engine used to build high performance, fault tolerant and scalable streaming data services. In this post I will describe how you can implement some of the features included in Akka Streaming using only simple streams of integers and strings, although the true power of Akka streams only becomes apparent when we are consuming data from real sources such as Websockets, databases and files. Akka is available in Java and Scala, but I will be focusing on the Scala API in this post.</p>
 <div id="building-a-new-sbt-project" class="section level2">
@@ -153,14 +150,3 @@ val zipStream = RunnableGraph.fromGraph(FlowGraph.create() { implicit builder =&
 <h2>Summary</h2>
 <p>We have covered a few ways to express simple streams using Akka Streaming. The real power of Akka streaming is when it is combined with file or connection handling. Streaming libraries can be used to process extremely large, or unbounded, data files using a bounded amount of computational power. This is useful when dealing with infinite sources of data, such as streaming data from Twitter.</p>
 </div>
-
-
-
-<!-- BLOGDOWN-HEAD
-
-
-
-
-
-
-/BLOGDOWN-HEAD -->

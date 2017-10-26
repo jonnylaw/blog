@@ -27,11 +27,6 @@
   </url>
   
   <url>
-    <loc>/blog/kalmanfilter/</loc>
-    <lastmod>2016-12-12T12:13:14-05:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/post/kalmanfilter/</loc>
     <lastmod>2016-12-12T12:13:14-05:00</lastmod>
   </url>
@@ -39,12 +34,6 @@
   <url>
     <loc>/post/practicalakkastreams/</loc>
     <lastmod>2016-12-01T12:13:14-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/blog/</loc>
-    <lastmod>2016-12-12T12:13:14-05:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>

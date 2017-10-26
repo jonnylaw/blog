@@ -6,9 +6,6 @@ categories: scala, streaming, akka
 ---
 
 
-<!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE -->
 
 <p>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple <a href="http://akka.io/">Akka Http</a> client to read data from the <a href="http://uoweb1.ncl.ac.uk/">Urban Observatory</a> in Newcastle. If you just want to read the code, see this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
 <div id="exploring-the-api" class="section level2">
@@ -204,14 +201,3 @@ val res: Future[HttpResponse] =
 <p>This should print the parsed data to the console. There are a variety of other Akka <code>Sink</code>s which can be used to consume the <code>HttpEntity</code>, they can be found in the Akka docs <a href="http://doc.akka.io/docs/akka/current/scala/stream/stages-overview.html">overview of built in stages</a>.</p>
 <p>A complete working example is available in this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
 </div>
-
-
-
-<!-- BLOGDOWN-HEAD
-
-
-
-
-
-
-/BLOGDOWN-HEAD -->

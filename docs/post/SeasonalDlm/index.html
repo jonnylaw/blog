@@ -63,7 +63,7 @@
 
 
 <meta itemprop="dateModified" content="2016-12-13T12:13:14-05:00" />
-<meta itemprop="wordCount" content="816">
+<meta itemprop="wordCount" content="791">
 
 
 
@@ -94,12 +94,6 @@
         
             
         
-
-
-
-
-
-
     </head>
     <body>
 
@@ -275,9 +269,7 @@
     
 
     <div id="content">
-
-
-<div id="the-seasonal-dlm" class="section level2">
+        <div id="the-seasonal-dlm" class="section level2">
 <h2>The Seasonal DLM</h2>
 <p>I introduced the class of state space models called DLMs in a previous post covering the <a href="KalmanFilter/">Kalman Filter</a>. The seasonal DLM is similar to the first order DLM, however it incorporates a deterministic transformation to the state, in order to capture cyclic trends. Remember a general DLM can be written as:</p>
 <p><span class="math display">\[\begin{align}
@@ -338,22 +330,8 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
   } yield MarkovChain(init)(simStep(p))
 }</code></pre>
 <p>Note that the Markov chain is a <code>Rand[Process[Double]]</code>, this is not the most elegant and I’m open to suggestions on a better way to formulate this. Once we have defined a Markov chain, we must draw from it which returns a <code>Process[Double]</code>, the initial draw is to sample from the initial state distribution <span class="math inline">\(\mathcal{N}(m_0, C_0)\)</span>. Next, we can sample from the <code>Process</code> and plot it. A simulation from the seasonal DLM, with parameters <span class="math inline">\(V = 3\)</span> and <span class="math inline">\(W = I_6\)</span>, is given below:</p>
-<p><img src="figures/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="../../post/SeasonalDlm_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 </div>
-
-
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
-
 
     </div>
 
@@ -604,7 +582,7 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
                         <article>
                             <header>
                                 <a href="../../categories/scala/">scala</a>
-                                <span style="float:right;">4</span>
+                                <span style="float:right;">3</span>
                             </header>
                         </article>
                     </li>

@@ -91,12 +91,6 @@
         
             
         
-
-
-
-
-
-
     </head>
     <body>
 
@@ -272,9 +266,7 @@
     
 
     <div id="content">
-
-
-<p>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple <a href="http://akka.io/">Akka Http</a> client to read data from the <a href="http://uoweb1.ncl.ac.uk/">Urban Observatory</a> in Newcastle. If you just want to read the code, see this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
+        <p>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple <a href="http://akka.io/">Akka Http</a> client to read data from the <a href="http://uoweb1.ncl.ac.uk/">Urban Observatory</a> in Newcastle. If you just want to read the code, see this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
 <div id="exploring-the-api" class="section level2">
 <h2>Exploring the API</h2>
 <p>The Urban Observatory consists of a grid of sensors around the North East, measuring traffic, pollution and weather. The focus of this post will be getting sensor data from a single sensor, N05171T, a traffic sensor located near the Metro Centre on Hollinside road. The metadata from this sensor can be found by querying an API endpoint: <a href="http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key" class="uri">http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key</a>=&amp;sensor_name=N05171T. Note that this requires authentication, using an API key. An API key can be requested using <a href="http://uoweb1.ncl.ac.uk/api_page/key_form/">this form</a>.</p>
@@ -468,9 +460,6 @@ val res: Future[HttpResponse] =
 <p>This should print the parsed data to the console. There are a variety of other Akka <code>Sink</code>s which can be used to consume the <code>HttpEntity</code>, they can be found in the Akka docs <a href="http://doc.akka.io/docs/akka/current/scala/stream/stages-overview.html">overview of built in stages</a>.</p>
 <p>A complete working example is available in this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
 </div>
-
-
-
 
     </div>
 
@@ -715,7 +704,7 @@ val res: Future[HttpResponse] =
                         <article>
                             <header>
                                 <a href="../../categories/scala/">scala</a>
-                                <span style="float:right;">4</span>
+                                <span style="float:right;">3</span>
                             </header>
                         </article>
                     </li>

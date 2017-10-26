@@ -4,6 +4,7 @@ utils
 grDevices
 graphics
 stats
+methods
 tidyverse
 ggplot2
 tibble
