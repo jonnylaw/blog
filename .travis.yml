@@ -1,27 +1,25 @@
 language: r
 dist: trusty
 sudo: false
-
 branches:
   only:
-    - master
-
+  - master
 cache:
-  packages: yes
+  packages: true
   directories:
-    - $HOME/bin
-
+  - "$HOME/bin"
 before_script:
-  - "Rscript -e 'blogdown::install_hugo()'"
-
+- Rscript -e 'blogdown::install_hugo()'
 script:
-  - "Rscript -e 'blogdown::build_site()'"
-
+- Rscript -e 'blogdown::build_site()'
 deploy:
   provider: pages
   skip_cleanup: true
-  github_token: $GITHUB_TOKEN
+  github_token: "$GITHUB_TOKEN"
   on:
     branch: master
   local_dir: public
   fqdn: travis-blogdown.yihui.name
+env:
+  global:
+    secure: Z8T6TjW7uiCWTNrpceqqB39ZnQXxrxFT120EpyrGn5Ug6TdqNbjxXy4HtU6IUWHXHcrGhTyN4fOVd962i4/k39F7tshFXvNNF+CkOoVHDObEDx95uiiged0HGkrej4YxtTn7EYPWM6/Thi6KHUc7vaRRVBa3EeJ10kX42aSstlCdLH13uSGkaVEuHK6in35jA35TxZITbD0Me3LEF+RxCKZQP7+hcrQNsOGjas6zTBwPOuatJVDDL2dpl4OViPSkQYSTVWI5HrBZfMSd8oEDrnQjrdq7rBPjiphDA3Yy+5oRByAuVgJ7vglic3EgaRitijCZeHtHn3fSP0St3iFGyzhz8jRnNgxGLvOWcg3CSNQaOuP5rI5PtdfyjhvPx+6M/p0yOiMB1DY91Y6juE3J6bR+9DuMYb1Q41i3AukByxInVaq7esC4wWiKTnZM5DG+TxYUB2lA5GAhNyyAFMD1kSbvVcKT0LyBw0Qhm6hJ9UnD1IxUOTF5nzoLdjML68J7u/m86/beAB5ubSjO8nF+xby/5sFZk1W1EakfofD3dVcDbTi+DLxDBfcCkadYwQ7RaUQwempul2ucYFORuEfqvM8Pw6LWPzjJ8CH4IzgzdCJ5ZaUrzHsvINYpcUSQLkmsspmd+4U0p4mnnxxyycX0/x49NmuEK75J5AT9F10KphA=

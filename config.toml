@@ -1,7 +1,7 @@
 baseurl = "https://jonnylaw.github.io/blog/"
 publishdir = "docs"
 languageCode = "en-us"
-title = "Probabilistic Programming in Scala"
+title = "Bayesian Statistics and Functional Programming "
 theme = "hugo-lithium-theme"
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
@@ -22,7 +22,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     url = "https://twitter.com/lawsy"
 
 [params]
-    description = "Jonny Law's Research Weblog: Bayesian Statistics and Functional Programming in Scala"
+    description = "Jonny Law"
 
     # options for highlight.js (version, additional languages, and theme)
     highlightjsVersion = "9.11.0"
