@@ -12,7 +12,7 @@ knitr::opts_chunk$set(engine.path = list(
 library(tidyverse)
 library(coda)
 library(ggmcmc)
-library(patchwork)
+library(gridExtra)
 theme_set(theme_minimal())
 ```
 
@@ -53,7 +53,7 @@ p1 = ggplot(data, aes(x = x, y = y)) + geom_point()
 p2 = ggplot(data, aes(x = x, y = ..density..)) + geom_histogram(binwidth = 0.1)
 p3 = ggplot(data, aes(x = y, y = ..density..)) + geom_histogram(binwidth = 0.1)
 
-p1 / (p2 | p3)
+grid.arrange(p1, p2, p3, layout_matrix = rbind(c(1, 1), c(2, 3)))
 ```
 
 It is simple to write a function to calculate the log-likelihood of this model:
