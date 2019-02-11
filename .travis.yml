@@ -9,7 +9,7 @@ before_install:
   - sudo dpkg --force-all -i libstdc++6
 install:
   - wget -q -O hugo.deb
-    https://github.com/gohugoio/hugo/releases/download/v0.47.1/hugo_extended_0.54.0_Linux-64bit.deb
+    https://github.com/gohugoio/hugo/releases/download/v0.47.1/hugo_extended_0.47.1_Linux-64bit.deb
   - sudo dpkg -i hugo.deb
   
 branches:
