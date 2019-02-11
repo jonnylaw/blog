@@ -250,7 +250,7 @@ out_cpp %>%
   ggs_traceplot()
 ```
 
-The relative speedup can be calculated using the [https://github.com/joshuaulrich/microbenchmark/](microbenchmark) package. 
+The relative speedup can be calculated using the [microbenchmark](https://github.com/joshuaulrich/microbenchmark/) package. 
 The relative speedup is plotted below 100 correlated samples from the posterior distribution.
 
 
