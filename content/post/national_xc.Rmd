@@ -15,7 +15,8 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(htmltab)
 library(gridExtra)
-theme_set(theme_minimal())
+library(ggthemes)
+theme_set(theme_tufte())
 ```
 
 # Area Results
@@ -92,6 +93,8 @@ fit_northern <- lm(position_national ~ position_northern, data = national_northe
 broom::tidy(fit_northern) %>% knitr::kable()
 fit_midlands <- lm(position_national ~ position_midlands, data = national_midlands)
 fit_southern <- lm(position_national ~ position_southern, data = national_southern)
+
+broom::augment(fit_northern)
 ```
 
 Next we plot a Normal Q-Q plot to check the distribution of the residuals is Normal. If the residuals (the errors, $Y_i - \varepsilon_i, i = 1,\dots,N$) are Normally distributed, this means the conclusions drawn from the model are valid. The Q-Q plots look reasonable (except maybe the midlands (centre)) with only a few outliers identified by R.
@@ -124,7 +127,9 @@ p3 <- national_southern %>%
 grid.arrange(p1, p2, p3, ncol = 3)
 ```
 
-The same is repeated for the midlands and the southerns:
+Looking at the line of best fit, the data appears to be linear, however exceptional performances in both competitions are not accurately modelled. 
+
+The coefficients for the midlands and the southerns simple linear regression are as follows:
 
 ```{r}
 broom::tidy(fit_midlands) %>%
@@ -133,7 +138,7 @@ broom::tidy(fit_southern) %>%
   knitr::kable()
 ```
 
-# Predict 2019
+# Predict 2019 National placing using the linear model
 
 Now we'd like to use this data in order to predict a performance in 2019. I ran in the Northern XC, finished 289th. The linear model predicts a mean finishing position of 742, given by the equation:
 
@@ -144,4 +149,15 @@ $$Y = 95 + 2.239 * 289$$
 predict(fit_northern, newdata = tibble(position_northern = 289))
 ```
 
+# Ordinal Regression
 
+The linear regression can be used as a model for the latent continuous variable $y^\star$ which is then used to fit an ordered logit model where the conditional distribution of an observed position at the national, $y$ is:
+
+$$P(y=k|x) = P(\theta_{k-1} < y^\star \leq \theta_k|x)$$
+
+For an arbitrary position $k$.
+
+```{r}
+library(brms)
+fit <- brm(position_national ~ position_northern, data = national_northern, family = sratio(link = "probit"))
+```

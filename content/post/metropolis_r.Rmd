@@ -1,8 +1,12 @@
 ---
-title: "Efficient Markov Chain Monte Carlo in R"
+title: "Efficient Markov Chain Monte Carlo in R with Rcpp"
 author: "Jonny Law"
 date: '2019-02-11'
-output: html_document
+slug: hmc
+categories:
+  - R
+  - Bayesian
+tags: []
 ---
 
 ```{r setup, include=FALSE}

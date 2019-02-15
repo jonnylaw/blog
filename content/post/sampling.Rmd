@@ -1,9 +1,9 @@
 ---
-title: "Inverse Sampling"
+title: "Sampling from a distribution with a known CDF"
 author: "Jonny Law"
 draft: TRUE
 date: '2019-02-25'
-slug: harrier-league-cross-country
+slug: inverse-sampling
 categories:
   - R
   - Running
@@ -13,10 +13,9 @@ tags: []
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(ggthemes)
 theme_set(theme_tufte())
 ```
-
-# Inverse Sampling
 
 A distribution with an inverse cumulative distribution function (CDF) can be
 sampled from using just samples from $U[0, 1]$. The inverse CDF (sometimes
@@ -41,7 +40,6 @@ Since the CDF of the uniform distribution over the interval $[0, 1]$ is:
 \end{align*}
 %
 Then $F_x^{-1}(X) = g(x)$ as required. Algorithm~\ref{alg:inverse-sampler} summarises the inverse sampling procedure.
-
 
 1. Sample $u \sim U[0, 1]$\;
 2. Evaluate $x = F^{-1}(u)$\;

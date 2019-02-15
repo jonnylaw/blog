@@ -1,9 +1,15 @@
 ---
 title: "Bayesian Inference using rejection sampling"
 author: "Jonny Law"
-date: "09/02/2019"
-output: html_document
+draft: TRUE
+date: '2019-02-25'
+slug: rejection-sampling
+categories:
+  - R
+  - Bayesian
+tags: []
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

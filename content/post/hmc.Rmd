@@ -1,12 +1,12 @@
 ---
-title: "HMC in R"
+title: "Hamiltonian Monte Carlo in R"
 author: "Jonny Law"
 draft: TRUE
 date: '2019-03-01'
-slug: harrier-league-cross-country
+slug: hmc
 categories:
   - R
-  - Running
+  - Bayesian
 tags: []
 ---
 

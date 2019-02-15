@@ -9,6 +9,7 @@ Imports:
   ggthemes,
   gridExtra,
   htmltab,
+  latex2exp,
   microbenchmark,
   numDeriv,
   scales,
