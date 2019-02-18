@@ -5,7 +5,6 @@ Version: 0.0.1
 Imports: 
   blogdown,
   coda,
-  ggExtra,
   ggmcmc,
   ggthemes,
   gridExtra,
