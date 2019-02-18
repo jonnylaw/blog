@@ -1,6 +1,6 @@
-Package: placeholder
+Package: myblog
 Type: Website
-Title: Does not matter.
+Title: This is my blog.
 Version: 0.0.1
 Imports: 
   blogdown,
@@ -16,4 +16,4 @@ Imports:
   scales,
   tidyverse,
   zeallot
-Remotes: rstudio/blogdown
+Remotes: jonnylaw/blog
