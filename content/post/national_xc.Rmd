@@ -7,7 +7,6 @@ categories:
   - R
   - Running
 tags: []
-draft: TRUE
 ---
 
 ```{r setup, include=FALSE}
@@ -147,17 +146,4 @@ $$Y = 95 + 2.239 * 289$$
 
 ```{r}
 predict(fit_northern, newdata = tibble(position_northern = 289))
-```
-
-# Ordinal Regression
-
-The linear regression can be used as a model for the latent continuous variable $y^\star$ which is then used to fit an ordered logit model where the conditional distribution of an observed position at the national, $y$ is:
-
-$$P(y=k|x) = P(\theta_{k-1} < y^\star \leq \theta_k|x)$$
-
-For an arbitrary position $k$.
-
-```{r}
-library(brms)
-fit <- brm(position_national ~ position_northern, data = national_northern, family = sratio(link = "probit"))
 ```
