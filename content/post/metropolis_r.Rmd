@@ -40,8 +40,8 @@ bivariate_normal <- function(theta, n) {
 theta <- c(5.0, 0.5, 2.0, 1.5)
 sims <- bivariate_normal(theta, 1000)
 xs <- as.matrix(sims)
-p <- ggplot(sims, aes(x, y)) + geom_point() + theme_classic()
-ggExtra::ggMarginal(p, type = "histogram")
+ggplot(sims, aes(x, y)) + 
+  geom_point()
 ```
 
 The random variables in the model can be written as:
