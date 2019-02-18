@@ -37,9 +37,11 @@ bivariate_normal <- function(theta, n) {
   tibble(x, y)
 }
 
-theta = c(5.0, 0.5, 2.0, 1.5)
-sims = bivariate_normal(theta, 1000)
-qplot(sims$x, sims$y)
+theta <- c(5.0, 0.5, 2.0, 1.5)
+sims <- bivariate_normal(theta, 1000)
+xs <- as.matrix(sims)
+p <- ggplot(sims, aes(x, y)) + geom_point() + theme_classic()
+ggExtra::ggMarginal(p, type = "histogram")
 ```
 
 The random variables in the model can be written as:
@@ -76,9 +78,19 @@ log_posterior <- function(xs)
     log_likelihood(xs, theta) + log_prior(theta)
 ```
 
-# Metropolis algorithm in R
+# Metropolis-Hastings algorithm
 
-A [Metropolis](https://en.wikipedia.org/wiki/Metropolis–Hastings_algorithm) algorithm can be used to determine the posterior distribution of the parameters, $\mu$ and $\Sigma$.
+A [Metropolis-Hastings](https://en.wikipedia.org/wiki/Metropolis–Hastings_algorithm) algorithm can be used to determine the posterior distribution of the parameters, $theta = \{\mu, \Sigma\}$. The Metropolis algorithm constructs a Markov chain whose stationary distribution corresponds to the target posterior distribution, $p(\theta|y)$. In order to construct the Markov chain with this property, a carefully chosen tansition function $P(\theta^\prime|\theta)$ is used. In order to prove the Metropolis algorithm has the target distribution as its stationary distribution, the existence and uniqueness of the stationary distribution must be determined. A transition function which satisfies detailed balance is chosen which is a sufficient condition for the existence of the stationary distribution:
+
+$$P(\theta^\prime|\theta)p(\theta|y) = P(\theta|\theta^\prime)p(\theta^\prime|y)$$
+
+The Markov chain proceeds by proposing a new value of the parameters, $\theta^\prime$ from a distribution which can be easily simulated from (typically a Normal distribution centred at the previously accepted value of the parameter, $\theta$), $q(\theta^\prime|\theta)$. The transition function is the product of the proposal distribution and the acceptance ratio. The acceptance ration which satisfies detailed balance is called the Metropolis choice:
+
+$$A = \operatorname{min}\left(1, \frac{p(\theta^\prime|y)q(\theta|\theta^\prime)}{p(\theta|y)q(\theta^\prime|\theta)}\right).$$
+
+# R Implementation
+
+First of a single step of the Metropolis algorithm is implementated. This is a higher order function, since two of the arguments are functions themselves. The function `log_posterior` is a function from parameters to log-likelihood and the `proposal` is a symmetric proposal distribution for the parameters, a function from parameters to parameters. The final argument, `theta` represents the parameters.
 
 ```{r}
 metropolis_step <- function(theta, log_posterior, proposal) {
@@ -91,7 +103,11 @@ metropolis_step <- function(theta, log_posterior, proposal) {
     theta
   }
 }
+```
 
+Next the 
+
+```{r}
 metropolis <- function(theta, log_posterior, proposal, m) {
   out = matrix(NA_real_, nrow = m, ncol = length(theta))
   out[1, ] = theta
@@ -115,7 +131,6 @@ proposal <- function(x) {
 Finally, all the components are there to sample from the posterior distribution of the parameters. The mean of the sampled posterior distribution should coincide with the parameters used to simulate the data. In the figure below the actual values used to simulate the data are plotted with dashed lines.
 
 ```{r}
-xs <- as.matrix(sims)
 out = metropolis(theta, log_posterior(xs), proposal, 10000)
 ```
 
@@ -138,7 +153,7 @@ out %>%
   facet_wrap(~Parameter, scales = "free_y")
 ```
 
-# Parallel Chains
+# Parallel Chains in R
 
 Typically, multiple chains are run in parallel, a straightforward way to do this in R is to use a parallel version of `lapply`. The following exports the functions and data required by the Metropolis algorithm to the "cluster" which are simply multiple cores on the host machine and runs two MCMC algorithms in parallel.
 
@@ -165,7 +180,7 @@ ggs_density(mh_samples)
 
 # Rcpp implementation
 
-R has a straightforward interface to C++, the Metropolis-Hastings algorithm can be re-implemented using C++. C++ is a statically typed imperative language, hopefully the effort of reimplementing in C++ will result in a significant speed-up. The following code-chunk shows how the Metropolis algorithm is implemented in C++. I don't have much experience with C++ (in fact this is the first time I've written anything in C++!) so there are most likely better ways to write this, for instance using templating and generic implementations which would make it easier to re-use.
+R has a straightforward interface to C++, the Metropolis-Hastings algorithm can be re-implemented using C++. C++ is a statically typed imperative language, hopefully the effort of reimplementing in C++ will result in a significant speed-up. The `log_posterior` and `proposal` functions are run many times to calculate the Markov chain. Let's first implement these two functions using C++:
 
 ```{Rcpp}
 #include <Rcpp.h>
@@ -197,70 +212,32 @@ NumericVector proposalCpp(NumericVector p, double delta) {
   propP(3) *= exp(z(3));
   return propP;
 }
-
-// [[Rcpp::export]]
-double logAcceptance(NumericMatrix ys,
-                      NumericVector propP, 
-                      NumericVector p) {
-  double a = logDensity(ys, propP) - logDensity(ys, p);
-  return a;
-}
-
-// [[Rcpp::export]]
-NumericVector mStep(NumericMatrix ys, NumericVector p) {
-  NumericVector propP = proposalCpp(p, 0.05);
-  double a = logAcceptance(ys, propP, p);
-  double u = R::runif(0, 1);
-  NumericVector nextParameter;
-  if (log(u) < a) {
-    nextParameter = propP;
-  } else {
-    nextParameter = p;
-  }
-
-  return nextParameter;
-}
-
-// [[Rcpp::export]]
-NumericMatrix metropolisCpp(NumericMatrix ys, 
-                            NumericVector p,
-                            int N) {
-  int d = p.size();
-  NumericMatrix mat(N, d);
-  // initialise first row of output
-  for (int j = 0; j < d; j++) {
-    mat(0, j) = p(j);
-  }
-  
-  // create markov chain
-  for (int i = 1; i < N; i++) {
-    NumericVector newP = mStep(ys, mat(i-1, _));
-    for (int j = 0; j < d; j++) {
-      mat(i, j) = newP(j);
-    }
-  }
-  return mat;
-}
 ```
 
-The algorithm is run using the C++ implementation and the results plotted using R, as we can see from the below code chunk the C++ function appears as if it was an R function but performs much quicker!
+These functions can then be used in the Metropolis algorithm written using R, as we can see from the below code chunk the C++ function appears as if it was an R function.
 
 ```{r}
-out_cpp <- metropolisCpp(xs, theta, 10000)
+out_cpp <- metropolis(theta, function(p) logDensity(xs, p), function(p) proposalCpp(p, 0.05), 10000)
+```
+
+```{r, echo=FALSE}
+out_cpp <- as_tibble(out_cpp)
+colnames(out_cpp) <- actual_values$Parameter
 
 out_cpp %>%
   mcmc() %>%
   ggs() %>%
-  ggs_traceplot()
+  ggs_traceplot() +
+  geom_hline(data = actual_values, aes(yintercept = actual_value), linetype = "dashed")
 ```
 
-The relative speedup can be calculated using the [microbenchmark](https://github.com/joshuaulrich/microbenchmark/) package. 
-The relative speedup is plotted below 100 correlated samples from the posterior distribution.
+But what about the performance, the relative speedup can be calculated using the [microbenchmark](https://github.com/joshuaulrich/microbenchmark/) package. The relative speedup of the C++ method used to generate 100 correlated samples from the posterior distribution is plotted below.
 
 
 ```{r}
 timings <- microbenchmark(metropolis(theta, log_posterior(xs), proposal, 100), 
-                          metropolisCpp(xs, theta, 100))
+                          metropolis(theta, function(p) logDensity(xs, p), 
+                                     function(p) proposalCpp(p, 0.05), 100), times = 500)
 ```
 
 ```{r relative-speedup, echo=FALSE}
@@ -274,4 +251,61 @@ timings %>%
   ggplot(aes(x = relative_speedup)) +
   geom_histogram()
 ```
+
+
+
+```{Rcpp, echo=FALSE}
+#include <Rcpp.h>
+using namespace Rcpp;
+// [[Rcpp::plugins(cpp11)]]
+
+// [[Rcpp::export]]
+double logAcceptance(Function logDensity, 
+                     NumericVector propP, 
+                     NumericVector p) {
+  double a = as<double>(logDensity(propP)) - as<double>(logDensity(p));
+  return a;
+}
+
+// [[Rcpp::export]]
+NumericVector mStep(Function logDensity,
+                    Function proposal,
+                    NumericVector p) {
+  NumericVector propP = proposal(p);
+  double a = logAcceptance(logDensity, propP, p);
+  double u = R::runif(0, 1);
+  NumericVector nextParameter;
+  if (log(u) < a) {
+    nextParameter = propP;
+  } else {
+    nextParameter = p;
+  }
+
+  return nextParameter;
+}
+
+// [[Rcpp::export]]
+NumericMatrix metropolisCpp(Function logDensity,
+                            Function proposal,
+                            NumericVector p,
+                            int N) {
+  int d = p.size();
+  NumericMatrix mat(N, d);
+  // initialise first row of output
+  for (int j = 0; j < d; j++) {
+    mat(0, j) = p(j);
+  }
+  
+  // create markov chain
+  for (int i = 1; i < N; i++) {
+    NumericVector newP = mStep(logDensity, proposal, mat(i-1, _));
+    for (int j = 0; j < d; j++) {
+      mat(i, j) = newP(j);
+    }
+  }
+  return mat;
+}
+```
+
+
 
