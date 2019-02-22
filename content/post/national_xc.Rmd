@@ -1,7 +1,7 @@
 ---
 title: National Cross Country
 author: Jonny Law
-date: '2019-02-18'
+date: '2019-02-22'
 slug: national-cross-country
 categories:
   - R
@@ -20,7 +20,7 @@ theme_set(theme_tufte())
 
 # Area Results
 
-Download the results from Power of ten for northern, midlands, southern and national:
+Download the results from Power of ten for northern, midlands, southern and national.
 
 ```{r}
 parse_po10 <- function(url, page) {

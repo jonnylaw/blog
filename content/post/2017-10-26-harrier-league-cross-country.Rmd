@@ -14,7 +14,6 @@ library(tidyverse)
 library(htmltab)
 ```
 
-
 The [Harrier League](http://www.harrierleague.com) is a cross country
 running league with seven fixtures across the North East of England in
 the 2017/18 season across the winter months from September ’17 until

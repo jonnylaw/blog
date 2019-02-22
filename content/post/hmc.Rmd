@@ -50,7 +50,7 @@ log_likelihood <- function(xs, theta) {
   apply(xs, 1, function(x) dnorm(x[1], mean = theta[1], sd = theta[2], log = T) + dnorm(x[2], mean = theta[3], sd = theta[4], log = T)) %>% sum()
 }
 log_prior <- function(theta) {
-  dnorm(theta[1], log = T) + dnorm(theta[3], log = T) + dgamma(theta[2], shape = 3.0, rate = 3.0, log = T) + dgamma(theta[4], shape = 3.0, rate = 3.0, log = T)
+  dnorm(theta[1], sd = 3, log = T) + dnorm(theta[3], sd = 3, log = T) + dgamma(theta[2], shape = 3.0, rate = 3.0, log = T) + dgamma(theta[4], shape = 3.0, rate = 3.0, log = T)
 }
 log_posterior <- function(xs) function(theta) log_likelihood(xs, theta) + log_prior(theta)
 ```
@@ -65,7 +65,6 @@ The gradient of the un normalised log-posterior distribution can be used to expl
 leapfrog_step <- function(gradient, step_size, position, momentum) {
   momentum1 <- momentum + gradient(position) * 0.5 * step_size
   position1 <- position + step_size * momentum1
-  print(position1)
   momentum2 <- momentum + gradient(position1) * 0.5 * step_size
 
   list(position = position1, momentum = momentum2)
@@ -86,7 +85,7 @@ leapfrogs <- function(gradient, step_size, l) {
 ```{r}
 log_acceptance <- function(propPosition, propMomentum, position,
                            momentum, log_posterior) {
-  log_posterior(propPosition) - sum(sapply(propMomentum, function(x) dnorm(x, log = T))) - log_posterior(position) + sum(sapply(momentum, function(x) dnorm(x, log = T)))
+  log_posterior(propPosition) + sum(dnorm(propMomentum, log = T)) - log_posterior(position) - sum(dnorm(momentum, log = T))
 }
 ```
 
@@ -96,10 +95,7 @@ hmc_step <- function(log_posterior, gradient, step_size, l, position) {
   momentum <- rnorm(d)
   c(propPosition, propMomentum) %<-% leapfrogs(gradient, step_size, l)(position, momentum)
   a <- log_acceptance(propPosition, propMomentum, position, momentum, log_posterior)
-  print(a)
-  u <- log(runif(1))
-  print(u)
-  if (u < a) {
+  if (log(runif(1)) < a) {
     propPosition
   } else {
     position
@@ -118,12 +114,29 @@ hmc <- function(log_posterior, gradient, step_size, l, initP, m) {
 }
 ```
 
+From the previous post, the log-posterior distribution is the sum of the log-prior and the log-likelihood. The log-likelihood is given by:
+
+$$\log p(y|\mu, \Sigma) = \sum_{j=1}^2\left(-\frac{N}{2}\log(2\pi\sigma_{j}^2) - \frac{1}{2\sigma_{j}^2}\sum_{i=1}^N(y_{ij}-\mu_j)^2\right)$$
+Where $\Sigma = \operatorname{diag}(\sigma_1, \sigma_2)$, the prior distributions are chosen to be:
+
+$$\begin{align}
+p(\mu_j) &= \mathcal{N}(0, 3), \\
+p(\sigma_j) &= \textrm{Gamma}(3, 3), \quad j = 1, 2.
+\end{align}$$
+
+The log-pdf of these distributions are:
+
+$$\begin{align}
+\log p(\mu_j) &= -\frac{1}{2}\log(18\pi)-\frac{\mu_j^2}{18} \\
+\log p(\sigma_j) &= \alpha\log(\beta)-\log(\Gamma(\alpha)) + (\alpha-1)\log(\sigma_j)-\beta \sigma_j
+\end{align}$$
+
 The gradient of the log-posterior with respect to each of the paramters can be written as:
 
 $$
 \begin{align}
-\frac{\partial \ell}{\partial \mu_j} &= \frac{1}{\sigma_j}\sum_{i=1}^N(y_{ij}-\mu_j) - \frac{\mu_j}{\sigma_j}, \\
-\frac{\partial \ell}{\partial \sigma_j} &= -\frac{N}{\sigma_j} + \frac{3}{2\sigma_j^3}\sum_{i=1}^N(y_{ij}-\mu_j)^2 + , \quad j = 1, 2.
+\frac{\partial \ell}{\partial \mu_j} &= \frac{1}{\sigma_j^2}\sum_{i=1}^N(y_{ij}-\mu_j) - \frac{\mu_j}{9}, \\
+\frac{\partial \ell}{\partial \sigma_j} &= -\frac{N}{\sigma_j} +  \frac{1}{\sigma_j^3}\sum_{i=1}^N(y_{ij}-\mu_j)^2 + \frac{2}{\sigma_j}-3, \quad j = 1, 2.
 \end{align}
 $$
 
@@ -135,10 +148,10 @@ gradient <- function(ys) {
     mu <- c(theta[1], theta[3])
     sigma <- c(theta[2], theta[4])
     n <- nrow(ys)
-    c(1/sigma[1]*sum(ys[,1] - mu[1]) - mu[1]/sigma[1],
-      -n/sigma[1] + (3 * sum((ys[,1] - mu[1])^2)) / (2 * sigma[1]^3),
-      1/sigma[2]*sum(ys[,2] - mu[2]) - mu[2]/sigma[2],
-      -n/sigma[2] + (3 * sum((ys[,2] - mu[2])^2)) / (2 * sigma[2]^3))
+    c(1/sigma[1]^2*sum(ys[,1] - mu[1]) - mu[1]/9,
+      -n/sigma[1] + sum((ys[,1] - mu[1])^2) / sigma[1]^3 + 2/sigma[1] - 3,
+      1/sigma[2]^2*sum(ys[,2] - mu[2]) - mu[2]/9,
+      -n/sigma[2] + sum((ys[,2] - mu[2])^2) / sigma[2]^3 + 2/sigma[2] - 3)
   }
 }
 ```
@@ -152,53 +165,80 @@ approx_gradient <- function(xs) {
   }
 }
 
-compare_gradient <- function(theta) {
-  list(gradient(xs)(theta), approx_gradient(xs)(theta))
+compare_gradient <- function(theta, tol) {
+  abs(gradient(xs)(theta) - approx_gradient(xs)(theta)) < tol
 }
 
-compare_gradient(theta)
+compare_gradient(theta, 1e-3)
 ```
 
-HMC works best using unconstrained values of the parameters. A `transform` function is defined for the parameters, $\theta$ which calculates the exponential of the standard deviation parameters. The log-posterior is calculated using the transformed values. The leapfrog step proposal is calculated using the unconstrained parameters, hence the log-jacobian of the transformation is required to be added to the value of the density. Then the derivative of the log-jacobian is calculated to get the value of the gradient corresponding to the unconstrained parameters in the leapfrog step.
+It appears the calculated derivative is correct. Next, HMC works best when the leapgrog proposal can propose unconstrained values of the parameters which lie on the whole real line. A `transform` function is defined for the parameters, $\theta$ which calculates the exponential of the standard deviation parameters. The log-posterior is calculated using the transformed values, the appropriate transformation and inverse transformation functions can be written as:
 
 ```{r}
 transform <- function(theta) {
   c(theta[1], exp(theta[2]), theta[3], exp(theta[4]))
 }
 
+inv_transform <- function(theta) {
+  c(theta[1], log(theta[2]), theta[3], log(theta[4]))
+}
+```
+
+The leapfrog step proposal is calculated using the unconstrained parameters, hence the derivative of the log-jacobian of the transformation is required to be added to the value of the gradient of the log-density. Then the derivative of the log-jacobian is calculated to get the value of the gradient corresponding to the unconstrained parameters in the leapfrog step.
+
+```{r}
 log_jacobian <- function(theta) {
   c(0, theta[2], 0, theta[4])
+}
+
+deriv_log_jacobian <- function(theta) {
+  c(0, 1, 0, 1)
 }
 ```
 
 The derivative of the log-jacobian contributes the value 1 to each of the partial derivatives $\frac{\partial \ell}{\partial \sigma_j}, j = 1, 2.$
 
-```{r, eval=F}
+```{r}
+# evaluate the log-posterior on the appropriate scale, using the transform function
 bounded_log_posterior <- function(xs) {
   function(theta) {
     log_posterior(xs)(transform(theta)) + sum(log_jacobian(theta))
   }
 }
-out_hmc <- hmc(bounded_log_posterior(xs), gradient(xs), 0.05, 1, theta, 1000)
+
+bounded_gradient <- function(xs) {
+  function(theta) {
+    gradient(xs)(theta) + deriv_log_jacobian(theta)
+  }
+}
+
+out_hmc <- hmc(log_posterior(xs), gradient(xs), 
+               0.01, 4, theta, 10000)
 ```
 
-```{r, eval=F}
-hmc_samples <- as_data_frame(out_hmc) %>%
-  mutate(iteration = row_number()) %>%
-  rename(mu1 = V1, mu2 = V3, sigma1 = V2, sigma2 = V4) %>%
-  gather(key = parameter, value, -iteration) 
+```{r}
+actual_values = tibble(
+  Parameter = c("mu1", "sigma1", "mu2", "sigma2"),
+  actual_value = c(5.0, 0.5, 2.0, 1.5)
+)
 
-hmc_samples %>%
+# Transform parameters to bounded and put in a tibble
+out_hmc <- as_tibble(t(apply(out_hmc, 1, transform)))
+colnames(out_hmc) <- actual_values$Parameter
+
+out_hmc %>%
+  mutate(iteration = row_number()) %>%
+  gather(key = Parameter, value, -iteration) %>%
   inner_join(actual_values) %>%
   ggplot(aes(x = iteration, y = value)) + 
   geom_line() +
   geom_hline(aes(yintercept = actual_value), linetype = "dashed") +
-  facet_wrap(~parameter, scales = "free_y")
+  facet_wrap(~Parameter, scales = "free_y")
 ```
 
 In order to compare efficiency for similar Markov chain Monte Carlo (or other simulation) algorithms the amount of information from each sample can be measured. This is termed the effective sample size, corresponding to the number of effective independent draws from the posterior distribution. The code below calculates the ESS of each parameter in the chain.
 
-```{r, eval=F}
+```{r}
 coda::effectiveSize(mcmc(out_hmc))
 ```
 
@@ -214,19 +254,6 @@ using namespace Rcpp;
 // [[Rcpp::plugins(cpp11)]]
 
 // [[Rcpp::export]]
-NumericVector gradient(NumericMatrix ys, NumericVector position) {
-  int n = ys.size();
-  NumericVector ssy1 = (ys(_,0) - position(0)) * (ys(_,0) - position(0));
-  NumericVector ssy2 = (ys(_,1) - position(2)) * (ys(_,1) - position(2));
-  NumericVector out = NumericVector::create(1/position(1) * sum(ys(_,0) - position(0) ) - position(0) /position(1),
-                                            -n/position(1) + (3 * std::accumulate(ssy1.begin(), ssy1.end(), 0.0)) / (2 * pow(position(1), 3)),
-                                            1/position(3) *sum(ys(_,1) - position(2) ) - position(2) /position(3) ,
-                                            -n/position(3) + (3 * std::accumulate(ssy2.begin(), ssy2.end(), 0.0)) / (2 * pow(position(3), 3)));
-  
-  return out;
-}
-
-// [[Rcpp::export]]
 double logDensity(NumericMatrix ys, NumericVector p) {
   double ll = 0;
   int n = ys.nrow();
@@ -236,17 +263,69 @@ double logDensity(NumericMatrix ys, NumericVector p) {
   return ll;
 }
 
-NumericVector transform(NumericVector qp) {
-  int d = qp.size();
-  NumericVector out(d);
-  for (int i = 0; i < d; i++) {
-    out(i) = qp(i);
-  }
-  out(1) = exp(qp(1));
-  out(3) = exp(qp(3));
+// [[Rcpp::export]]
+NumericVector gradientCpp(NumericMatrix ys, NumericVector position) {
+  int n = ys.nrow();
+  NumericVector ssy1 = (ys(_,0) - position(0)) * (ys(_,0) - position(0));
+  NumericVector ssy2 = (ys(_,1) - position(2)) * (ys(_,1) - position(2));
+  NumericVector out = NumericVector::create(
+    1/position(1) * sum(ys(_,0) - position(0) ) - position(0) / 9,
+    -n/position(1) + std::accumulate(ssy1.begin(), ssy1.end(), 0.0) / pow(position(1), 3) + 2/position(2) - 3,
+    1/position(3) *sum(ys(_,1) - position(2) ) - position(2) / 9,
+    -n/position(3) + std::accumulate(ssy2.begin(), ssy2.end(), 0.0) / pow(position(3), 3)) + 2/position(2) - 3;
+  
   return out;
 }
 
+// [[Rcpp::export]]
+NumericVector leapfrogCpp(
+    Function gradient,
+    NumericMatrix ys,
+    NumericVector qp,
+    double stepSize) {
+  
+  // unasign values
+  int d = qp.size() / 2;
+  NumericVector momentum(d);
+  NumericVector position(d);
+  for (int i = 0; i < d; i++) {
+    momentum(i) = qp(d + i);
+    position(i) = qp(i);
+  }
+  
+  NumericVector momentum1 = momentum + as<NumericVector>(gradient(ys, position)) * 0.5 * stepSize;
+  NumericVector position1 = position + stepSize * momentum1;
+  NumericVector momentum2 = momentum + as<NumericVector>(gradient(ys, position1)) * 0.5 * stepSize;
+  
+  NumericVector newqp(2 * d);
+  for (int i = 0; i < d; i++) {
+    newqp(i) = position1(i);
+    newqp(d + i) = momentum2(i);
+  }
+  return newqp;
+}
+```
+
+```{r}
+
+```
+
+
+```{r}
+leapfrogs <- function(gradient, step_size, l) {
+  function(position, momentum) {
+    for (i in 1:l) {
+      c(position, momentum) %<-% leapfrogCpp(gradient, step_size, position, momentum)
+    }
+    list(position = position, momentum = momentum)
+  }
+}
+
+out_hmc <- hmc(function(theta) logDensity(xs, theta), function(theta) gradientCpp(xs, theta), 0.01, 4, theta, 1000)
+```
+
+
+```{Rcpp}
 // [[Rcpp::export]]
 double logAcceptance(NumericMatrix ys,
                      NumericVector prop, 
@@ -268,33 +347,6 @@ double logAcceptance(NumericMatrix ys,
   
   double a = logDensity(ys, transform(propPosition)) - phiP - logDensity(ys, transform(position)) + propPhiP;
   return a;
-}
-
-// [[Rcpp::export]]
-NumericVector leapfrog(
-    NumericMatrix ys,
-    NumericVector qp,
-    double stepSize) {
-  
-  // unasign values
-  int d = qp.size() / 2;
-  NumericVector momentum(d);
-  NumericVector position(d);
-  for (int i = 0; i < d; i++) {
-    momentum(i) = qp(d + i);
-    position(i) = qp(i);
-  }
-  
-  NumericVector momentum1 = momentum + gradient(ys, position) * 0.5 * stepSize;
-  NumericVector position1 = position + stepSize * momentum1;
-  NumericVector momentum2 = momentum + gradient(ys, position1) * 0.5 * stepSize;
-  
-  NumericVector newqp(2 * d);
-  for (int i = 0; i < d; i++) {
-    newqp(i) = position1(i);
-    newqp(d + i) = momentum2(i);
-  }
-  return newqp;
 }
 
 // [[Rcpp::export]]
@@ -380,12 +432,4 @@ NumericMatrix hmc(
   return mat;
 }
 ```
-
-```{r}
-qp = c(theta, rnorm(4))
-prop = leapfrogs(xs, qp, 0.05, 5)
-logAcceptance(xs, prop, qp)
-# hmc(xs, theta, 0.05, 4, 1000)
-```
-
 
