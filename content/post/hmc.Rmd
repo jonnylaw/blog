@@ -248,7 +248,7 @@ To measure the efficiency, the ESS per second can be measured.
 
 Again, this code can be written using Rcpp. 
 
-```{Rcpp}
+```{Rcpp, eval=FALSE}
 #include <Rcpp.h>
 using namespace Rcpp;
 // [[Rcpp::plugins(cpp11)]]
@@ -311,7 +311,7 @@ NumericVector leapfrogCpp(
 ```
 
 
-```{r}
+```{r, eval=FALSE}
 leapfrogs <- function(gradient, step_size, l) {
   function(position, momentum) {
     for (i in 1:l) {
@@ -325,7 +325,7 @@ out_hmc <- hmc(function(theta) logDensity(xs, theta), function(theta) gradientCp
 ```
 
 
-```{Rcpp}
+```{Rcpp, eval=FALSE}
 // [[Rcpp::export]]
 double logAcceptance(NumericMatrix ys,
                      NumericVector prop, 
