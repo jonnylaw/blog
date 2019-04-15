@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Hugo 0.30.2" />
+<meta name="generator" content="Hugo 0.55.1" />
 
 
-<title>An Akka HTTP Client with JSON Parsing - Probabilistic Programming in Scala</title>
-<meta property="og:title" content="An Akka HTTP Client with JSON Parsing - Probabilistic Programming in Scala">
+<title>An Akka HTTP Client with JSON Parsing - Bayesian Statistics and Functional Programming </title>
+<meta property="og:title" content="An Akka HTTP Client with JSON Parsing - Bayesian Statistics and Functional Programming ">
 
 
 
@@ -71,7 +71,10 @@
     
 
     <div class="article-content">
-      <p>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple <a href="http://akka.io/">Akka Http</a> client to read data from the <a href="http://uoweb1.ncl.ac.uk/">Urban Observatory</a> in Newcastle. If you just want to read the code, see this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
+      
+
+
+<p>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple <a href="http://akka.io/">Akka Http</a> client to read data from the <a href="http://uoweb1.ncl.ac.uk/">Urban Observatory</a> in Newcastle. If you just want to read the code, see this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
 <div id="exploring-the-api" class="section level2">
 <h2>Exploring the API</h2>
 <p>The Urban Observatory consists of a grid of sensors around the North East, measuring traffic, pollution and weather. The focus of this post will be getting sensor data from a single sensor, N05171T, a traffic sensor located near the Metro Centre on Hollinside road. The metadata from this sensor can be found by querying an API endpoint: <a href="http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key" class="uri">http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key</a>=&amp;sensor_name=N05171T. Note that this requires authentication, using an API key. An API key can be requested using <a href="http://uoweb1.ncl.ac.uk/api_page/key_form/">this form</a>.</p>

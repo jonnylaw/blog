@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Bayesian on Bayesian Statistics and Functional Programming </title>
+    <link>https://jonnylaw.github.io/blog/categories/bayesian/</link>
+    <description>Recent content in Bayesian on Bayesian Statistics and Functional Programming </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 11 Feb 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://jonnylaw.github.io/blog/categories/bayesian/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Efficient Markov Chain Monte Carlo in R with Rcpp</title>
+      <link>https://jonnylaw.github.io/blog/2019/02/11/hmc/</link>
+      <pubDate>Mon, 11 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://jonnylaw.github.io/blog/2019/02/11/hmc/</guid>
+      <description>Bivariate Normal Model This post considers how to implement a simple Metropolis scheme to determine the parameter posterior distribution of a bivariate Normal distribution. The implementation is generic, using higher-order-functions and hence can be re-used with new algorithms by specifying the un-normalised log-posterior density and a proposal distribution for the parameters. The built-in parallel package is used fit multiple chains in parallel, finally the Metropolis algorithm is reimplemented in C++ using Rcpp which seemlessly integrates with R.</description>
+    </item>
+    
+  </channel>
+</rss>

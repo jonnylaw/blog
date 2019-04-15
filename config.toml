@@ -1,4 +1,4 @@
-baseurl = "https://jonnylaw.github.io/blog/"
+baseurl = "/"
 publishdir = "docs"
 languageCode = "en-us"
 title = "Bayesian Statistics and Functional Programming "

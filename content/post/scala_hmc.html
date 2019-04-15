@@ -1,0 +1,19 @@
+---
+title: "Scala HMC"
+author: "Jonny Law"
+date: "10/02/2019"
+output: html_document
+---
+
+
+
+<div id="scala-implementation" class="section level1">
+<h1>Scala implementation</h1>
+<p>To implement HMC, first identify the individual components of the algorithm and write them as referentially transparent functions. The first step is to sample the momentum, <span class="math inline">\(\phi\)</span> from the prior distribution, chosen to be a standard multivariate Normal distribution of dimension <span class="math inline">\(m\)</span>:</p>
+
+<p>% The prior distribution of <span class="math inline">\(\phi\)</span> represented by the function \lstinline{priorPhi} can be sampled from and the log-pdf can be calculated. The prior distribution can have a general covariance matrix <span class="math inline">\(\Sigma\)</span> to replace the <span class="math inline">\(m\)</span> dimensional identity matrix <span class="math inline">\(I_m\)</span>. Next the leapfrog discretization of Hamilton’s equations can be implemented:</p>
+
+<p>% The parameters and momentum are represented as \lstinline{DenseVector}s from the Breeze scientific computing library to simplify the implementation details, since addition and multiplication of vectors are already implemented. A function which performs multiple \lstinline{leapfrog} steps dependent on the previous value can be implemented using sec:immutable-data}. Finally the HMC kernel can be written as a function from the parameters to a distribution over the new parameters, \lstinline{DenseVector[Double] =&gt; Rand[DenseVector[Double]}:</p>
+
+<p>% The kernel can then be used to draw samples from a posterior distribution of a model with un-normalised log-posterior grad} using \lstinline{MarkovChain}:</p>
+</div>

@@ -1,15 +1,24 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Scala on Probabilistic Programming in Scala</title>
+    <title>scala on Bayesian Statistics and Functional Programming </title>
     <link>https://jonnylaw.github.io/blog/categories/scala/</link>
-    <description>Recent content in Scala on Probabilistic Programming in Scala</description>
+    <description>Recent content in scala on Bayesian Statistics and Functional Programming </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 04 Jan 2017 12:13:14 -0500</lastBuildDate>
+    <lastBuildDate>Mon, 15 Apr 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://jonnylaw.github.io/blog/categories/scala/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Scala and Jupyter Notebook with Almond</title>
+      <link>https://jonnylaw.github.io/blog/2019/04/15/scala-and-jupyter-notebook-with-almond/</link>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://jonnylaw.github.io/blog/2019/04/15/scala-and-jupyter-notebook-with-almond/</guid>
+      <description>Typically, when programming with Scala I use a combination of ensime in emacs, sbt and the Scala repl. However, sometimes when working on a new project which requires a lot of data exploration and graphics it is sometimes more useful to have a notebook where figures are rendered inline with descriptions of why each figure has been generated and what it shows for future reference. Jupyter notebooks have long been the standard in Python (although I prefer rmarkdown and knitr when using R).</description>
+    </item>
     
     <item>
       <title>Using Monads for Handling Failures and Exceptions</title>

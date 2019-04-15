@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Hugo 0.30.2" />
+<meta name="generator" content="Hugo 0.55.1" />
 
 
-<title>Practical Introduction to Akka Streaming - Probabilistic Programming in Scala</title>
-<meta property="og:title" content="Practical Introduction to Akka Streaming - Probabilistic Programming in Scala">
+<title>Practical Introduction to Akka Streaming - Bayesian Statistics and Functional Programming </title>
+<meta property="og:title" content="Practical Introduction to Akka Streaming - Bayesian Statistics and Functional Programming ">
 
 
 
@@ -71,7 +71,10 @@
     
 
     <div class="article-content">
-      <p><a href="%22http://akka.io%22">Akka Streaming</a> is a streaming IO engine used to build high performance, fault tolerant and scalable streaming data services. In this post I will describe how you can implement some of the features included in Akka Streaming using only simple streams of integers and strings, although the true power of Akka streams only becomes apparent when we are consuming data from real sources such as Websockets, databases and files. Akka is available in Java and Scala, but I will be focusing on the Scala API in this post.</p>
+      
+
+
+<p><a href="%22http://akka.io%22">Akka Streaming</a> is a streaming IO engine used to build high performance, fault tolerant and scalable streaming data services. In this post I will describe how you can implement some of the features included in Akka Streaming using only simple streams of integers and strings, although the true power of Akka streams only becomes apparent when we are consuming data from real sources such as Websockets, databases and files. Akka is available in Java and Scala, but I will be focusing on the Scala API in this post.</p>
 <div id="building-a-new-sbt-project" class="section level2">
 <h2>Building a new SBT Project</h2>
 <p><a href="http://www.scala-sbt.org/">Simple Build Tool</a> is the most used build tool of Scala developers, despite the name it is incredibly powerful with many advanced features. In this post, we will be using SBT to manage the dependency on Akka. Firstly we must specify the following directory structure:</p>

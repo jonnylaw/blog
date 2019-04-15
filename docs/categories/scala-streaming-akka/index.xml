@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Scala Streaming Akka on Probabilistic Programming in Scala</title>
+    <title>scala, streaming, akka on Bayesian Statistics and Functional Programming </title>
     <link>https://jonnylaw.github.io/blog/categories/scala-streaming-akka/</link>
-    <description>Recent content in Scala Streaming Akka on Probabilistic Programming in Scala</description>
+    <description>Recent content in scala, streaming, akka on Bayesian Statistics and Functional Programming </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 21 Feb 2017 12:13:14 -0500</lastBuildDate>
@@ -17,7 +17,7 @@
       <pubDate>Tue, 21 Feb 2017 12:13:14 -0500</pubDate>
       
       <guid>https://jonnylaw.github.io/blog/2017/02/21/an-akka-http-client-with-json-parsing/</guid>
-      <description>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple Akka Http client to read data from the Urban Observatory in Newcastle.</description>
+      <description>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with.</description>
     </item>
     
   </channel>
