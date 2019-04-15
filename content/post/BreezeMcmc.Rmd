@@ -48,7 +48,7 @@ val data = model(p).sample(100)
 
 ```{r bivariate-normal-plot, echo=FALSE, message=FALSE}
 # system("cd ../../breeze && sbt \"runMain model.GaussianModel\"")
-data = read_csv("../../breeze/data/BivariateSimulated.csv", col_names = c("x", "y"))
+data = read_csv("../../scala_projects/breeze/data/BivariateSimulated.csv", col_names = c("x", "y"))
 p1 = ggplot(data, aes(x = x, y = y)) + geom_point()
 p2 = ggplot(data, aes(x = x, y = ..density..)) + geom_histogram(binwidth = 0.1)
 p3 = ggplot(data, aes(x = y, y = ..density..)) + geom_histogram(binwidth = 0.1)
@@ -108,7 +108,7 @@ MarkovChain.metropolis(p, propose(0.05))(logMeasure)
 ```
 
 ```{r bivariate-normal-parameters, echo=FALSE, message=FALSE}
-parameters = read_csv("../../breeze/data/Parameters.csv", col_names = c("mu_1", "mu_2", "sigma"))
+parameters = read_csv("../../scala_projects/breeze/data/Parameters.csv", col_names = c("mu_1", "mu_2", "sigma"))
 
 parameters[-c(1:1000),] %>%
   mcmc() %>%

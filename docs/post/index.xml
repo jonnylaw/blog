@@ -107,15 +107,5 @@ Referential Transparency One of the most important properties of functional prog
       <description>Akka Streaming is a streaming IO engine used to build high performance, fault tolerant and scalable streaming data services. In this post I will describe how you can implement some of the features included in Akka Streaming using only simple streams of integers and strings, although the true power of Akka streams only becomes apparent when we are consuming data from real sources such as Websockets, databases and files. Akka is available in Java and Scala, but I will be focusing on the Scala API in this post.</description>
     </item>
     
-    <item>
-      <title>Scala HMC</title>
-      <link>/1/01/01/scala-hmc/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/1/01/01/scala-hmc/</guid>
-      <description>Scala implementation To implement HMC, first identify the individual components of the algorithm and write them as referentially transparent functions. The first step is to sample the momentum, \(\phi\) from the prior distribution, chosen to be a standard multivariate Normal distribution of dimension \(m\):
-% The prior distribution of \(\phi\) represented by the function \lstinline{priorPhi} can be sampled from and the log-pdf can be calculated. The prior distribution can have a general covariance matrix \(\Sigma\) to replace the \(m\) dimensional identity matrix \(I_m\).</description>
-    </item>
-    
   </channel>
 </rss>

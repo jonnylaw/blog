@@ -1,12 +1,13 @@
 ---
 title: "Scala HMC"
 author: "Jonny Law"
-date: "10/02/2019"
+date: "2019-04-30"
 output: html_document
+draft: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 # Scala implementation
@@ -15,19 +16,19 @@ To implement HMC, first identify the individual components of the algorithm and
 write them as referentially transparent functions. The first step is to sample
 the momentum, $\phi$ from the prior distribution, chosen to be a standard multivariate Normal distribution of dimension $m$:
 
-\begin{lstlisting}
+```scala
 def priorPhi(m: Int) = 
   MultivariateGaussian(DenseVector.zeros[Double](m),
     DenseMatrix.eye[Double](m))
-\end{lstlisting}
-%
+```
+
 The prior distribution of $\phi$ represented by the function
-\lstinline{priorPhi} can be sampled from and the log-pdf can be calculated.
+`priorPhi` can be sampled from and the log-pdf can be calculated.
 The prior distribution can have a general covariance matrix $\Sigma$ to replace
 the $m$ dimensional identity matrix $I_m$. Next the leapfrog discretization of
 Hamilton's equations can be implemented:
 
-\begin{lstlisting}
+```scala
 def leapfrog(
   eps: Double,
   gradient: DenseVector[Double] => DenseVector[Double])(
@@ -38,18 +39,16 @@ def leapfrog(
   val p2 = p1 + eps * 0.5 * gradient(t1)
   (t1, p2)
 }
-\end{lstlisting}
-%
-The parameters and momentum are represented as \lstinline{DenseVector}s from the
+```
+
+The parameters and momentum are represented as `DenseVector`s from the
 Breeze scientific computing library to simplify
 the implementation details, since addition and multiplication of vectors are
 already implemented. A function which performs multiple
-\lstinline{leapfrog} steps dependent on the previous value can be implemented
-using \lstinline{Vector.iterate} introduced in section~\ref{sec:immutable-data}.
-Finally the HMC kernel can be written as a function from the parameters to
-a distribution over the new parameters, \newline \lstinline{DenseVector[Double] => Rand[DenseVector[Double]}:
+`leapfrog` steps dependent on the previous value can be implemented
+using `Vector.iterate`. Finally the HMC kernel can be written as a function from the parameters to a distribution over the new parameters, `DenseVector[Double] => Rand[DenseVector[Double]`:
 
-\begin{lstlisting}[caption={Kernel of the HMC algorithm},label={lst:hmc-kernel}]
+```scala
 def step(
   priorPhi: ContinuousDistr[Double],
   eps: Double,
@@ -70,9 +69,12 @@ def step(
     }
   } yield next
 }
-\end{lstlisting}
-%
+```
+
 The kernel can then be used to draw samples
 from a posterior distribution of a model with un-normalised log-posterior
-\lstinline{logPos} and gradient, \lstinline{grad} using \lstinline{MarkovChain}:
+`logPos` and gradient, `grad` using `MarkovChain`:
 
+```scala
+
+```
