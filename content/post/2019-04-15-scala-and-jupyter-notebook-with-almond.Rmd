@@ -1,0 +1,125 @@
+---
+title: Scala and Jupyter Notebook with Almond
+author: Jonny Law
+date: '2019-04-15'
+slug: scala-and-jupyter-notebook-with-almond
+categories:
+  - scala
+tags: []
+---
+
+Typically, when programming with Scala I use a combination of [ensime](https://ensime.github.io/) in emacs, [sbt](https://www.scala-sbt.org/) and the Scala repl. However, sometimes when working on a new project which requires a lot of data exploration and graphics it is sometimes more useful to have a notebook where figures are rendered inline with descriptions of why each figure has been generated and what it shows for future reference. Jupyter notebooks have long been the standard in Python (although I prefer rmarkdown and knitr when using R). 
+
+Jupyter notebooks can be initialised with many different kernels to serve a wide array of users. Recently there has been a release which combines the power of the [Ammonite](https://ammonite.io/) scala repl which empowers users to write small Scala scripts where dependencies can be stored in the same script file and are fetched using coursier without the need for a large SBT project. Ammonite has many more features besides this, however scripting is one of my favourites. It also allows us to write self-contained Jupyter notebooks with dependencies by utilising Ammonite as the kernel of the Jupyter notebook using [Almond](https://almond.sh/). 
+
+In this blog, I will show you how to use Almond to fit a linear regression using the probabilistic programming language, [Rainier](https://github.com/stripe/rainier/).
+
+## Setup of Almond
+
+1. Install Jupyter Notebook
+2. Install Almond https://almond.sh/docs/quick-start-install
+3. Run jupyter notebook and create a new document using the "Scala" kernel
+
+## Scala library dependencies
+
+Ammonite lets you import dependencies directly from Maven central using a special import syntax, for example to import the latest version of the Rainier core library simply type:
+
+```scala
+import $ivy.`com.stripe::rainier:0.2.2`
+```
+
+Them all imports from inside the Rainier library should be available. Additionally, we want to be able to use a plotting library [Evilplot](https://github.com/cibotech/evilplot) which does not have a standard resolver. Luckily Ammonite makes adding new resolvers straightforward, simply add a new block which points to the Maven repository of cibotech. Note that this is not an especially common operation - since most OSS Scala libraries are stored in the [Maven central repository](https://search.maven.org/). 
+
+```scala
+import coursier.MavenRepository
+
+interp.repositories() ++= Seq(MavenRepository(
+  "http://dl.bintray.com/cibotech/public"
+))
+```
+
+Then the plotting library can be imported, ensure this is in a new block.
+
+```scala
+import $ivy.`com.stripe::rainier-plot:0.2.2`
+```
+
+## Building a model using rainier
+
+The model under consideration is straightforward, a simple linear regression with unknown slope and intercept:
+
+$$y_i = \alpha + \beta x_i + \varepsilon_i, \quad \varepsilon_i \sim \mathcal{N}(0, \sigma^2)$$
+
+In order to perform inference to determine the posterior distribution of the unknown parameters, $\psi = \{\alpha, \beta, \sigma\}$ on this model using Rainier first we simulate some data from the model:
+
+```scala
+val (alpha, beta, sigma) =  (-1.5, 2.0, 0.5)
+
+val lm = for {
+  x <- Normal(0, 1).param
+  y <- Normal(alpha + beta * x, sigma).param
+} yield (x, y)
+
+val sims = lm.sample(100)
+```
+
+The code above uses rainiers sampling-based monad in order to simulate standard Normal data representing the covariates, $x_i, i = 1,\dots,100$ and the dependent variable $y_i$. 100 $(x, y)$ pairs are simulated from the model with the selected parameter values. Now it might be of interest to plot the data using the Evilplot plotting library. In order to view the plot inline within the Jupyter notebook the almond api is used, this is mostly taken from the [recent commit to Rainier](https://github.com/stripe/rainier/commit/5c1b39c3d920dfc1df3433a1a71fda65c3883436) to support almond:
+
+```scala
+import com.cibo.evilplot.numeric.Point
+import com.cibo.evilplot.plot._
+import com.cibo.evilplot.plot.renderers.PointRenderer
+import com.cibo.evilplot.plot.aesthetics.DefaultTheme._
+import almond.interpreter.api._
+
+def renderBytes(plot: com.cibo.evilplot.plot.Plot) = {
+    val baos = new java.io.ByteArrayOutputStream
+    javax.imageio.ImageIO
+      .write(
+        plot.render().asBufferedImage,
+        "png",
+        baos)
+    val array = baos.toByteArray
+    baos.close
+    array
+}
+
+DisplayData
+  .png(renderBytes(ScatterPlot(
+      sims.map { case (x, y) => Point(x, y) }
+    ).xAxis()
+     .yAxis()
+     .frame()
+     .rightLegend()))
+ .show()
+```
+
+The actual code used to build the scatter plot is within the function `renderBytes`, you should now see a plot which looks like:
+
+![linear model](/post/2019-04-15-scala-and-jupyter-notebook-with-almond_files/Screenshot 2019-04-15 at 15.55.29.png)
+
+The code required to sample from the posterior distribution is similar to that required to simulate the model:
+
+```scala
+import com.stripe.rainier.compute._
+
+def linearModel(data: Seq[(Double, Double)]): RandomVariable[Map[String, Real]] = for {
+    alpha <- Normal(0, 5).param
+    beta <- Normal(0, 5).param
+    sigma <- LogNormal(2, 2).param
+    _ <- Predictor[Double].from { x =>
+      Normal(alpha + beta * x, sigma)
+    }
+    .fit(data)
+  } yield Map("alpha" -> alpha, "beta" -> beta, "sigma" -> sigma)
+```
+
+First prior distributions are chosen for the static parameters, then the function `Predictor` is used to specify the likelihood for the linear regression as the Normal distribution. The data consists of a sequence of tuples. Finally to sample values from the posterior using Hamiltonian Monte Carlo:
+
+```scala
+val iters = linearModel(sims).sample(HMC(5), 5000, 100000, 100)
+```
+
+![Posterior diagnostics](/post/2019-04-15-scala-and-jupyter-notebook-with-almond_files/Screenshot 2019-04-15 at 16.09.10.png)
+
+The full notebook can be viewed on Github [here](https://github.com/jonnylaw/blog/notebooksrainier_linear_model.ipynb)
