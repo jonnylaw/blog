@@ -1,6 +1,7 @@
 language: r
-dist: trusty
-sudo: false
+dist: xenial
+latex: false
+
 before_install:
   # This workaround is required to avoid libstdc++ errors while
   # running "extended" hugo with SASS support.
@@ -17,14 +18,12 @@ branches:
   - master
   
 cache:
-  packages: true
+  packages: yes
   directories:
   - "$HOME/bin"
   
-before_script:
-- Rscript -e 'blogdown::install_hugo()'
-
 script:
+- Rscript -e 'blogdown::install_hugo()'
 - Rscript -e 'blogdown::build_site()'
 
 deploy:
