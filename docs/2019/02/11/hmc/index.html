@@ -24,8 +24,8 @@
 
 
 
-<link rel="stylesheet" href="/blog/css/fonts.css" media="all">
-<link rel="stylesheet" href="/blog/css/main.css" media="all">
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
 
 
 
@@ -34,8 +34,8 @@
     <div class="wrapper">
       <header class="header">
         <nav class="nav">
-  <a href="/blog/" class="nav-logo">
-    <img src="/blog/images/logo.png"
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
          width="50"
          height="50"
          alt="Logo">
@@ -43,9 +43,9 @@
 
   <ul class="nav-links">
     
-    <li><a href="/blog/about/">About</a></li>
+    <li><a href="/about/">About</a></li>
     
-    <li><a href="/blog/">Blog</a></li>
+    <li><a href="/">Blog</a></li>
     
     <li><a href="https://github.com/jonnylaw">GitHub</a></li>
     
@@ -92,7 +92,7 @@ sims &lt;- bivariate_normal(theta, 1000)
 xs &lt;- as.matrix(sims)
 ggplot(sims, aes(x, y)) + 
   geom_point()</code></pre>
-<p><img src="/blog/post/metropolis_r_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="/post/metropolis_r_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <p>The random variables in the model can be written as:</p>
 <p><span class="math display">\[p(y,\mu, \Sigma) = p(\mu)p(\Sigma)\prod_{i=1}^N\mathcal{N}(y_i;\mu, \Sigma)\]</span></p>
 <p>The covariance matrix is diagonal, hence the log-likelihood can be written as the sum of two univariate normal distributions:</p>
@@ -153,7 +153,7 @@ log_posterior &lt;- function(xs)
 }</code></pre>
 <p>Finally, all the components are there to sample from the posterior distribution of the parameters. The mean of the sampled posterior distribution should coincide with the parameters used to simulate the data. In the figure below the actual values used to simulate the data are plotted with dashed lines.</p>
 <pre class="r"><code>out = metropolis(theta, log_posterior(xs), proposal, 10000)</code></pre>
-<p><img src="/blog/post/metropolis_r_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="/post/metropolis_r_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 </div>
 <div id="parallel-chains-in-r" class="section level1">
 <h1>Parallel Chains in R</h1>
@@ -171,7 +171,7 @@ clusterEvalQ(cl, library(dplyr))</code></pre>
 <pre class="r"><code>chains = parLapply(cl, 1:2, function(x) metropolis(theta, log_posterior(xs), proposal, 10000))
 stopCluster(cl)</code></pre>
 <p>The figure below shows the trace plots from 10,000 draws of the Metropolis hastings algorithm.</p>
-<p><img src="/blog/post/metropolis_r_files/figure-html/parallel-diagnostics-1.png" width="672" /><img src="/blog/post/metropolis_r_files/figure-html/parallel-diagnostics-2.png" width="672" /><img src="/blog/post/metropolis_r_files/figure-html/parallel-diagnostics-3.png" width="672" /></p>
+<p><img src="/post/metropolis_r_files/figure-html/parallel-diagnostics-1.png" width="672" /><img src="/post/metropolis_r_files/figure-html/parallel-diagnostics-2.png" width="672" /><img src="/post/metropolis_r_files/figure-html/parallel-diagnostics-3.png" width="672" /></p>
 </div>
 <div id="rcpp-implementation" class="section level1">
 <h1>Rcpp implementation</h1>
@@ -207,12 +207,12 @@ NumericVector proposalCpp(NumericVector p, double delta) {
 }</code></pre>
 <p>These functions can then be used in the Metropolis algorithm written using R, as we can see from the below code chunk the C++ function appears as if it was an R function.</p>
 <pre class="r"><code>out_cpp &lt;- metropolis(theta, function(p) logDensity(xs, p), function(p) proposalCpp(p, 0.05), 10000)</code></pre>
-<p><img src="/blog/post/metropolis_r_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><img src="/post/metropolis_r_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <p>But what about the performance, the relative speedup can be calculated using the <a href="https://github.com/joshuaulrich/microbenchmark/">microbenchmark</a> package. The relative speedup of the C++ method used to generate 100 correlated samples from the posterior distribution is plotted below.</p>
 <pre class="r"><code>timings &lt;- microbenchmark(metropolis(theta, log_posterior(xs), proposal, 100), 
                           metropolis(theta, function(p) logDensity(xs, p), 
                                      function(p) proposalCpp(p, 0.05), 100), times = 500)</code></pre>
-<p><img src="/blog/post/metropolis_r_files/figure-html/relative-speedup-1.png" width="672" /></p>
+<p><img src="/post/metropolis_r_files/figure-html/relative-speedup-1.png" width="672" /></p>
 </div>
 
     </div>
@@ -226,10 +226,10 @@ NumericVector proposalCpp(NumericVector p, double delta) {
       <footer class="footer">
         <ul class="footer-links">
           <li>
-            <a href="/blog/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
           </li>
           <li>
-            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/blog/images/hugo-logo.png" width="22" height="22"></a>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" width="22" height="22"></a>
           </li>
         </ul>
       </footer>
@@ -251,7 +251,7 @@ NumericVector proposalCpp(NumericVector p, double delta) {
 
 
     
-<script src="/blog/js/math-code.js"></script>
+<script src="/js/math-code.js"></script>
 <script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
 

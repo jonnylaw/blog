@@ -103,7 +103,7 @@ def simMarkov(p: Parameters): Rand[Process[Data]] = {
 Note that the Markov chain is a `Rand[Process[Double]]`, this is not the most elegant and I'm open to suggestions on a better way to formulate this. Once we have defined a Markov chain, we must draw from it which returns a `Process[Double]`, the initial draw is to sample from the initial state distribution $\mathcal{N}(m_0, C_0)$. Next, we can sample from the `Process` and plot it. A simulation from the seasonal DLM, with parameters $V = 3$ and $W = I_6$, is given below:
 
 ```{r, echo=FALSE, message=FALSE, cache=TRUE}
-sims = read_csv("../../SeasonalDlm/SeasonalDlm.csv", col_names = c("Time", "Observation", sapply(1:6, function(i) paste0("state_", i))))
+sims = read_csv("../../scala_projects/SeasonalDlm/SeasonalDlm.csv", col_names = c("Time", "Observation", sapply(1:6, function(i) paste0("state_", i))))
 
 sims %>%
   ggplot(aes(x = Time, y = Observation)) + 

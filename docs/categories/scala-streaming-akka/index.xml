@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>scala, streaming, akka on Bayesian Statistics and Functional Programming </title>
-    <link>https://jonnylaw.github.io/blog/categories/scala-streaming-akka/</link>
+    <link>/categories/scala-streaming-akka/</link>
     <description>Recent content in scala, streaming, akka on Bayesian Statistics and Functional Programming </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 21 Feb 2017 12:13:14 -0500</lastBuildDate>
     
-	<atom:link href="https://jonnylaw.github.io/blog/categories/scala-streaming-akka/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/scala-streaming-akka/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>An Akka HTTP Client with JSON Parsing</title>
-      <link>https://jonnylaw.github.io/blog/2017/02/21/an-akka-http-client-with-json-parsing/</link>
+      <link>/2017/02/21/an-akka-http-client-with-json-parsing/</link>
       <pubDate>Tue, 21 Feb 2017 12:13:14 -0500</pubDate>
       
-      <guid>https://jonnylaw.github.io/blog/2017/02/21/an-akka-http-client-with-json-parsing/</guid>
+      <guid>/2017/02/21/an-akka-http-client-with-json-parsing/</guid>
       <description>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with.</description>
     </item>
     

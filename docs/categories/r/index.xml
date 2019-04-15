@@ -2,40 +2,40 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>R on Bayesian Statistics and Functional Programming </title>
-    <link>https://jonnylaw.github.io/blog/categories/r/</link>
+    <link>/categories/r/</link>
     <description>Recent content in R on Bayesian Statistics and Functional Programming </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Fri, 22 Feb 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://jonnylaw.github.io/blog/categories/r/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>National Cross Country</title>
-      <link>https://jonnylaw.github.io/blog/2019/02/22/national-cross-country/</link>
+      <link>/2019/02/22/national-cross-country/</link>
       <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://jonnylaw.github.io/blog/2019/02/22/national-cross-country/</guid>
+      <guid>/2019/02/22/national-cross-country/</guid>
       <description>Area Results Download the results from Power of ten for northern, midlands, southern and national.
  A linear model The goal is to fit a model, where the outcome is the position at the national and the input is the position at the northern XC. This then allows us to determine the quality of the field at each XC and determine what position you are likely to finish in the National this season given a result in the area championships.</description>
     </item>
     
     <item>
       <title>Efficient Markov Chain Monte Carlo in R with Rcpp</title>
-      <link>https://jonnylaw.github.io/blog/2019/02/11/hmc/</link>
+      <link>/2019/02/11/hmc/</link>
       <pubDate>Mon, 11 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://jonnylaw.github.io/blog/2019/02/11/hmc/</guid>
+      <guid>/2019/02/11/hmc/</guid>
       <description>Bivariate Normal Model This post considers how to implement a simple Metropolis scheme to determine the parameter posterior distribution of a bivariate Normal distribution. The implementation is generic, using higher-order-functions and hence can be re-used with new algorithms by specifying the un-normalised log-posterior density and a proposal distribution for the parameters. The built-in parallel package is used fit multiple chains in parallel, finally the Metropolis algorithm is reimplemented in C++ using Rcpp which seemlessly integrates with R.</description>
     </item>
     
     <item>
       <title>Harrier League Cross Country</title>
-      <link>https://jonnylaw.github.io/blog/2017/10/26/harrier-league-cross-country/</link>
+      <link>/2017/10/26/harrier-league-cross-country/</link>
       <pubDate>Thu, 26 Oct 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://jonnylaw.github.io/blog/2017/10/26/harrier-league-cross-country/</guid>
+      <guid>/2017/10/26/harrier-league-cross-country/</guid>
       <description>The Harrier League is a cross country running league with seven fixtures across the North East of England in the 2017/18 season across the winter months from September ’17 until March ‘18.
 The Harrier League is unique to other cross country fixtures because the senior runners are divided up into slow, medium and fast packs. In the senior men’s race, the slow runners start first followed 2 minutes 30 seconds later by the medium pack runners, then a further 2 minutes 30 seconds by the fast pack runners.</description>
     </item>

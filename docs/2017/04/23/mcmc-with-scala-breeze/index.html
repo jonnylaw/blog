@@ -24,8 +24,8 @@
 
 
 
-<link rel="stylesheet" href="/blog/css/fonts.css" media="all">
-<link rel="stylesheet" href="/blog/css/main.css" media="all">
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
 
 
 
@@ -34,8 +34,8 @@
     <div class="wrapper">
       <header class="header">
         <nav class="nav">
-  <a href="/blog/" class="nav-logo">
-    <img src="/blog/images/logo.png"
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
          width="50"
          height="50"
          alt="Logo">
@@ -43,9 +43,9 @@
 
   <ul class="nav-links">
     
-    <li><a href="/blog/about/">About</a></li>
+    <li><a href="/about/">About</a></li>
     
-    <li><a href="/blog/">Blog</a></li>
+    <li><a href="/">Blog</a></li>
     
     <li><a href="https://github.com/jonnylaw">GitHub</a></li>
     
@@ -94,7 +94,7 @@ def model(params: Parameters) =
 <p>A simulation from the bivariate Gaussian model is plotted below, the mean for x is 2.0, the mean for y is 3.0 and the variance for each dimension is 0.5.</p>
 <pre class="scala"><code>val p = Parameters(DenseVector(2.0, 3.0), 0.5)
 val data = model(p).sample(100)</code></pre>
-<p><img src="/blog/post/BreezeMcmc_files/figure-html/bivariate-normal-plot-1.png" width="672" /></p>
+<p><img src="/post/BreezeMcmc_files/figure-html/bivariate-normal-plot-1.png" width="672" /></p>
 <p>It is simple to write a function to calculate the log-likelihood of this model:</p>
 <pre class="scala"><code>def likelihood(points: Seq[DenseVector[Double]])(p: Parameters) =
     points.map { point =&gt; 
@@ -122,7 +122,7 @@ def propose(scale: Double)(p: Parameters) =
   } yield Parameters(mu, sigma)</code></pre>
 <p>Here, the value of sigma is proposed on the log-scale, since sigma is expected to be positive. Now, we have all we need to build the sampler using breeze:</p>
 <pre class="scala"><code>MarkovChain.metropolis(p, propose(0.05))(logMeasure)</code></pre>
-<p><img src="/blog/post/BreezeMcmc_files/figure-html/bivariate-normal-parameters-1.png" width="672" /></p>
+<p><img src="/post/BreezeMcmc_files/figure-html/bivariate-normal-parameters-1.png" width="672" /></p>
 <p>The full code required to run the MCMC in Breeze can be found in this <a href="https://gist.github.com/jonnylaw/b75147d08ea89ec1b78fa94d5a4d2f7d">gist</a>. Note that Breeze is a required dependency.</p>
 </div>
 
@@ -137,10 +137,10 @@ def propose(scale: Double)(p: Parameters) =
       <footer class="footer">
         <ul class="footer-links">
           <li>
-            <a href="/blog/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
           </li>
           <li>
-            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/blog/images/hugo-logo.png" width="22" height="22"></a>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" width="22" height="22"></a>
           </li>
         </ul>
       </footer>
@@ -162,7 +162,7 @@ def propose(scale: Double)(p: Parameters) =
 
 
     
-<script src="/blog/js/math-code.js"></script>
+<script src="/js/math-code.js"></script>
 <script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
 

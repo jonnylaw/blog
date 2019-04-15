@@ -24,8 +24,8 @@
 
 
 
-<link rel="stylesheet" href="/blog/css/fonts.css" media="all">
-<link rel="stylesheet" href="/blog/css/main.css" media="all">
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
 
 
 
@@ -34,8 +34,8 @@
     <div class="wrapper">
       <header class="header">
         <nav class="nav">
-  <a href="/blog/" class="nav-logo">
-    <img src="/blog/images/logo.png"
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
          width="50"
          height="50"
          alt="Logo">
@@ -43,9 +43,9 @@
 
   <ul class="nav-links">
     
-    <li><a href="/blog/about/">About</a></li>
+    <li><a href="/about/">About</a></li>
     
-    <li><a href="/blog/">Blog</a></li>
+    <li><a href="/">Blog</a></li>
     
     <li><a href="https://github.com/jonnylaw">GitHub</a></li>
     
@@ -135,7 +135,7 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
   } yield MarkovChain(init)(simStep(p))
 }</code></pre>
 <p>Note that the Markov chain is a <code>Rand[Process[Double]]</code>, this is not the most elegant and I’m open to suggestions on a better way to formulate this. Once we have defined a Markov chain, we must draw from it which returns a <code>Process[Double]</code>, the initial draw is to sample from the initial state distribution <span class="math inline">\(\mathcal{N}(m_0, C_0)\)</span>. Next, we can sample from the <code>Process</code> and plot it. A simulation from the seasonal DLM, with parameters <span class="math inline">\(V = 3\)</span> and <span class="math inline">\(W = I_6\)</span>, is given below:</p>
-<p><img src="/blog/post/SeasonalDlm_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="/post/SeasonalDlm_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 </div>
 
     </div>
@@ -149,10 +149,10 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
       <footer class="footer">
         <ul class="footer-links">
           <li>
-            <a href="/blog/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
           </li>
           <li>
-            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/blog/images/hugo-logo.png" width="22" height="22"></a>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" width="22" height="22"></a>
           </li>
         </ul>
       </footer>
@@ -174,7 +174,7 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
 
 
     
-<script src="/blog/js/math-code.js"></script>
+<script src="/js/math-code.js"></script>
 <script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
 
