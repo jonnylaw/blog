@@ -216,7 +216,7 @@ out_hmc <- hmc(log_posterior(xs), gradient(xs),
                0.01, 4, theta, 10000)
 ```
 
-```{r}
+```{r, eval=FALSE}
 actual_values = tibble(
   Parameter = c("mu1", "sigma1", "mu2", "sigma2"),
   actual_value = c(5.0, 0.5, 2.0, 1.5)

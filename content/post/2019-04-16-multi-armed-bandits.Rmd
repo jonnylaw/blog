@@ -1,10 +1,11 @@
 ---
-title: "Multi-armed Bandits"
+title: "Multi-armed Bandits in Scala"
 author: "Jonny Law"
 date: '2019-04-16'
 slug: multi-armed-bandits
 tags: []
-categories: []
+categories: 
+  - scala
 ---
 
 ```{r setup, include=FALSE}
@@ -13,170 +14,133 @@ library(tidyverse)
 theme_set(theme_minimal())
 ```
 
-# A Simple Bandit Example
+## Setting up the Environment
 
-A method which can be used to determine the optimal action. Q(a) is the long-term reward, R(a) is the instantaneous reward, a is the action. Note that the reward function is stationary.
+This post uses [Almond](https://almond.sh/) in order to run Scala code in a Jupyter notebook. See [my previous post](/2019/04/15/scala-and-jupyter-notebook-with-almond/) for my setup of Jupyter, Ammonite and Almond. That post examined using the Scala libraries EvilPlot (including inline plotting in the Jupyter notebook) and Rainier for Bayesian inference in a simple linear model.
 
-```{r}
-bandit <- function(epsilon, actions, reward, steps) {
-  q <- rep(0, times = actions)
-  N <- rep(0, times = actions)
-  R <- numeric(steps)
-  
-  for (i in seq_len(steps)) {
-    u <- runif(1)
-    next_action <- if (u < epsilon) {
-      sample.int(n = actions, size = 1)
-    } else {
-      which.max(q)
-    }
-    R[i] <- reward(next_action)
-    N[next_action] <- N[next_action] + 1
-    q[next_action] <- q[next_action] + (R[i] - q[next_action]) / N[next_action] 
-  }
-  
-  list(q, N, R)
+The imports required for this post are:
+
+```scala
+import coursier.MavenRepository
+
+interp.repositories() ++= Seq(MavenRepository(
+  "http://dl.bintray.com/cibotech/public"
+))
+
+import $ivy.`com.stripe::rainier-core:0.2.2`
+import $ivy.`com.stripe::rainier-plot:0.2.2`
+import $ivy.`org.scalanlp::breeze:0.13.2`
+
+import breeze.stats.distributions._
+import breeze.linalg._
+import almond.interpreter.api._
+```
+
+The full working notebook can be found [here](https://github.com/jonnylaw/blog/tree/master/notebooks/multi_armed_bandit.ipynb).
+
+# A Multi-armed Bandit
+
+A multi-armed bandit is an analogy taken from the one-armed bandit slot machines where a lever is pulled and the player has an unknown probability of a prize. A multi-armed bandit is a generalisation, whereby the player have multiple one-armed bandits each of which could have different rewards. The problem is to determine the best bandit to play. One way to determine this is to randomly pull levers to get information on how frequently each bandit pays out. Assuming the probability of payout is constant in time, then after a period of exploration the player will be able to know which bandits pay out most frequently. 
+
+# Epsilon Greedy Method
+
+One strategy to maximise the expected long-term reward from a bandit is to choose the bandit with the largest long-term reward a fraction of the time and the rest of the time choose a bandit uniformly at random in order to continually explore the space of actions. At each time step, the reward for a given action can be calculated and the long-term reward can be calculated as the function:
+
+$$Q_{t+1}(A) = Q_t(A) + \frac{R_t(A) - Q_t(A)}{N_t(A)}$$
+where $A$ is the current action, $Q_t(A)$ is the long-term reward at time $t$ for action $A$, $R_t(A)$ is the instantaneous reward for action $A$ at time $t$ and $N_t(A)$ is the total number of times action $A$ has been performed by time step $t$. Using this calculation of long-term reward a single step of the epsilon-greedy algorithm for a multi-armed bandit can be calculated:
+
+```scala
+case class BanditState(
+    reward: Array[Double],
+    longTermReward: List[Double],
+    actions: Map[Int, Int]
+)
+
+def banditStep(
+    epsilon: Double,
+    reward: Int => Rand[Double])(s: BanditState): Rand[BanditState] = {
+    for {
+        u <- Uniform(0, 1)
+        nextAction <- if (u < epsilon) {
+          Multinomial(DenseVector.ones[Double](s.actions.size))
+        } else {
+          Rand.always(s.longTermReward.zipWithIndex.maxBy(_._1)._2)
+        }
+        newReward <- reward(nextAction)
+        prevCount = s.actions.get(nextAction).get
+        nextCount  = prevCount + 1
+        newLongTermReward = s.longTermReward(nextAction) + (newReward - s.longTermReward(nextAction)) / nextCount
+    } yield BanditState(s.reward :+ newReward, 
+                s.longTermReward.updated(nextAction, newLongTermReward),
+                s.actions.updated(nextAction, nextCount))
 }
 ```
 
-Reproducing Figure 2.2
+Firstly, we define a `BanditState` which contains all of the rewards $R_t(A)$ for each time step, a list of length equal to the number of actions containing the long-term reward for each action. `actions` represents $N_t(A)$ using a map from the index of the action to the count of actions. The algorithm proceeds by sampling a uniform random number, if this number is less than the chosen value of epsilon, then a random action is sampled from a Multinomial distribution with equal probabilities, otherwise the algorithm selects the action which currently has the highest long-term reward. The values are updated according to the formula above.
 
-```{r}
-qs <- rnorm(10)
-# The reward is selected from a N(q(A_t), 1)
-r <- function(qa) {
-  function(action) {
-    rnorm(1, mean = qa[action], sd = 1)
-  }
+To run this algorithm for a pre-determined number of steps, realise that it is recursive and completely determined by the count and long-term reward at the previous time step. Hence it can be implemented as a Markov chain.
+
+```scala
+def buildActions(actions: Int): Map[Int, Int] = {
+    (0 until actions).map(a => a -> 0).toMap
 }
 
-# Calculate the average reward for n 10-arm bandit models with steps and an epsilon-greedy method
-average_reward <- function(n, steps, eps) {
-  tibble(
-    epsilon = rep(eps, times = steps),
-    step = seq_len(steps),  
-    average_reward = replicate(n = n, expr = bandit(eps, actions = 10, reward = r(qs), steps))[3,] %>% 
-      reduce(`+`) / n
-  )
+def bandit(
+    epsilon: Double, 
+    actions: Int, 
+    reward: Int => Rand[Double],
+    n: Int): BanditState = {
+    
+    val initState = BanditState(Array(0.0), List.fill(10)(0.0), buildActions(actions))
+    MarkovChain(initState)(banditStep(epsilon, reward)).steps.drop(n-1).next
 }
-
-c(0.0, 0.1, 0.01) %>% 
-  map_df(~ average_reward(2000, 1000, .)) %>% 
-  ggplot(aes(x = step, y = average_reward, colour = as.factor(epsilon))) +
-  geom_line()
 ```
 
-# Exercise 2.5: Non-stationary Rewards
+We can assume that the rewards for each of the ten actions is Normally distributed and define a suitable reward function
 
-Assume that $q_t(a) \sim N(q_{t-1}(a), 0.1)$.
+```scala
+val qs = Gaussian(0, 1).sample(10)
 
-```{r}
-bandit_non_constant <- function(epsilon, actions, reward, steps) {
-  q <- rep(0, times = actions)
-  N <- rep(0, times = actions)
-  R <- numeric(steps)
-  qa <- rnorm(10)
-  
-  for (i in seq_len(steps)) {
-    u <- runif(1)
-    next_action <- if (u < epsilon) {
-      sample.int(n = actions, size = 1)
-    } else {
-      which.max(q)
-    }
-    qr <- reward(qa, next_action)
-    qa <- qr[1:actions]
-    R[i] <- qr[actions+1]
-    N[next_action] <- N[next_action] + 1
-    q[next_action] <- q[next_action] + (R[i] - q[next_action]) / N[next_action]
-  }
-  list(q, N, R)
-}
-
-# Random walk for the true expected-reward
-step <- function(q) 
-  q + rnorm(1, sd = 0.01)
-
-# The reward is selected from a N(q(A_t), 1)
-r <- function(qa, action) {
-  new_q <- step(qa)
-  r <- rnorm(1, mean = new_q[action], sd = 1)
-  return(c(new_q, r))
-}
-
-average_reward <- function(n, steps, eps) {
-  tibble(
-    epsilon = rep(eps, times = steps),
-    step = seq_len(steps),  
-    average_reward = replicate(n = n, expr = bandit_non_constant(eps, actions = 10, reward = r, steps))[3,] %>% 
-      reduce(`+`) / n
-  )
-}
-
-c(0.0, 0.1, 0.01) %>% 
-  map_df(~ average_reward(2000, 1000, .)) %>% 
-  ggplot(aes(x = step, y = average_reward, colour = as.factor(epsilon))) +
-  geom_line()
+// The reward is selected from a N(q(A_t), 1)
+def r(qa: Seq[Double])(action: Int): Rand[Double] = 
+    Gaussian(qa(action), 1)
+    
+//  qs: IndexedSeq[Double] = Vector(
+//    -1.1319170735731177,
+//    0.5392647196381599,
+//    0.7127636875526561,
+//    0.8765526115252499,
+//    -0.9555744042626685,
+//    -0.2723645491439034,
+//    0.10029206857194808,
+//    0.3758538986470721,
+//    1.9412629812694995,
+//    1.0620845496569054
+//)
 ```
 
-# Constant step-size parameter
+Then the algorithm can be run for a single multi-armed bandit
 
-Use epsilon = 0.1, alpha = 0.1
-
-```{r}
-bandit_alpha <- function(epsilon, actions, reward, steps, alpha) {
-  q <- rep(0, times = actions)
-  R <- numeric(steps)
-  qa <- rnorm(10)
-  
-  for (i in seq_len(steps)) {
-    u <- runif(1)
-    next_action <- if (u < epsilon) {
-      sample.int(n = actions, size = 1)
-    } else {
-      which.max(q)
-    }
-    qr <- reward(qa, next_action)
-    qa <- qr[1:actions]
-    R[i] <- qr[actions+1]
-    q[next_action] <- q[next_action] + alpha * (R[i] - q[next_action])
-  }
-  list(q, R)
-}
-
-# Random walk for the true expected-reward
-step <- function(q) 
-  q + rnorm(1, sd = 0.01)
-
-# The reward is selected from a N(q(A_t), 1)
-r <- function(qa, action) {
-  new_q <- step(qa)
-  r <- rnorm(1, mean = new_q[action], sd = 1)
-  return(c(new_q, r))
-}
-
-average_reward <- function(n, steps, al, eps) {
-  tibble(
-    alpha = rep(al, times = steps),
-    epsilon = rep(eps, times = steps),
-    step = seq_len(steps),  
-    average_reward = replicate(n = n, expr = bandit_alpha(eps, actions = 10, reward = r, steps, al))[2,] %>% 
-      reduce(`+`) / n
-  )
-}
-
-epsilon <- c(0.0, 0.1, 0.01)
-alpha <- c(0.1, 0.2, 0.5)
-params <- expand.grid(epsilon, alpha)
-map2_df(params[,1], params[,2], function(eps, al) average_reward(2000, 1000, al, eps)) %>% 
-  ggplot(aes(x = step, y = average_reward, colour = as.factor(epsilon))) +
-  geom_line() +
-  facet_wrap(~alpha) +
-  theme(legend.position = "bottom") +
-  labs(title = "Average expected reward for a non-constant actual reward using various values of alpha")
+```scala
+val oneBandit = bandit(0.5, 10, r(qs), 1000)
 ```
 
-# Contextual Bandits
+The distribution of actions at the end of 1,000 steps with epsilon = 0.5 and number of actions 10 is:
 
-The best action depends on the state of the bandit.
+<img src="/post/2019-04-16-multi-armed-bandits_files/actions_bar.png" alt="actions distribution" width=500 />
 
+The mean reward at action 8 was highest at approximately 1.95, the epsilon-greedy algorithm prefers to take action 8.
+
+# Multiple Multi-armed Bandits
+
+Now to see the behaviour of a typicaly multi-armed bandit with an approximately constant reward function, calculate the average reward for n = 2,000 10-arm bandits each with 1,000 steps.
+
+```scala
+Vector.fill(2000)(DenseVector(bandit(0.1, 10, r(qs), 1000).reward)).
+  reduce(_ + _).
+  map(_ / 2000)
+```
+
+The average reward for each time step can then be plotted, this can be used to evaluate different choices of epsilon.
+
+<img src="/post/2019-04-16-multi-armed-bandits_files/average_reward.png" alt="actions distribution" width=500 />

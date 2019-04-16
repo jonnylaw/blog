@@ -13,7 +13,7 @@
 *.nav
 *.snm
 .Rhistory
-.ipynb_checkpoints/*
+*/.ipynb_checkpoints/*
 
 # LaTeX output files
 *.pdf

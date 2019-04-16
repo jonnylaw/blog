@@ -140,10 +140,8 @@ out_hmc &lt;- hmc(log_posterior(xs), gradient(xs),
 )
 
 # Transform parameters to bounded and put in a tibble
-out_hmc &lt;- as_tibble(t(apply(out_hmc, 1, transform)))</code></pre>
-<pre><code>## Warning: `as_tibble.matrix()` requires a matrix with column names or a `.name_repair` argument. Using compatibility `.name_repair`.
-## This warning is displayed once per session.</code></pre>
-<pre class="r"><code>colnames(out_hmc) &lt;- actual_values$Parameter
+out_hmc &lt;- as_tibble(t(apply(out_hmc, 1, transform)))
+colnames(out_hmc) &lt;- actual_values$Parameter
 
 out_hmc %&gt;%
   mutate(iteration = row_number()) %&gt;%
@@ -153,12 +151,10 @@ out_hmc %&gt;%
   geom_line() +
   geom_hline(aes(yintercept = actual_value), linetype = &quot;dashed&quot;) +
   facet_wrap(~Parameter, scales = &quot;free_y&quot;)</code></pre>
-<pre><code>## Joining, by = &quot;Parameter&quot;</code></pre>
-<p><img src="/post/hmc_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <p>In order to compare efficiency for similar Markov chain Monte Carlo (or other simulation) algorithms the amount of information from each sample can be measured. This is termed the effective sample size, corresponding to the number of effective independent draws from the posterior distribution. The code below calculates the ESS of each parameter in the chain.</p>
 <pre class="r"><code>coda::effectiveSize(mcmc(out_hmc))</code></pre>
-<pre><code>##        mu1     sigma1        mu2     sigma2 
-##  6007.5108 12180.8683   676.1003  1384.6118</code></pre>
+<pre><code>##       var1       var2       var3       var4 
+##  6691.4921 11941.7596   682.3928  1334.9123</code></pre>
 <p>To measure the efficiency, the ESS per second can be measured.</p>
 </div>
 <div id="rcpp-implementation" class="section level1">

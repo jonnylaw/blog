@@ -139,10 +139,7 @@ DisplayData
      .rightLegend()))
  .show()</code></pre>
 <p>The actual code used to build the scatter plot is within the function <code>renderBytes</code>, you should now see a plot which looks like:</p>
-<div class="figure">
-<embed src="/post/2019-04-15-scala-and-jupyter-notebook-with-almond_files/Screenshot%202019-04-15%20at%2015.55.29.png%20=500x500" />
-<p class="caption">linear model</p>
-</div>
+<p><img src="/post/2019-04-15-scala-and-jupyter-notebook-with-almond_files/Screenshot 2019-04-15 at 15.55.29.png" alt="linear model" width="500"/></p>
 <p>The code required to sample from the posterior distribution is similar to that required to simulate the model:</p>
 <pre class="scala"><code>import com.stripe.rainier.compute._
 
@@ -157,10 +154,7 @@ def linearModel(data: Seq[(Double, Double)]): RandomVariable[Map[String, Real]] 
   } yield Map(&quot;alpha&quot; -&gt; alpha, &quot;beta&quot; -&gt; beta, &quot;sigma&quot; -&gt; sigma)</code></pre>
 <p>First prior distributions are chosen for the static parameters, then the function <code>Predictor</code> is used to specify the likelihood for the linear regression as the Normal distribution. The data consists of a sequence of tuples. Finally to sample values from the posterior using Hamiltonian Monte Carlo:</p>
 <pre class="scala"><code>val iters = linearModel(sims).sample(HMC(5), 5000, 100000, 100)</code></pre>
-<div class="figure">
-<embed src="/post/2019-04-15-scala-and-jupyter-notebook-with-almond_files/Screenshot%202019-04-15%20at%2016.09.10.png%20=500x500" />
-<p class="caption">Posterior diagnostics</p>
-</div>
+<p><img src="/post/2019-04-15-scala-and-jupyter-notebook-with-almond_files/Screenshot 2019-04-15 at 16.09.10.png" alt="parameter diagnostics" width="500" /></p>
 <p>The full notebook can be viewed on Github <a href="https://github.com/jonnylaw/blog/blob/master/notebooks/rainier_linear_model.ipynb">here</a></p>
 </div>
 
