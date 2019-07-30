@@ -76,5 +76,5 @@ from a posterior distribution of a model with un-normalised log-posterior
 `logPos` and gradient, `grad` using `MarkovChain`:
 
 ```scala
-
+MarkovChain(init)(step(priorPhi, eps, l, gradient, logPos))
 ```

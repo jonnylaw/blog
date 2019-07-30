@@ -2,7 +2,7 @@
 title: "Efficient Markov Chain Monte Carlo in R with Rcpp"
 author: "Jonny Law"
 date: '2019-02-11'
-slug: hmc
+slug: efficient_mcmc_using_rcpp
 categories:
   - R
   - Bayesian
@@ -15,7 +15,7 @@ library(tidyverse)
 library(ggthemes)
 library(ggmcmc)
 library(coda)
-library(parallel)
+library(furrr)
 library(Rcpp)
 library(microbenchmark)
 
@@ -105,7 +105,7 @@ metropolis_step <- function(theta, log_posterior, proposal) {
 }
 ```
 
-Next the 
+Next the step function can be used in a for loop to generate m samples, each dependent on the previous step. An matrix containing $m$ rows is initialised to contain each iteration of the Metropolis algorithm.
 
 ```{r}
 metropolis <- function(theta, log_posterior, proposal, m) {
@@ -130,8 +130,13 @@ proposal <- function(x) {
 
 Finally, all the components are there to sample from the posterior distribution of the parameters. The mean of the sampled posterior distribution should coincide with the parameters used to simulate the data. In the figure below the actual values used to simulate the data are plotted with dashed lines.
 
-```{r}
+```{r, eval=FALSE}
 out = metropolis(theta, log_posterior(xs), proposal, 10000)
+write_rds(out, path = "../../static/models/metropolis_serial.Rds")
+```
+
+```{r, echo=FALSE}
+out <- read_rds("../../static/models/metropolis_serial.Rds")
 ```
 
 ```{r, echo=FALSE}
@@ -155,9 +160,9 @@ out %>%
 
 # Parallel Chains in R
 
-Typically, multiple chains are run in parallel, a straightforward way to do this in R is to use a parallel version of `lapply`. The following exports the functions and data required by the Metropolis algorithm to the "cluster" which are simply multiple cores on the host machine and runs two MCMC algorithms in parallel.
+Typically, multiple chains are run in parallel, a straightforward way to do this in R is to use a parallel map from the [furrr](https://davisvaughan.github.io/furrr/) package. 
 
-```{r}
+```{r, echo=FALSE, eval=FALSE}
 cl <- makeCluster(2)
 clusterExport(cl, varlist = c("metropolis", "theta", "log_posterior", "xs", "proposal", "metropolis_step", "log_likelihood", "log_prior"))
 clusterEvalQ(cl, library(dplyr))
@@ -165,17 +170,49 @@ chains = parLapply(cl, 1:2, function(x) metropolis(theta, log_posterior(xs), pro
 stopCluster(cl)
 ```
 
-The figure below shows the trace plots from 10,000 draws of the Metropolis hastings algorithm.
+First we create a new function which alters the `metropolis` function to return a dataframe: 
+
+```{r}
+metropolis_df <- function(theta, log_posterior, proposal, m, parameter_names) {
+  function(x) {
+    mat <- metropolis(theta, log_posterior, proposal, m)
+    colnames(mat) <- parameter_names
+    as.data.frame(mat)
+  }
+}
+```
+
+Then `future_map_dfr` is used which performs the function `.f` for each element of `.x`. It then rowbinds into a dataframe. This is explicit in the function name, the suffix `_dfr` meaning a dataframe is the return type and is created by rowbinding the results. The `id` of each function run is provided by the `.id` column and takes on the values of `.x`.
+
+```{r, eval=FALSE}
+plan(multiprocess)
+mh_samples <- future_map_dfr(
+  .x = 1:2,
+  .f = metropolis_df(theta, log_posterior(xs), proposal, 10000, actual_values$Parameter),
+  .id = "chain"
+)
+```
+
+```{r, eval=FALSE, echo=FALSE}
+write_rds(mh_samples, "../../static/models/metropolis_parallel.Rds")
+```
+
+```{r, echo=FALSE}
+mh_samples <- read_rds("../../static/models/metropolis_parallel.Rds")
+```
+
+The figure below shows the trace plots from 10,000 draws of the parallel Metropolis hastings algorithm.
 
 ```{r parallel-diagnostics, echo=FALSE}
-mh_samples <- chains %>%
-  map(mcmc) %>%
-  mcmc.list() %>%
-  ggs()
-
-ggs_traceplot(mh_samples)
-ggs_autocorrelation(mh_samples)
-ggs_density(mh_samples)
+mh_samples %>%
+  group_by(chain) %>% 
+  mutate(iteration = row_number()) %>%
+  gather(key = Parameter, value, -iteration, -chain) %>%
+  inner_join(actual_values) %>%
+  ggplot(aes(x = iteration, y = value, colour = chain)) +
+  geom_line(alpha = 0.5) +
+  geom_hline(aes(yintercept = actual_value), linetype = "dashed") +
+  facet_wrap(~Parameter, scales = "free_y")
 ```
 
 # Rcpp implementation
@@ -231,13 +268,22 @@ out_cpp %>%
   geom_hline(data = actual_values, aes(yintercept = actual_value), linetype = "dashed")
 ```
 
+# Performance Improvements
+
 But what about the performance, the relative speedup can be calculated using the [microbenchmark](https://github.com/joshuaulrich/microbenchmark/) package. The relative speedup of the C++ method used to generate 100 correlated samples from the posterior distribution is plotted below.
 
-
-```{r}
+```{r, eval=FALSE}
 timings <- microbenchmark(metropolis(theta, log_posterior(xs), proposal, 100), 
                           metropolis(theta, function(p) logDensity(xs, p), 
                                      function(p) proposalCpp(p, 0.05), 100), times = 500)
+```
+
+```{r, eval=FALSE, echo=FALSE}
+write_rds(timings, "../../static/models/rcpp.Rds")
+```
+
+```{r, echo=FALSE}
+timings <- read_rds("../../static/models/rcpp.Rds")
 ```
 
 ```{r relative-speedup, echo=FALSE}

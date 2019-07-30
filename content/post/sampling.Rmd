@@ -1,7 +1,6 @@
 ---
 title: "Sampling from a distribution with a known CDF"
 author: "Jonny Law"
-draft: TRUE
 date: '2019-02-25'
 slug: inverse-sampling
 categories:
@@ -24,26 +23,24 @@ exists which takes a value sampled from the standard
 uniform distribution $u \sim U[0, 1]$ and returns a value distributed according
 to the target distribution. Then the inverse CDF can be written as:
 
-\begin{equation*}
-Pr(g(U) \leq x) = Pr(U \leq g^{-1}(x)) = g^{-1}(x)
-\end{equation*}
-%
+$$Pr(g(U) \leq x) = Pr(U \leq g^{-1}(x)) = g^{-1}(x)$$
+
 Since the CDF of the uniform distribution over the interval $[0, 1]$ is:
 
-\begin{align*}
+$$\begin{align*}
   F_U(u) =
   \begin{cases}
     0 & u < 0 \\
     u & u \in [0, 1) \\
     1 & u \geq 1
   \end{cases}
-\end{align*}
-%
-Then $F_x^{-1}(X) = g(x)$ as required. Algorithm~\ref{alg:inverse-sampler} summarises the inverse sampling procedure.
+\end{align*}$$
 
-1. Sample $u \sim U[0, 1]$\;
-2. Evaluate $x = F^{-1}(u)$\;
-3. Return $x$\;
+Then $F_x^{-1}(X) = g(x)$ as required. The algorithm below summarises the inverse sampling procedure.
+
+1. Sample $u \sim U[0, 1]$
+2. Evaluate $x = F^{-1}(u)$
+3. Return $x$
  
 Most statistical packages will expose the quantile function for common
 distributions making it practical to use inverse sampling.
@@ -69,5 +66,7 @@ qplot(gamma_samples, geom = "blank") +
   theme(
     text = element_text(size = 20), legend.title = element_blank(),
     legend.text = element_text(size = rel(1.3)), legend.position = c(0.8, 0.8)
-  )
+  ) +
+  ylab("density") +
+  xlab("value")
 ```

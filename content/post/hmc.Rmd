@@ -1,7 +1,7 @@
 ---
 title: "Hamiltonian Monte Carlo in R"
 author: "Jonny Law"
-draft: TRUE
+draft: true
 date: '2019-03-01'
 slug: hmc
 categories:
@@ -26,7 +26,7 @@ theme_set(theme_minimal())
 
 # Bivariate Normal Model
 
-The same bivariate Normal model from a [previous post implementing the Metropolis algorithm](metropolis_r.html) is used. See that post for details of deriving the log-likelihood and choice of prior distributions for the parameters.
+The same bivariate Normal model from a [previous post implementing the Metropolis algorithm](2019/02/11/efficient_mcmc_rcpp) is used. See that post for details of deriving the log-likelihood and choice of prior distributions for the parameters.
 
 ```{r, echo=F}
 bivariate_normal <- function(theta, n) {
@@ -42,7 +42,7 @@ bivariate_normal <- function(theta, n) {
 theta = c(5.0, 0.5, 2.0, 1.5)
 sims = bivariate_normal(theta, 1000)
 xs <- as.matrix(sims)
-qplot(sims$x, sims$y)
+qplot(x = sims$x, y = sims$y)
 ```
 
 ```{r, echo=F}
@@ -72,19 +72,20 @@ leapfrog_step <- function(gradient, step_size, position, momentum) {
 ```
 
 ```{r}
-leapfrogs <- function(gradient, step_size, l) {
-  function(position, momentum) {
+leapfrogs <- function(gradient, step_size, l, position, momentum) {
     for (i in 1:l) {
       c(position, momentum) %<-% leapfrog_step(gradient, step_size, position, momentum)
     }
     list(position = position, momentum = momentum)
-  }
 }
 ```
 
 ```{r}
-log_acceptance <- function(propPosition, propMomentum, position,
-                           momentum, log_posterior) {
+log_acceptance <- function(propPosition,
+                           propMomentum,
+                           position,
+                           momentum,
+                           log_posterior) {
   log_posterior(propPosition) + sum(dnorm(propMomentum, log = T)) - log_posterior(position) - sum(dnorm(momentum, log = T))
 }
 ```
@@ -93,7 +94,7 @@ log_acceptance <- function(propPosition, propMomentum, position,
 hmc_step <- function(log_posterior, gradient, step_size, l, position) {
   d <- length(position)
   momentum <- rnorm(d)
-  c(propPosition, propMomentum) %<-% leapfrogs(gradient, step_size, l)(position, momentum)
+  c(propPosition, propMomentum) %<-% leapfrogs(gradient, step_size, l, position, momentum)
   a <- log_acceptance(propPosition, propMomentum, position, momentum, log_posterior)
   if (log(runif(1)) < a) {
     propPosition
@@ -133,12 +134,10 @@ $$\begin{align}
 
 The gradient of the log-posterior with respect to each of the paramters can be written as:
 
-$$
-\begin{align}
+$$\begin{align}
 \frac{\partial \ell}{\partial \mu_j} &= \frac{1}{\sigma_j^2}\sum_{i=1}^N(y_{ij}-\mu_j) - \frac{\mu_j}{9}, \\
 \frac{\partial \ell}{\partial \sigma_j} &= -\frac{N}{\sigma_j} +  \frac{1}{\sigma_j^3}\sum_{i=1}^N(y_{ij}-\mu_j)^2 + \frac{2}{\sigma_j}-3, \quad j = 1, 2.
-\end{align}
-$$
+\end{align}$$
 
 In R the gradient can be programmed by hand:
 
@@ -159,14 +158,12 @@ gradient <- function(ys) {
 To ensure the value of the gradient is correct we can compare it to a numerical approximation of the gradient using the [https://cran.r-project.org/web/packages/numDeriv/numDeriv.pdf](numDeriv) package:
 
 ```{r}
-approx_gradient <- function(xs) {
-  function(theta) {
+approx_gradient <- function(xs, theta) {
     grad(log_posterior(xs), theta)
-  }
 }
 
 compare_gradient <- function(theta, tol) {
-  abs(gradient(xs)(theta) - approx_gradient(xs)(theta)) < tol
+  abs(gradient(xs)(theta) - approx_gradient(xs, theta)) < tol
 }
 
 compare_gradient(theta, 1e-3)
@@ -212,8 +209,7 @@ bounded_gradient <- function(xs) {
   }
 }
 
-out_hmc <- hmc(log_posterior(xs), gradient(xs), 
-               0.01, 4, theta, 10000)
+out_hmc <- hmc(log_posterior(xs), gradient(xs), 0.01, 4, theta, 10000)
 ```
 
 ```{r, eval=FALSE}
@@ -246,7 +242,7 @@ To measure the efficiency, the ESS per second can be measured.
 
 # Rcpp implementation
 
-Again, this code can be written using Rcpp. 
+This code can be written using Rcpp. 
 
 ```{Rcpp, eval=FALSE}
 #include <Rcpp.h>
@@ -324,6 +320,7 @@ leapfrogs <- function(gradient, step_size, l) {
 out_hmc <- hmc(function(theta) logDensity(xs, theta), function(theta) gradientCpp(xs, theta), 0.01, 4, theta, 1000)
 ```
 
+## Using RCpp
 
 ```{Rcpp, eval=FALSE}
 // [[Rcpp::export]]
