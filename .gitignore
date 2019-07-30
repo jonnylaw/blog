@@ -8,12 +8,16 @@
 *.bbl
 *.blg
 
+# Content HTML Files
+content/post/*.html
+
 # Misc Files
 *.pptx
 *.nav
 *.snm
 .Rhistory
 */.ipynb_checkpoints/*
+.DS_Store
 
 # LaTeX output files
 *.pdf
