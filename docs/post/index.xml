@@ -32,6 +32,15 @@ import coursier.MavenRepository interp.repositories() ++= Seq(MavenRepository( &
     </item>
     
     <item>
+      <title>Sampling from a distribution with a known CDF</title>
+      <link>/2019/02/25/inverse-sampling/</link>
+      <pubDate>Mon, 25 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/02/25/inverse-sampling/</guid>
+      <description>A distribution with an inverse cumulative distribution function (CDF) can be sampled from using just samples from \(U[0, 1]\). The inverse CDF (sometimes called the quantile function) is the value of \(x\) such that \(F_X(x) = Pr(X \leq x) = p\). Consider a that a transformation \(g: [0, 1] \rightarrow \mathbb{R}\), exists which takes a value sampled from the standard uniform distribution \(u \sim U[0, 1]\) and returns a value distributed according to the target distribution.</description>
+    </item>
+    
+    <item>
       <title>National Cross Country</title>
       <link>/2019/02/22/national-cross-country/</link>
       <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
@@ -43,10 +52,10 @@ import coursier.MavenRepository interp.repositories() ++= Seq(MavenRepository( &
     
     <item>
       <title>Efficient Markov Chain Monte Carlo in R with Rcpp</title>
-      <link>/2019/02/11/hmc/</link>
+      <link>/2019/02/11/efficient_mcmc_using_rcpp/</link>
       <pubDate>Mon, 11 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/02/11/hmc/</guid>
+      <guid>/2019/02/11/efficient_mcmc_using_rcpp/</guid>
       <description>Bivariate Normal Model This post considers how to implement a simple Metropolis scheme to determine the parameter posterior distribution of a bivariate Normal distribution. The implementation is generic, using higher-order-functions and hence can be re-used with new algorithms by specifying the un-normalised log-posterior density and a proposal distribution for the parameters. The built-in parallel package is used fit multiple chains in parallel, finally the Metropolis algorithm is reimplemented in C++ using Rcpp which seemlessly integrates with R.</description>
     </item>
     

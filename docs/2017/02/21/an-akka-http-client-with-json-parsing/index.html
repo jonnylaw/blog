@@ -35,7 +35,7 @@
       <header class="header">
         <nav class="nav">
   <a href="/" class="nav-logo">
-    <img src="/images/logo.png"
+    <img src="/images/picture_cropped.jpg"
          width="50"
          height="50"
          alt="Logo">
@@ -77,7 +77,7 @@
 <p>There are many sources of open data on the web, freely accessible via an Application Programming Interface (API) made available over the web. A common interchange format for these APIs is Javascript Object Notation (JSON) which is human readable and predictable, however is not in the correct format for analysis. The data needs to be parsed from the JSON string and made available as an object we can work with. This blog post considers a simple <a href="http://akka.io/">Akka Http</a> client to read data from the <a href="http://uoweb1.ncl.ac.uk/">Urban Observatory</a> in Newcastle. If you just want to read the code, see this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
 <div id="exploring-the-api" class="section level2">
 <h2>Exploring the API</h2>
-<p>The Urban Observatory consists of a grid of sensors around the North East, measuring traffic, pollution and weather. The focus of this post will be getting sensor data from a single sensor, N05171T, a traffic sensor located near the Metro Centre on Hollinside road. The metadata from this sensor can be found by querying an API endpoint: <a href="http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key" class="uri">http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key</a>=&amp;sensor_name=N05171T. Note that this requires authentication, using an API key. An API key can be requested using <a href="http://uoweb1.ncl.ac.uk/api_page/key_form/">this form</a>.</p>
+<p>The Urban Observatory consists of a grid of sensors around the North East, measuring traffic, pollution and weather. The focus of this post will be getting sensor data from a single sensor, N05171T, a traffic sensor located near the Metro Centre on Hollinside road. The metadata from this sensor can be found by querying an API endpoint: <a href="http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key=&amp;sensor_name=N05171T" class="uri">http://uoweb1.ncl.ac.uk/api/v1/sensor.json?api_key=&amp;sensor_name=N05171T</a>. Note that this requires authentication, using an API key. An API key can be requested using <a href="http://uoweb1.ncl.ac.uk/api_page/key_form/">this form</a>.</p>
 <p>The result of this query is:</p>
 <pre><code>## {
 ##     &quot;type&quot;: &quot;Traffic&quot;,
@@ -109,7 +109,7 @@
 ## }
 ## </code></pre>
 <p>We can see a bit of information about the sensor, including its location, time of latest reading and whether the sensor is active.</p>
-<p>In order to retrieve the actual data from the sensor, we query the url <a href="http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json" class="uri">http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json</a> with the following required fields:</p>
+<p>In order to retrieve the actual data from the sensor, we query the url <a href="http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json">http://uoweb1.ncl.ac.uk/api/v1/sensor/data/raw.json</a> with the following required fields:</p>
 <ul>
 <li><code>api_key</code> your API key here</li>
 <li><code>sensor_name</code> N05171T</li>

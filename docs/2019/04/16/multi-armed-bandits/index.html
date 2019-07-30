@@ -35,7 +35,7 @@
       <header class="header">
         <nav class="nav">
   <a href="/" class="nav-logo">
-    <img src="/images/logo.png"
+    <img src="/images/picture_cropped.jpg"
          width="50"
          height="50"
          alt="Logo">
@@ -100,7 +100,8 @@ import almond.interpreter.api._</code></pre>
 <div id="epsilon-greedy-method" class="section level1">
 <h1>Epsilon Greedy Method</h1>
 <p>One strategy to maximise the expected long-term reward from a bandit is to choose the bandit with the largest long-term reward a fraction of the time and the rest of the time choose a bandit uniformly at random in order to continually explore the space of actions. At each time step, the reward for a given action can be calculated and the long-term reward can be calculated as the function:</p>
-<p><span class="math display">\[Q_{t+1}(A) = Q_t(A) + \frac{R_t(A) - Q_t(A)}{N_t(A)}\]</span> where <span class="math inline">\(A\)</span> is the current action, <span class="math inline">\(Q_t(A)\)</span> is the long-term reward at time <span class="math inline">\(t\)</span> for action <span class="math inline">\(A\)</span>, <span class="math inline">\(R_t(A)\)</span> is the instantaneous reward for action <span class="math inline">\(A\)</span> at time <span class="math inline">\(t\)</span> and <span class="math inline">\(N_t(A)\)</span> is the total number of times action <span class="math inline">\(A\)</span> has been performed by time step <span class="math inline">\(t\)</span>. Using this calculation of long-term reward a single step of the epsilon-greedy algorithm for a multi-armed bandit can be calculated:</p>
+<p><span class="math display">\[Q_{t+1}(A) = Q_t(A) + \frac{R_t(A) - Q_t(A)}{N_t(A)}\]</span>
+where <span class="math inline">\(A\)</span> is the current action, <span class="math inline">\(Q_t(A)\)</span> is the long-term reward at time <span class="math inline">\(t\)</span> for action <span class="math inline">\(A\)</span>, <span class="math inline">\(R_t(A)\)</span> is the instantaneous reward for action <span class="math inline">\(A\)</span> at time <span class="math inline">\(t\)</span> and <span class="math inline">\(N_t(A)\)</span> is the total number of times action <span class="math inline">\(A\)</span> has been performed by time step <span class="math inline">\(t\)</span>. Using this calculation of long-term reward a single step of the epsilon-greedy algorithm for a multi-armed bandit can be calculated:</p>
 <pre class="scala"><code>case class BanditState(
     reward: Array[Double],
     longTermReward: List[Double],
@@ -167,7 +168,7 @@ def r(qa: Seq[Double])(action: Int): Rand[Double] =
 </div>
 <div id="multiple-multi-armed-bandits" class="section level1">
 <h1>Multiple Multi-armed Bandits</h1>
-<p>Now to see the behaviour of a typicaly multi-armed bandit with an approximately constant reward function, calculate the average reward for n = 2,000 10-arm bandits each with 1,000 steps.</p>
+<p>Now to see the behaviour of a typical multi-armed bandit with an approximately constant reward function, calculate the average reward for n = 2,000 10-arm bandits each with 1,000 steps.</p>
 <pre class="scala"><code>Vector.fill(2000)(DenseVector(bandit(0.1, 10, r(qs), 1000).reward)).
   reduce(_ + _).
   map(_ / 2000)</code></pre>

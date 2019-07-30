@@ -224,4 +224,4 @@ ggplot() +
   )
 ```
 
-This can be sped up even more using RCpp [2019/02/11/efficient_mcmc_rcpp]
+This can be sped up even more using [RCpp](2019/02/11/efficient_mcmc_rcpp).

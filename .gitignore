@@ -11,6 +11,10 @@
 # Content HTML Files
 content/post/*.html
 
+# Content cache
+content/post/*files*
+content/post/*cache*
+
 # Misc Files
 *.pptx
 *.nav

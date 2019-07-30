@@ -35,7 +35,7 @@
       <header class="header">
         <nav class="nav">
   <a href="/" class="nav-logo">
-    <img src="/images/logo.png"
+    <img src="/images/picture_cropped.jpg"
          width="50"
          height="50"
          alt="Logo">
@@ -85,7 +85,8 @@ x_t &amp;= G_t x_{t-1} + \omega_t, \quad \mathcal{N}(0, W_t).
 <p><span class="math display">\[R = \begin{pmatrix}
 \cos(\omega) &amp; -\sin(\omega) \\
 \sin(\omega) &amp; \cos(\omega)
-\end{pmatrix},\]</span> where <span class="math inline">\(\omega\)</span> is the frequency of the seasonality. In practice, it is easier to specify the period of the seasonality, <span class="math inline">\(T\)</span>, which is related to the frequency: <span class="math inline">\(\omega = 2 \pi/T\)</span>. This means if we have data measured at hourly intervals and we believe the process has a daily cycle, then we will set <span class="math inline">\(T = 24\)</span>.</p>
+\end{pmatrix},\]</span>
+where <span class="math inline">\(\omega\)</span> is the frequency of the seasonality. In practice, it is easier to specify the period of the seasonality, <span class="math inline">\(T\)</span>, which is related to the frequency: <span class="math inline">\(\omega = 2 \pi/T\)</span>. This means if we have data measured at hourly intervals and we believe the process has a daily cycle, then we will set <span class="math inline">\(T = 24\)</span>.</p>
 <p>In order to model higher harmonics of the seasonality, we combine rotation matrices together into a block diagonal matrix, to form the <span class="math inline">\(G\)</span> matrix, for instance with 3 harmonics the system matrix is:</p>
 <p><span class="math display">\[G = \begin{pmatrix}
 \cos(\omega) &amp; -\sin(\omega) &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
@@ -135,7 +136,7 @@ def simStep(p: Parameters): Data =&gt; Rand[Data] = d =&gt; {
   } yield MarkovChain(init)(simStep(p))
 }</code></pre>
 <p>Note that the Markov chain is a <code>Rand[Process[Double]]</code>, this is not the most elegant and I’m open to suggestions on a better way to formulate this. Once we have defined a Markov chain, we must draw from it which returns a <code>Process[Double]</code>, the initial draw is to sample from the initial state distribution <span class="math inline">\(\mathcal{N}(m_0, C_0)\)</span>. Next, we can sample from the <code>Process</code> and plot it. A simulation from the seasonal DLM, with parameters <span class="math inline">\(V = 3\)</span> and <span class="math inline">\(W = I_6\)</span>, is given below:</p>
-<p><img src="SeasonalDlm_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="/post/SeasonalDlm_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 </div>
 
     </div>
