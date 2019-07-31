@@ -1,0 +1,290 @@
+---
+title: "Hamiltonian Monte Carlo in R"
+author: "Jonny Law"
+date: '2019-07-31'
+slug: hamiltonian_monte_carlo_in_R
+categories:
+  - R
+  - Bayesian
+tags: []
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(numDeriv)
+library(furrr)
+library(jonnylaw) # My personal R library containing code from this blog
+
+theme_set(theme_minimal())
+```
+
+# Hamiltonian Monte Carlo
+
+Metropolis-Hastings requires the specification of a proposal distribution, the log-likelihood and prior distributions for the parameters. The proposal distribution is often a multivariate Normal distribution with mean corresponding to the previous value of the parameters, the covariance of the proposal distribution is a tuning parameter. This proposal results in random walk behaviour and although the MH algorithm is guaranteed to converge it can take a long time to get satisfactory draws from the posterior distribution.
+
+The gradient of the un-normalised log-posterior distribution can be used to explore the posterior distribution more efficiently. Hamiltonian Monte Carlo (HMC) is an MCMC method which utilises a discretisation of Hamilton's equations in order to model a physical system where the parameters are represented by the position of a particle in $\theta \in \mathbb{R^d}$. In order to implement HMC, the posterior distribution is augmented with a momentum vector, $\phi$, which is used to propose updates to the position which can be far away from the initial position.
+
+```{r}
+leapfrog_step <- function(gradient, step_size, position, momentum) {
+  momentum1 <- momentum + gradient(position) * 0.5 * step_size
+  position1 <- position + step_size * momentum1
+  momentum2 <- momentum + gradient(position1) * 0.5 * step_size
+
+  list(position = position1, momentum = momentum2)
+}
+```
+
+```{r}
+leapfrogs <- function(gradient, step_size, l, position, momentum) {
+    for (i in 1:l) {
+      pos_mom <- leapfrog_step(gradient, step_size, position, momentum)
+    }
+    list(position = pos_mom[["position"]], momentum = pos_mom[["momentum"]])
+}
+```
+
+```{r}
+log_acceptance <- function(propPosition,
+                           propMomentum,
+                           position,
+                           momentum,
+                           log_posterior) {
+  log_posterior(propPosition) + sum(dnorm(propMomentum, log = T)) - 
+    log_posterior(position) - sum(dnorm(momentum, log = T))
+}
+```
+
+```{r}
+hmc_step <- function(log_posterior, gradient, step_size, l, position) {
+  d <- length(position)
+  momentum <- rnorm(d)
+  pos_mom <- leapfrogs(gradient, step_size, l, position, momentum)
+  propPosition <- pos_mom[["position"]]
+  propMomentum <- pos_mom[["momentum"]]
+  a <- log_acceptance(propPosition, propMomentum, position, momentum, log_posterior)
+  if (log(runif(1)) < a) {
+    propPosition
+  } else {
+    position
+  }
+}
+```
+
+```{r}
+hmc <- function(log_posterior, gradient, step_size, l, initP, m) {
+  out <- matrix(NA_real_, nrow = m, ncol = length(initP))
+  out[1, ] <- initP
+  for (i in 2:m) {
+    out[i, ] <- hmc_step(log_posterior, gradient, step_size, l, out[i-1,])
+  }
+  out
+}
+```
+
+## An Example Model: Bivariate Normal Model
+
+The same bivariate Normal model from a [previous post implementing the Metropolis algorithm](2019/02/11/efficient_mcmc_rcpp) is used. See that post for details of deriving the log-likelihood and choice of prior distributions for the parameters.
+
+```{r, echo=F}
+bivariate_normal <- function(theta, n) {
+  mu1 <- theta[1]
+  sigma1 <- theta[2]
+  mu2 <- theta[3]
+  sigma2 <- theta[4]
+  x <- rnorm(n / 2, mean = mu1, sd = sigma1)
+  y <- rnorm(n / 2, mean = mu2, sd = sigma2)
+  tibble(x, y)
+}
+
+theta = c(5.0, 0.5, 2.0, 1.5)
+sims = bivariate_normal(theta, 1000)
+xs <- as.matrix(sims)
+qplot(x = sims$x, y = sims$y)
+```
+
+```{r, echo=F}
+log_likelihood <- function(xs, theta) {
+  apply(xs, 1, function(x) dnorm(x[1], mean = theta[1], sd = theta[2], log = T) + 
+          dnorm(x[2], mean = theta[3], sd = theta[4], log = T)) %>% sum()
+}
+log_prior <- function(theta) {
+  dnorm(theta[1], sd = 3, log = T) + 
+    dnorm(theta[3], sd = 3, log = T) + 
+    dgamma(theta[2], shape = 3.0, rate = 3.0, log = T) + 
+    dgamma(theta[4], shape = 3.0, rate = 3.0, log = T)
+}
+log_posterior <- function(xs) function(theta) log_likelihood(xs, theta) + log_prior(theta)
+```
+
+From the previous post, the log-posterior distribution is the sum of the log-prior and the log-likelihood. The log-likelihood is given by:
+
+$$\log p(y|\mu, \Sigma) = \sum_{j=1}^2\left(-\frac{N}{2}\log(2\pi\sigma_{j}^2) - \frac{1}{2\sigma_{j}^2}\sum_{i=1}^N(y_{ij}-\mu_j)^2\right)$$
+Where $\Sigma = \operatorname{diag}(\sigma_1, \sigma_2)$, the prior distributions are chosen to be:
+
+$$\begin{align}
+p(\mu_j) &= \mathcal{N}(0, 3), \\
+p(\sigma_j) &= \textrm{Gamma}(3, 3), \quad j = 1, 2.
+\end{align}$$
+
+The log-pdf of these distributions are:
+
+$$\begin{align}
+\log p(\mu_j) &= -\frac{1}{2}\log(18\pi)-\frac{\mu_j^2}{18} \\
+\log p(\sigma_j) &= \alpha\log(\beta)-\log(\Gamma(\alpha)) + (\alpha-1)\log(\sigma_j)-\beta \sigma_j
+\end{align}$$
+
+The gradient of the log-posterior with respect to each of the paramters can be written as:
+
+$$\begin{align}
+\frac{\partial \ell}{\partial \mu_j} &= \frac{1}{\sigma_j^2}\sum_{i=1}^N(y_{ij}-\mu_j) - \frac{\mu_j}{9}, \\
+\frac{\partial \ell}{\partial \sigma_j} &= -\frac{N}{\sigma_j} +  \frac{1}{\sigma_j^3}\sum_{i=1}^N(y_{ij}-\mu_j)^2 + \frac{2}{\sigma_j}-3, \quad j = 1, 2.
+\end{align}$$
+
+In R the gradient can be programmed by hand:
+
+```{r}
+gradient <- function(ys) {
+  function(theta) {
+    mu <- c(theta[1], theta[3])
+    sigma <- c(theta[2], theta[4])
+    n <- nrow(ys)
+    c(1/sigma[1]^2*sum(ys[,1] - mu[1]) - mu[1]/9,
+      -n/sigma[1] + sum((ys[,1] - mu[1])^2) / sigma[1]^3 + 2/sigma[1] - 3,
+      1/sigma[2]^2*sum(ys[,2] - mu[2]) - mu[2]/9,
+      -n/sigma[2] + sum((ys[,2] - mu[2])^2) / sigma[2]^3 + 2/sigma[2] - 3)
+  }
+}
+```
+
+To ensure the value of the gradient is correct we can compare it to a numerical approximation of the gradient using the [https://cran.r-project.org/web/packages/numDeriv/numDeriv.pdf](numDeriv) package:
+
+```{r}
+approx_gradient <- function(xs, theta) {
+    grad(log_posterior(xs), theta)
+}
+
+compare_gradient <- function(theta, tol) {
+  abs(gradient(xs)(theta) - approx_gradient(xs, theta)) < tol
+}
+
+compare_gradient(theta, 1e-3)
+```
+
+It appears the calculated derivative is correct. Next, HMC works best when the leapgrog proposal can propose unconstrained values of the parameters which lie on the whole real line. A `transform` function is defined for the parameters, $\theta$ which calculates the exponential of the standard deviation parameters. The log-posterior is calculated using the transformed values, the appropriate transformation and inverse transformation functions can be written as:
+
+```{r}
+transform <- function(theta) {
+  c(theta[1], exp(theta[2]), theta[3], exp(theta[4]))
+}
+
+inv_transform <- function(theta) {
+  c(theta[1], log(theta[2]), theta[3], log(theta[4]))
+}
+```
+
+The leapfrog step proposal is calculated using the unconstrained parameters, hence the derivative of the log-jacobian of the transformation is required to be added to the value of the gradient of the log-density. Then the derivative of the log-jacobian is calculated to get the value of the gradient corresponding to the unconstrained parameters in the leapfrog step.
+
+```{r}
+log_jacobian <- function(theta) {
+  c(0, theta[2], 0, theta[4])
+}
+
+deriv_log_jacobian <- function(theta) {
+  c(0, 1, 0, 1)
+}
+```
+
+The derivative of the log-jacobian contributes the value 1 to each of the partial derivatives $\frac{\partial \ell}{\partial \sigma_j}, j = 1, 2.$
+
+```{r}
+# evaluate the log-posterior on the appropriate scale, using the transform function
+bounded_log_posterior <- function(xs) {
+  function(theta) {
+    log_posterior(xs)(transform(theta)) + sum(log_jacobian(theta))
+  }
+}
+
+bounded_gradient <- function(xs) {
+  function(theta) {
+    gradient(xs)(transform(theta)) + deriv_log_jacobian(theta)
+  }
+}
+```
+
+The HMC algorithm can be run in parallel using the [furrr](https://davisvaughan.github.io/furrr/) package as described in my post about the [Metropolis algorithm](2019/02/11/efficient_mcmc_using_rcpp). First the `hmc` function is used in another function which returns a dataframe called `hmc_df`. 
+
+```{r}
+hmc_df <- function(log_posterior, gradient, step_size, l, initP, m, parameter_names) {
+  mat <- hmc(log_posterior, gradient, step_size, l, initP, m)
+  colnames(mat) <- parameter_names
+  as.data.frame(mat) %>% 
+    mutate(iteration = row_number())
+}
+```
+
+Then the function is used in `future_map_dfr`:
+
+```{r hmc, eval=FALSE}
+future::plan(future::multiprocess)
+out_hmc <-
+  furrr::future_map_dfr(
+    .x = 1:2,
+    .f = function(x)
+      hmc_df(
+        bounded_log_posterior(xs),
+        bounded_gradient(xs),
+        0.01,
+        4,
+        inv_transform(theta),
+        10000,
+        c("mu1", "sigma1", "mu2", "sigma2")
+      ),
+    .id = "chain"
+  )
+```
+
+```{r, echo=FALSE, eval=FALSE}
+write_rds(out_hmc, "~/git/blog/static/models/hmc_bivariate.Rds")
+```
+
+```{r, echo=FALSE}
+out_hmc <- read_rds("~/git/blog/static/models/hmc_bivariate.Rds")
+```
+
+The traceplots of the chains both chains are plotted below.
+
+```{r, echo=FALSE}
+actual_values = tibble(
+  Parameter = c("mu1", "sigma1", "mu2", "sigma2"),
+  actual_value = c(5.0, 0.5, 2.0, 1.5)
+)
+
+out_hmc %>% 
+  mutate_at(vars(contains("sigma")), exp) %>% 
+  gather(key = "parameter", value, -chain, -iteration) %>% 
+  traceplot()
+```
+
+In order to compare between Markov chain Monte Carlo algorithms the amount of information from each correlated sample can be measured. This is termed the effective sample size, corresponding to the number of effectively independent draws from the posterior distribution. The code below calculates the ESS of each parameter in the chain using `ess_bulk` from the R interface to stan `rstan` library. 
+
+```{r}
+out_hmc %>% 
+  summarise_at(2:5, rstan::ess_bulk)
+```
+
+This could be compared to a similar method, such as the [Metropolis algorithm](2019/02/11/efficient_mcmc_rcpp).
+
+```{r}
+proposal <- function(x) {
+  z = rnorm(4, sd = 0.05)
+  c(x[1] + z[1], x[2] * exp(z[2]),
+    x[3] + z[3], x[4] * exp(z[4]))
+}
+out_met <- metropolis(theta, log_posterior(xs), proposal, 10000, chains = 2, parallel = TRUE)
+
+out_met %>% 
+    summarise_at(2:5, rstan::ess_bulk)
+```
+

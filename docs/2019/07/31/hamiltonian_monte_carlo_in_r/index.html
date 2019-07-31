@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.55.1" />
+
+
+<title>Hamiltonian Monte Carlo in R - Bayesian Statistics and Functional Programming </title>
+<meta property="og:title" content="Hamiltonian Monte Carlo in R - Bayesian Statistics and Functional Programming ">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/tomorrow-night-eighties.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/picture_cropped.jpg"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/">Blog</a></li>
+    
+    <li><a href="https://github.com/jonnylaw">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/lawsy">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">6 min read</span>
+    
+
+    <h1 class="article-title">Hamiltonian Monte Carlo in R</h1>
+
+    
+    <span class="article-date">2019/07/31</span>
+    
+
+    <div class="article-content">
+      
+
+
+<div id="hamiltonian-monte-carlo" class="section level1">
+<h1>Hamiltonian Monte Carlo</h1>
+<p>Metropolis-Hastings requires the specification of a proposal distribution, the log-likelihood and prior distributions for the parameters. The proposal distribution is often a multivariate Normal distribution with mean corresponding to the previous value of the parameters, the covariance of the proposal distribution is a tuning parameter. This proposal results in random walk behaviour and although the MH algorithm is guaranteed to converge it can take a long time to get satisfactory draws from the posterior distribution.</p>
+<p>The gradient of the un-normalised log-posterior distribution can be used to explore the posterior distribution more efficiently. Hamiltonian Monte Carlo (HMC) is an MCMC method which utilises a discretisation of Hamilton’s equations in order to model a physical system where the parameters are represented by the position of a particle in <span class="math inline">\(\theta \in \mathbb{R^d}\)</span>. In order to implement HMC, the posterior distribution is augmented with a momentum vector, <span class="math inline">\(\phi\)</span>, which is used to propose updates to the position which can be far away from the initial position.</p>
+<pre class="r"><code>leapfrog_step &lt;- function(gradient, step_size, position, momentum) {
+  momentum1 &lt;- momentum + gradient(position) * 0.5 * step_size
+  position1 &lt;- position + step_size * momentum1
+  momentum2 &lt;- momentum + gradient(position1) * 0.5 * step_size
+
+  list(position = position1, momentum = momentum2)
+}</code></pre>
+<pre class="r"><code>leapfrogs &lt;- function(gradient, step_size, l, position, momentum) {
+    for (i in 1:l) {
+      pos_mom &lt;- leapfrog_step(gradient, step_size, position, momentum)
+    }
+    list(position = pos_mom[[&quot;position&quot;]], momentum = pos_mom[[&quot;momentum&quot;]])
+}</code></pre>
+<pre class="r"><code>log_acceptance &lt;- function(propPosition,
+                           propMomentum,
+                           position,
+                           momentum,
+                           log_posterior) {
+  log_posterior(propPosition) + sum(dnorm(propMomentum, log = T)) - 
+    log_posterior(position) - sum(dnorm(momentum, log = T))
+}</code></pre>
+<pre class="r"><code>hmc_step &lt;- function(log_posterior, gradient, step_size, l, position) {
+  d &lt;- length(position)
+  momentum &lt;- rnorm(d)
+  pos_mom &lt;- leapfrogs(gradient, step_size, l, position, momentum)
+  propPosition &lt;- pos_mom[[&quot;position&quot;]]
+  propMomentum &lt;- pos_mom[[&quot;momentum&quot;]]
+  a &lt;- log_acceptance(propPosition, propMomentum, position, momentum, log_posterior)
+  if (log(runif(1)) &lt; a) {
+    propPosition
+  } else {
+    position
+  }
+}</code></pre>
+<pre class="r"><code>hmc &lt;- function(log_posterior, gradient, step_size, l, initP, m) {
+  out &lt;- matrix(NA_real_, nrow = m, ncol = length(initP))
+  out[1, ] &lt;- initP
+  for (i in 2:m) {
+    out[i, ] &lt;- hmc_step(log_posterior, gradient, step_size, l, out[i-1,])
+  }
+  out
+}</code></pre>
+<div id="an-example-model-bivariate-normal-model" class="section level2">
+<h2>An Example Model: Bivariate Normal Model</h2>
+<p>The same bivariate Normal model from a <a href="2019/02/11/efficient_mcmc_rcpp">previous post implementing the Metropolis algorithm</a> is used. See that post for details of deriving the log-likelihood and choice of prior distributions for the parameters.</p>
+<p><img src="/post/hmc_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>From the previous post, the log-posterior distribution is the sum of the log-prior and the log-likelihood. The log-likelihood is given by:</p>
+<p><span class="math display">\[\log p(y|\mu, \Sigma) = \sum_{j=1}^2\left(-\frac{N}{2}\log(2\pi\sigma_{j}^2) - \frac{1}{2\sigma_{j}^2}\sum_{i=1}^N(y_{ij}-\mu_j)^2\right)\]</span>
+Where <span class="math inline">\(\Sigma = \operatorname{diag}(\sigma_1, \sigma_2)\)</span>, the prior distributions are chosen to be:</p>
+<p><span class="math display">\[\begin{align}
+p(\mu_j) &amp;= \mathcal{N}(0, 3), \\
+p(\sigma_j) &amp;= \textrm{Gamma}(3, 3), \quad j = 1, 2.
+\end{align}\]</span></p>
+<p>The log-pdf of these distributions are:</p>
+<p><span class="math display">\[\begin{align}
+\log p(\mu_j) &amp;= -\frac{1}{2}\log(18\pi)-\frac{\mu_j^2}{18} \\
+\log p(\sigma_j) &amp;= \alpha\log(\beta)-\log(\Gamma(\alpha)) + (\alpha-1)\log(\sigma_j)-\beta \sigma_j
+\end{align}\]</span></p>
+<p>The gradient of the log-posterior with respect to each of the paramters can be written as:</p>
+<p><span class="math display">\[\begin{align}
+\frac{\partial \ell}{\partial \mu_j} &amp;= \frac{1}{\sigma_j^2}\sum_{i=1}^N(y_{ij}-\mu_j) - \frac{\mu_j}{9}, \\
+\frac{\partial \ell}{\partial \sigma_j} &amp;= -\frac{N}{\sigma_j} +  \frac{1}{\sigma_j^3}\sum_{i=1}^N(y_{ij}-\mu_j)^2 + \frac{2}{\sigma_j}-3, \quad j = 1, 2.
+\end{align}\]</span></p>
+<p>In R the gradient can be programmed by hand:</p>
+<pre class="r"><code>gradient &lt;- function(ys) {
+  function(theta) {
+    mu &lt;- c(theta[1], theta[3])
+    sigma &lt;- c(theta[2], theta[4])
+    n &lt;- nrow(ys)
+    c(1/sigma[1]^2*sum(ys[,1] - mu[1]) - mu[1]/9,
+      -n/sigma[1] + sum((ys[,1] - mu[1])^2) / sigma[1]^3 + 2/sigma[1] - 3,
+      1/sigma[2]^2*sum(ys[,2] - mu[2]) - mu[2]/9,
+      -n/sigma[2] + sum((ys[,2] - mu[2])^2) / sigma[2]^3 + 2/sigma[2] - 3)
+  }
+}</code></pre>
+<p>To ensure the value of the gradient is correct we can compare it to a numerical approximation of the gradient using the <a href="numDeriv">https://cran.r-project.org/web/packages/numDeriv/numDeriv.pdf</a> package:</p>
+<pre class="r"><code>approx_gradient &lt;- function(xs, theta) {
+    grad(log_posterior(xs), theta)
+}
+
+compare_gradient &lt;- function(theta, tol) {
+  abs(gradient(xs)(theta) - approx_gradient(xs, theta)) &lt; tol
+}
+
+compare_gradient(theta, 1e-3)</code></pre>
+<pre><code>## [1] TRUE TRUE TRUE TRUE</code></pre>
+<p>It appears the calculated derivative is correct. Next, HMC works best when the leapgrog proposal can propose unconstrained values of the parameters which lie on the whole real line. A <code>transform</code> function is defined for the parameters, <span class="math inline">\(\theta\)</span> which calculates the exponential of the standard deviation parameters. The log-posterior is calculated using the transformed values, the appropriate transformation and inverse transformation functions can be written as:</p>
+<pre class="r"><code>transform &lt;- function(theta) {
+  c(theta[1], exp(theta[2]), theta[3], exp(theta[4]))
+}
+
+inv_transform &lt;- function(theta) {
+  c(theta[1], log(theta[2]), theta[3], log(theta[4]))
+}</code></pre>
+<p>The leapfrog step proposal is calculated using the unconstrained parameters, hence the derivative of the log-jacobian of the transformation is required to be added to the value of the gradient of the log-density. Then the derivative of the log-jacobian is calculated to get the value of the gradient corresponding to the unconstrained parameters in the leapfrog step.</p>
+<pre class="r"><code>log_jacobian &lt;- function(theta) {
+  c(0, theta[2], 0, theta[4])
+}
+
+deriv_log_jacobian &lt;- function(theta) {
+  c(0, 1, 0, 1)
+}</code></pre>
+<p>The derivative of the log-jacobian contributes the value 1 to each of the partial derivatives <span class="math inline">\(\frac{\partial \ell}{\partial \sigma_j}, j = 1, 2.\)</span></p>
+<pre class="r"><code># evaluate the log-posterior on the appropriate scale, using the transform function
+bounded_log_posterior &lt;- function(xs) {
+  function(theta) {
+    log_posterior(xs)(transform(theta)) + sum(log_jacobian(theta))
+  }
+}
+
+bounded_gradient &lt;- function(xs) {
+  function(theta) {
+    gradient(xs)(transform(theta)) + deriv_log_jacobian(theta)
+  }
+}</code></pre>
+<p>The HMC algorithm can be run in parallel using the <a href="https://davisvaughan.github.io/furrr/">furrr</a> package as described in my post about the <a href="2019/02/11/efficient_mcmc_using_rcpp">Metropolis algorithm</a>. First the <code>hmc</code> function is used in another function which returns a dataframe called <code>hmc_df</code>.</p>
+<pre class="r"><code>hmc_df &lt;- function(log_posterior, gradient, step_size, l, initP, m, parameter_names) {
+  mat &lt;- hmc(log_posterior, gradient, step_size, l, initP, m)
+  colnames(mat) &lt;- parameter_names
+  as.data.frame(mat) %&gt;% 
+    mutate(iteration = row_number())
+}</code></pre>
+<p>Then the function is used in <code>future_map_dfr</code>:</p>
+<pre class="r"><code>future::plan(future::multiprocess)
+out_hmc &lt;-
+  furrr::future_map_dfr(
+    .x = 1:2,
+    .f = function(x)
+      hmc_df(
+        bounded_log_posterior(xs),
+        bounded_gradient(xs),
+        0.01,
+        4,
+        inv_transform(theta),
+        10000,
+        c(&quot;mu1&quot;, &quot;sigma1&quot;, &quot;mu2&quot;, &quot;sigma2&quot;)
+      ),
+    .id = &quot;chain&quot;
+  )</code></pre>
+<p>The traceplots of the chains both chains are plotted below.</p>
+<p><img src="/post/hmc_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>In order to compare between Markov chain Monte Carlo algorithms the amount of information from each correlated sample can be measured. This is termed the effective sample size, corresponding to the number of effectively independent draws from the posterior distribution. The code below calculates the ESS of each parameter in the chain using <code>ess_bulk</code> from the R interface to stan <code>rstan</code> library.</p>
+<pre class="r"><code>out_hmc %&gt;% 
+  summarise_at(2:5, rstan::ess_bulk)</code></pre>
+<pre><code>##        mu1  sigma1      mu2   sigma2
+## 1 1352.983 1168.56 141.9009 632.9847</code></pre>
+<p>This could be compared to a similar method, such as the <a href="2019/02/11/efficient_mcmc_rcpp">Metropolis algorithm</a>.</p>
+<pre class="r"><code>proposal &lt;- function(x) {
+  z = rnorm(4, sd = 0.05)
+  c(x[1] + z[1], x[2] * exp(z[2]),
+    x[3] + z[3], x[4] * exp(z[4]))
+}
+out_met &lt;- metropolis(theta, log_posterior(xs), proposal, 10000, chains = 2, parallel = TRUE)</code></pre>
+<pre><code>## Warning: [ONE-TIME WARNING] Forked processing (&#39;multicore&#39;) is disabled
+## in future (&gt;= 1.13.0) when running R from RStudio, because it is
+## considered unstable. Because of this, plan(&quot;multicore&quot;) will fall
+## back to plan(&quot;sequential&quot;), and plan(&quot;multiprocess&quot;) will fall back to
+## plan(&quot;multisession&quot;) - not plan(&quot;multicore&quot;) as in the past. For more
+## details, how to control forked processing or not, and how to silence this
+## warning in future R sessions, see ?future::supportsMulticore</code></pre>
+<pre class="r"><code>out_met %&gt;% 
+    summarise_at(2:5, rstan::ess_bulk)</code></pre>
+<pre><code>## # A tibble: 1 x 4
+##      V1    V2    V3    V4
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 1828. 1446.  358. 1428.</code></pre>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/scala.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

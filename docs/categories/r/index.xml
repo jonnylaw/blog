@@ -6,10 +6,19 @@
     <description>Recent content in R on Bayesian Statistics and Functional Programming </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 25 Feb 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 31 Jul 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Hamiltonian Monte Carlo in R</title>
+      <link>/2019/07/31/hamiltonian_monte_carlo_in_r/</link>
+      <pubDate>Wed, 31 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/07/31/hamiltonian_monte_carlo_in_r/</guid>
+      <description>Hamiltonian Monte Carlo Metropolis-Hastings requires the specification of a proposal distribution, the log-likelihood and prior distributions for the parameters. The proposal distribution is often a multivariate Normal distribution with mean corresponding to the previous value of the parameters, the covariance of the proposal distribution is a tuning parameter. This proposal results in random walk behaviour and although the MH algorithm is guaranteed to converge it can take a long time to get satisfactory draws from the posterior distribution.</description>
+    </item>
     
     <item>
       <title>Sampling from a distribution with a known CDF</title>
