@@ -7,13 +7,13 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 library(hedgehog)
 ```
 
 ## Forward Mode Automatic Differentation
 
-Automatic differentiation can be used to calculate the exact derivative of a function at a point using applications of the chain rule. Dual numbers provide a straightforward implementation in R using S3 generic methods. A dual number has a real component and a "dual" component which can be used to exacly calculate the expression and derivative at a specific value of $x$. Consider the quadratic form $f(x) = 5x^2 + 3x + 10$ with derivative $f^\prime(x) = 10x + 3$. The function and derivative can be evaulated at a value, say $x = 5$ using the dual number $5 + \varepsilson$, the dual component $\varepilson$ is considered small such that $\varepsilon^2 = 0$ then calculating $f(5 + \varepsilon)$:
+Automatic differentiation can be used to calculate the exact derivative of a function at a point using applications of the chain rule. Dual numbers provide a straightforward implementation in R using S3 generic methods. A dual number has a real component and a "dual" component which can be used to exacly calculate the expression and derivative at a specific value of $x$. Consider the quadratic form $f(x) = 5x^2 + 3x + 10$ with derivative $f^\prime(x) = 10x + 3$. The function and derivative can be evaulated at a value, say $x = 5$ using the dual number $5 + \varepsilon$, the dual component $\varepilon$ is considered small such that $\varepsilon^2 = 0$ then calculating $f(5 + \varepsilon)$:
 
 $$\begin{align}
 f(5 + \varepsilon) &= 5(5 + \varepsilon)^2 + 3(5 + \varepsilon) + 10,\\
