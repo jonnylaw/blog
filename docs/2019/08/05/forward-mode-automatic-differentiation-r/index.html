@@ -6,8 +6,8 @@
 <meta name="generator" content="Hugo 0.55.1" />
 
 
-<title>Automatic Differentiation Part I: Forward Mode AD - Bayesian Statistics and Functional Programming </title>
-<meta property="og:title" content="Automatic Differentiation Part I: Forward Mode AD - Bayesian Statistics and Functional Programming ">
+<title>Forward Mode AD in R - Bayesian Statistics and Functional Programming </title>
+<meta property="og:title" content="Forward Mode AD in R - Bayesian Statistics and Functional Programming ">
 
 
 
@@ -61,10 +61,10 @@
 
   <article class="article">
     
-    <span class="article-duration">4 min read</span>
+    <span class="article-duration">5 min read</span>
     
 
-    <h1 class="article-title">Automatic Differentiation Part I: Forward Mode AD</h1>
+    <h1 class="article-title">Forward Mode AD in R</h1>
 
     
     <span class="article-date">2019/08/05</span>
@@ -136,6 +136,40 @@ divide &lt;- function(x, y)
 ## attr(,&quot;class&quot;)
 ## [1] &quot;dual&quot;</code></pre>
 <p>The definition of <code>f</code> is cumbersome since we have to explicitly create the constants using the <code>const</code> constructor. The methods defined in <code>Ops.dual</code> can be extended to handle cases when a double is multiplied by a dual number to convert the double to a <code>const</code> and hence we can automatically differentiate any univariate function using forward mode automatic differentiation.</p>
+<p>We can write a function which checks the arguments of <code>plus</code>, <code>minus</code> etc, then if the arguments aren’t explicitly dual number variables using the function <code>var</code> then they are converted to a dual constant using <code>const</code>. This function checks each argument (of a generic function of two arguments <code>f</code>) in turn to determine if they are doubles then promotes them to constants.</p>
+<pre class="r"><code>lift_function &lt;- function(f) {
+  function(x, y)
+    if (is.double(x)) {
+      f(const(x), y)
+    } else if (is.double(y)) {
+      f(x, const(y))
+    } else {
+      f(x, y)
+    }
+}</code></pre>
+<p>The ops can then be re-defined using the <code>lift_function</code>:</p>
+<pre class="r"><code>Ops.dual &lt;- function(x, y) {
+  switch(
+    .Generic,
+    `+` = lift_function(plus)(x, y),
+    `-` = lift_function(minus)(x, y),
+    `*` = lift_function(times)(x, y),
+    `/` = lift_function(divide)(x, y)
+  )
+}</code></pre>
+<p>Then <code>f</code> can be defined more naturally:</p>
+<pre class="r"><code>f &lt;- function(x) 
+  5 * x * x + 3 * x + 10</code></pre>
+<p>And the derivative calculated:</p>
+<pre class="r"><code>f(var(5))</code></pre>
+<pre><code>## $real
+## [1] 150
+## 
+## $eps
+## [1] 53
+## 
+## attr(,&quot;class&quot;)
+## [1] &quot;dual&quot;</code></pre>
 </div>
 <div id="testing-using-hedgehog" class="section level2">
 <h2>Testing using Hedgehog</h2>

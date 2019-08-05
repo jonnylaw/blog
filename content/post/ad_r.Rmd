@@ -1,5 +1,5 @@
 ---
-title: "Automatic Differentiation Part I: Forward Mode AD"
+title: "Forward Mode AD in R"
 author: "Jonny Law"
 date: "2019-08-05"
 slug: forward-mode-automatic-differentiation-R
@@ -89,6 +89,48 @@ f(var(5))
 ```
 
 The definition of `f` is cumbersome since we have to explicitly create the constants using the `const` constructor. The methods defined in `Ops.dual` can be extended to handle cases when a double is multiplied by a dual number to convert the double to a `const` and hence we can automatically differentiate any univariate function using forward mode automatic differentiation.
+
+We can write a function which checks the arguments of `plus`, `minus` etc, then if the arguments aren't explicitly dual number variables using the function `var` then they are converted to a dual constant using `const`. This function checks each argument (of a generic function of two arguments `f`) in turn to determine if they are doubles then promotes them to constants.
+
+```{r}
+lift_function <- function(f) {
+  function(x, y)
+    if (is.double(x)) {
+      f(const(x), y)
+    } else if (is.double(y)) {
+      f(x, const(y))
+    } else {
+      f(x, y)
+    }
+}
+```
+
+The ops can then be re-defined using the `lift_function`:
+
+```{r}
+Ops.dual <- function(x, y) {
+  switch(
+    .Generic,
+    `+` = lift_function(plus)(x, y),
+    `-` = lift_function(minus)(x, y),
+    `*` = lift_function(times)(x, y),
+    `/` = lift_function(divide)(x, y)
+  )
+}
+```
+
+Then `f` can be defined more naturally:
+
+```{r}
+f <- function(x) 
+  5 * x * x + 3 * x + 10
+```
+
+And the derivative calculated:
+
+```{r}
+f(var(5))
+```
 
 ## Testing using Hedgehog
 
