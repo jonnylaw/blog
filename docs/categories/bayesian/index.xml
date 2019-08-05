@@ -21,6 +21,15 @@
     </item>
     
     <item>
+      <title>Bayesian Inference using rejection sampling</title>
+      <link>/2019/02/25/rejection-sampling/</link>
+      <pubDate>Mon, 25 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/02/25/rejection-sampling/</guid>
+      <description>Coin Flip Model As an example, consider a (possibly biased) coin flip experiment. The parameter of interest is the probability of heads \(p_h\). A Beta distribution is chosen for the prior of \(p_h\), \(p(p_h) = \mathcal{B}(\alpha, \beta)\). The Beta distribution has support between 0 and 1, which is appropriate for a probability. The likelihood of a coin flip is Bernoulli, however the coin should be flipped several times in order to learn the parameter \(p_h\).</description>
+    </item>
+    
+    <item>
       <title>Efficient Markov Chain Monte Carlo in R with Rcpp</title>
       <link>/2019/02/11/efficient_mcmc_using_rcpp/</link>
       <pubDate>Mon, 11 Feb 2019 00:00:00 +0000</pubDate>

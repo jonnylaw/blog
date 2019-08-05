@@ -6,10 +6,19 @@
     <description>Recent content in Posts on Bayesian Statistics and Functional Programming </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 31 Jul 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 05 Aug 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Automatic Differentiation Part I: Forward Mode AD</title>
+      <link>/2019/08/05/forward-mode-automatic-differentiation-r/</link>
+      <pubDate>Mon, 05 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/08/05/forward-mode-automatic-differentiation-r/</guid>
+      <description>Forward Mode Automatic Differentation Automatic differentiation can be used to calculate the exact derivative of a function at a point using applications of the chain rule. Dual numbers provide a straightforward implementation in R using S3 generic methods. A dual number has a real component and a “dual” component which can be used to exacly calculate the expression and derivative at a specific value of \(x\). Consider the quadratic form \(f(x) = 5x^2 + 3x + 10\) with derivative \(f^\prime(x) = 10x + 3\).</description>
+    </item>
     
     <item>
       <title>Hamiltonian Monte Carlo in R</title>
@@ -38,6 +47,15 @@ import coursier.MavenRepository interp.repositories() ++= Seq(MavenRepository( &
       
       <guid>/2019/04/15/scala-and-jupyter-notebook-with-almond/</guid>
       <description>Typically, when programming with Scala I use a combination of ensime in emacs, sbt and the Scala repl. However, sometimes when working on a new project which requires a lot of data exploration and graphics it is sometimes more useful to have a notebook where figures are rendered inline with descriptions of why each figure has been generated and what it shows for future reference. Jupyter notebooks have long been the standard in Python (although I prefer rmarkdown and knitr when using R).</description>
+    </item>
+    
+    <item>
+      <title>Bayesian Inference using rejection sampling</title>
+      <link>/2019/02/25/rejection-sampling/</link>
+      <pubDate>Mon, 25 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/02/25/rejection-sampling/</guid>
+      <description>Coin Flip Model As an example, consider a (possibly biased) coin flip experiment. The parameter of interest is the probability of heads \(p_h\). A Beta distribution is chosen for the prior of \(p_h\), \(p(p_h) = \mathcal{B}(\alpha, \beta)\). The Beta distribution has support between 0 and 1, which is appropriate for a probability. The likelihood of a coin flip is Bernoulli, however the coin should be flipped several times in order to learn the parameter \(p_h\).</description>
     </item>
     
     <item>

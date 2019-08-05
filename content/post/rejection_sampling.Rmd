@@ -1,7 +1,6 @@
 ---
 title: "Bayesian Inference using rejection sampling"
 author: "Jonny Law"
-draft: TRUE
 date: '2019-02-25'
 slug: rejection-sampling
 categories:
@@ -23,18 +22,18 @@ theme_set(theme_tufte())
 
 As an example, consider a (possibly biased) coin flip experiment. The parameter of interest is the probability of heads $p_h$. A Beta distribution is chosen for the prior of $p_h$, $p(p_h) = \mathcal{B}(\alpha, \beta)$. The Beta distribution has support between 0 and 1, which is appropriate for a probability. The likelihood of a coin flip is Bernoulli, however the coin should be flipped several times in order to learn the parameter $p_h$. The distribution for $n$ independent Bernoulli trials is the Binomial distribution, hence the likelihood can be written as $\textrm{Bin}(Y;n,p_h)$. The coin is flipped $n = 10$ times and the results are displayed below:
 
-\begin{equation*}
+$$\begin{equation*}
   \label{eq:4}
 \{H, H, T, H, H, H, T, T, H, T\}  
-\end{equation*}
+\end{equation*}$$
 
 Then $Y = 6$, and it remains to determine the posterior distribution of the parameter $p_h$ representing the probability of obtaining heads. Applying Bayes theorem:
 
-\begin{align*}
+$$\begin{align*}
   p(p_h|Y) &= \frac{p(p_h)\textrm{Bin}(Y;n,p_h)}{\int_0^1 p(Y|p_h) dp_h} \\
            &\propto p_h^{\alpha - 1}(1-p_h)^{\beta-1}{n \choose Y}p_h^Y(1-p_h)^{n-Y} \\
            &= p_h^{Y + \alpha - 1}(1 - p_h)^{n-Y + \beta - 1}
-\end{align*}
+\end{align*}$$
 
 The posterior distribution is a Beta distribution, $\mathcal{B}(Y + \alpha, n - Y + \beta)$.
 
@@ -63,7 +62,7 @@ target distribution. Consider a problem where it is straightforward to evaluate
 the posterior density $p(\cdot)$ up to a constant. The rejection sampler
 algorithm proceeds as follows; start by sampling a value from a proposal
 distribution $\psi^\star \sim q(\cdot)$, then accept the proposed value with
-probability $p(\psi^\star)/Mq(\psi)$, where $M$ is an upper bound on $p/q$. Algorithm~\ref{alg:rejection-sampler} shows a single step of the rejection sampler algorithm which returns a single sample from the target distribution $p(\cdot)$.
+probability $p(\psi^\star)/Mq(\psi)$, where $M$ is an upper bound on $p/q$. The algorithm below shows a single step of the rejection sampler algorithm which returns a single sample from the target distribution $p(\cdot)$.
 
 1. Propose $\psi^\star \sim q(\cdot)$
 2. Continuously sample $u \sim U[0, 1]$ and check the condition in step 3.
