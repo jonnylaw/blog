@@ -26,7 +26,16 @@
       <pubDate>Wed, 31 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>/2019/07/31/hamiltonian_monte_carlo_in_r/</guid>
-      <description>Hamiltonian Monte Carlo Metropolis-Hastings requires the specification of a proposal distribution, the log-likelihood and prior distributions for the parameters. The proposal distribution is often a multivariate Normal distribution with mean corresponding to the previous value of the parameters, the covariance of the proposal distribution is a tuning parameter. This proposal results in random walk behaviour and although the MH algorithm is guaranteed to converge it can take a long time to get satisfactory draws from the posterior distribution.</description>
+      <description>Introduction Determining the posterior distribution for the parameters of a real-world Bayesian model inevitably requires calculating high-dimensional integrals. Often these are tedious or impossible to calculate by hand. Markov chain Monte Carlo (MCMC) algorithms are popular approaches, samplers such as the Gibbs sampler can be used to sample from models with conditionally conjugate specifications and the Metropolis-Hastings algorithm can be used when the conditionally conjugate form is not present.</description>
+    </item>
+    
+    <item>
+      <title>Bayesian Linear Regression with Gibbs Sampling in R</title>
+      <link>/2019/06/14/bayesian-linear-regression-gibbs/</link>
+      <pubDate>Fri, 14 Jun 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/06/14/bayesian-linear-regression-gibbs/</guid>
+      <description>## ── Attaching packages ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ── ## ✔ ggplot2 3.2.0 ✔ purrr 0.3.2 ## ✔ tibble 2.1.3 ✔ dplyr 0.8.3 ## ✔ tidyr 0.8.3 ✔ stringr 1.4.0 ## ✔ readr 1.3.1 ✔ forcats 0.4.0 ## ── Conflicts ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ── ## ✖ dplyr::filter() masks stats::filter() ## ✖ dplyr::lag() masks stats::lag() Linear regression models are commonly used to explain relationships between predictor variables and outcome variables. The data consists of pairs of independent observations \((y_i, x_i)\) where \(y_i \in \mathbb{R}^p\) represents the outcome variable of the \(i^{th}\) observation and \(x_i \in \mathbb{R}^{m \times 1}\) represents the predictor variable of the \(i^{th}\) observation.</description>
     </item>
     
     <item>

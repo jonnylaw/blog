@@ -2,13 +2,10 @@
 title: Bayesian Linear Regression with Gibbs Sampling in R
 author: Jonny Law
 date: '2019-06-14'
-draft: true
-slug: bayesian-model-evaluation
+slug: bayesian-linear-regression-gibbs
 categories: [R, Bayesian]
 tags: []
 ---
-
-TODO: Explore prior distributions
 
 ```{r echo=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
@@ -78,9 +75,7 @@ p(\beta) &= \mathcal{N}(\mu_\beta, \sigma^2_\beta).
 
 Gibbs sampling works by alternately sampling from the conditional conjugate distribution. It can often be faster for models which are specified using the conjugate structure, however the choice of prior distribution is not flexible (but the parameterisation is). The algebra below is not required to implement a Gibbs sampling algorithm as there are probabilistic programming languages such as BUGS and JAGS which work out the required maths.
 
-This next section is an illustration on how to fit a linear regression model using Gibbs sampling.
-
-Using the likelihood and priors derived in the section above we can derive the conditionally conjugate posterior distributions:
+Using the likelihood and priors from the section above we can derive the conditionally conjugate posterior distributions:
 
 $$\begin{align*}
 p(\tau|\textbf{y}, \textbf{x}, \psi^{(-\tau)}) &= p(\tau)\prod_{i=1}^np(y_i|\psi), \\

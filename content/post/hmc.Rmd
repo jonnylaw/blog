@@ -20,30 +20,40 @@ library(jonnylaw) # My personal R library containing code from this blog
 theme_set(theme_minimal())
 ```
 
-# Hamiltonian Monte Carlo
+## Introduction
 
-Metropolis-Hastings requires the specification of a proposal distribution, the log-likelihood and prior distributions for the parameters. The proposal distribution is often a multivariate Normal distribution with mean corresponding to the previous value of the parameters, the covariance of the proposal distribution is a tuning parameter. This proposal results in random walk behaviour and although the MH algorithm is guaranteed to converge it can take a long time to get satisfactory draws from the posterior distribution.
+Determining the posterior distribution for the parameters of a real-world Bayesian model inevitably requires calculating high-dimensional integrals. Often these are tedious or impossible to calculate by hand. Markov chain Monte Carlo (MCMC) algorithms are popular approaches, samplers such as the [Gibbs sampler](2019/06/14/bayesian-linear-regression-gibbs) can be used to sample from models with conditionally [conjugate](https://en.wikipedia.org/wiki/Conjugate_prior) specifications and the [Metropolis-Hastings algorithm](2019/02/11/efficient_mcmc_using_rcpp) can be used when the conditionally conjugate form is not present. 
+
+There are downsides to these established methods, Gibbs sampling puts a restrictive form on the prior distribution. Although Metropolis-Hastings (MH) allows any prior distribution from which the probability density function can be evaluaten, the proposal distribution is often a multivariate Normal distribution with mean corresponding to the previous value of the parameters. This proposal results in random walk behaviour and although the MH algorithm is guaranteed to converge it can take a long time to get satisfactory draws from the posterior distribution.
 
 The gradient of the un-normalised log-posterior distribution can be used to explore the posterior distribution more efficiently. Hamiltonian Monte Carlo (HMC) is an MCMC method which utilises a discretisation of Hamilton's equations in order to model a physical system where the parameters are represented by the position of a particle in $\theta \in \mathbb{R^d}$. In order to implement HMC, the posterior distribution is augmented with a momentum vector, $\phi$, which is used to propose updates to the position which can be far away from the initial position.
 
+## HMC in R
+
+Hamilton's equations are discretised and a "leapfrog" update is used. These leapfrog steps can be written as:
+
 ```{r}
-leapfrog_step <- function(gradient, step_size, position, momentum) {
+leapfrog_step <- function(gradient, step_size, position, momentum, d) {
   momentum1 <- momentum + gradient(position) * 0.5 * step_size
   position1 <- position + step_size * momentum1
   momentum2 <- momentum + gradient(position1) * 0.5 * step_size
 
-  list(position = position1, momentum = momentum2)
+  matrix(c(position1, momentum2), ncol = d*2)
 }
 ```
 
 ```{r}
-leapfrogs <- function(gradient, step_size, l, position, momentum) {
-    for (i in 1:l) {
-      pos_mom <- leapfrog_step(gradient, step_size, position, momentum)
-    }
-    list(position = pos_mom[["position"]], momentum = pos_mom[["momentum"]])
+leapfrogs <- function(gradient, step_size, l, position, momentum, d) {
+  for (i in 1:l) {
+    pos_mom <- leapfrog_step(gradient, step_size, position, momentum, d)
+    position <- pos_mom[seq_len(d)]
+    momentum <- pos_mom[-seq_len(d)]
+  }
+  pos_mom
 }
 ```
+
+The log-acceptance can be written as:
 
 ```{r}
 log_acceptance <- function(propPosition,
@@ -56,13 +66,15 @@ log_acceptance <- function(propPosition,
 }
 ```
 
+In order to propose a new set of parameters a random momentum vector is drawn from the Normal distribution and used in the leapfrog steps. To ensure detailed balance and that the stationary distribution of the Markov chain is equivalent to the target distribution, a metropolis step is used accepting the newly proposed parameters with log-probability equal to the `log_acceptance` defined above. To implement this in R, we compare a log uniform random number to the log acceptance criteria. A single HMC step can be written as:
+
 ```{r}
 hmc_step <- function(log_posterior, gradient, step_size, l, position) {
   d <- length(position)
   momentum <- rnorm(d)
-  pos_mom <- leapfrogs(gradient, step_size, l, position, momentum)
-  propPosition <- pos_mom[["position"]]
-  propMomentum <- pos_mom[["momentum"]]
+  pos_mom <- leapfrogs(gradient, step_size, l, position, momentum, d)
+  propPosition <- pos_mom[seq_len(d)]
+  propMomentum <- pos_mom[-seq_len(d)]
   a <- log_acceptance(propPosition, propMomentum, position, momentum, log_posterior)
   if (log(runif(1)) < a) {
     propPosition
@@ -71,6 +83,8 @@ hmc_step <- function(log_posterior, gradient, step_size, l, position) {
   }
 }
 ```
+
+The HMC algorithm can be written as
 
 ```{r}
 hmc <- function(log_posterior, gradient, step_size, l, initP, m) {
@@ -99,6 +113,7 @@ bivariate_normal <- function(theta, n) {
 }
 
 theta = c(5.0, 0.5, 2.0, 1.5)
+set.seed(123)
 sims = bivariate_normal(theta, 1000)
 xs <- as.matrix(sims)
 qplot(x = sims$x, y = sims$y)
@@ -172,7 +187,7 @@ compare_gradient <- function(theta, tol) {
 compare_gradient(theta, 1e-3)
 ```
 
-It appears the calculated derivative is correct. Next, HMC works best when the leapgrog proposal can propose unconstrained values of the parameters which lie on the whole real line. A `transform` function is defined for the parameters, $\theta$ which calculates the exponential of the standard deviation parameters. The log-posterior is calculated using the transformed values, the appropriate transformation and inverse transformation functions can be written as:
+It appears the calculated derivative is correct. Next, HMC works best when the leapfrog proposal can propose unconstrained values of the parameters which lie on the whole real line. A `transform` function is defined for the parameters, $\theta$ which calculates the exponential of the standard deviation parameters. The log-posterior is calculated using the transformed values, the appropriate transformation and inverse transformation functions can be written as:
 
 ```{r}
 transform <- function(theta) {
@@ -267,6 +282,8 @@ out_hmc %>%
   traceplot()
 ```
 
+## Evaluating the efficiency of a markov chain:
+
 In order to compare between Markov chain Monte Carlo algorithms the amount of information from each correlated sample can be measured. This is termed the effective sample size, corresponding to the number of effectively independent draws from the posterior distribution. The code below calculates the ESS of each parameter in the chain using `ess_bulk` from the R interface to stan `rstan` library. 
 
 ```{r}
@@ -276,15 +293,25 @@ out_hmc %>%
 
 This could be compared to a similar method, such as the [Metropolis algorithm](2019/02/11/efficient_mcmc_rcpp).
 
-```{r}
+```{r, eval=FALSE}
 proposal <- function(x) {
   z = rnorm(4, sd = 0.05)
   c(x[1] + z[1], x[2] * exp(z[2]),
     x[3] + z[3], x[4] * exp(z[4]))
 }
 out_met <- metropolis(theta, log_posterior(xs), proposal, 10000, chains = 2, parallel = TRUE)
+```
 
+```{r}
+out_met <- read_rds("~/git/blog/static/models/metropolis_parallel.Rds")
+```
+
+
+The ESS can be computed using:
+
+```{r}
 out_met %>% 
     summarise_at(2:5, rstan::ess_bulk)
 ```
+
 
