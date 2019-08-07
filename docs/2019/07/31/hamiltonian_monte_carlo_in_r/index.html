@@ -236,8 +236,8 @@ out_hmc &lt;-
 <p>In order to compare between Markov chain Monte Carlo algorithms the amount of information from each correlated sample can be measured. This is termed the effective sample size, corresponding to the number of effectively independent draws from the posterior distribution. The code below calculates the ESS of each parameter in the chain using <code>ess_bulk</code> from the R interface to stan <code>rstan</code> library.</p>
 <pre class="r"><code>out_hmc %&gt;% 
   summarise_at(2:5, rstan::ess_bulk)</code></pre>
-<pre><code>##        mu1  sigma1      mu2   sigma2
-## 1 1352.983 1168.56 141.9009 632.9847</code></pre>
+<pre><code>##        mu1   sigma1      mu2   sigma2
+## 1 12435.88 11126.64 1215.503 4702.777</code></pre>
 <p>This could be compared to a similar method, such as the <a href="2019/02/11/efficient_mcmc_rcpp">Metropolis algorithm</a>.</p>
 <pre class="r"><code>proposal &lt;- function(x) {
   z = rnorm(4, sd = 0.05)
