@@ -6,10 +6,19 @@
     <description>Recent content on Bayesian Statistics and Functional Programming </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 05 Aug 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 09 Aug 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Bayesian Survival Analysis: Exponential Model</title>
+      <link>/2019/08/09/bayesian-survival-analysis/</link>
+      <pubDate>Fri, 09 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/08/09/bayesian-survival-analysis/</guid>
+      <description>Poisson Distribution Consider an arbitrary interval where the expected number of events in the interval is denoted as \(\lambda\). The number of events in this interval is Poisson distributed with rate \(\lambda\). To see this, proceed to subdivide the interval into \(n\) smaller intervals \(t_1, \dots, t_n\) in which the probability of an event occuring in each small interval is \(\lambda / n\) and can be represented as an independent Bernoulli trial.</description>
+    </item>
     
     <item>
       <title>Forward Mode AD in R</title>
@@ -35,7 +44,7 @@
       <pubDate>Fri, 14 Jun 2019 00:00:00 +0000</pubDate>
       
       <guid>/2019/06/14/bayesian-linear-regression-gibbs/</guid>
-      <description>## ── Attaching packages ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ── ## ✔ ggplot2 3.2.0 ✔ purrr 0.3.2 ## ✔ tibble 2.1.3 ✔ dplyr 0.8.3 ## ✔ tidyr 0.8.3 ✔ stringr 1.4.0 ## ✔ readr 1.3.1 ✔ forcats 0.4.0 ## ── Conflicts ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ── ## ✖ dplyr::filter() masks stats::filter() ## ✖ dplyr::lag() masks stats::lag() Linear regression models are commonly used to explain relationships between predictor variables and outcome variables. The data consists of pairs of independent observations \((y_i, x_i)\) where \(y_i \in \mathbb{R}^p\) represents the outcome variable of the \(i^{th}\) observation and \(x_i \in \mathbb{R}^{m \times 1}\) represents the predictor variable of the \(i^{th}\) observation.</description>
+      <description>## ── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ── ## ✔ ggplot2 3.2.0 ✔ purrr 0.3.2 ## ✔ tibble 2.1.3 ✔ dplyr 0.8.3 ## ✔ tidyr 0.8.3 ✔ stringr 1.4.0 ## ✔ readr 1.3.1 ✔ forcats 0.4.0 ## ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ── ## ✖ dplyr::filter() masks stats::filter() ## ✖ dplyr::lag() masks stats::lag() Linear regression models are commonly used to explain relationships between predictor variables and outcome variables. The data consists of pairs of independent observations \((y_i, x_i)\) where \(y_i \in \mathbb{R}^p\) represents the outcome variable of the \(i^{th}\) observation and \(x_i \in \mathbb{R}^{m \times 1}\) represents the predictor variable of the \(i^{th}\) observation.</description>
     </item>
     
     <item>

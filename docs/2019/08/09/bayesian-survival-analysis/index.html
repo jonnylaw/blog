@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.55.1" />
+
+
+<title>Bayesian Survival Analysis: Exponential Model - Bayesian Statistics and Functional Programming </title>
+<meta property="og:title" content="Bayesian Survival Analysis: Exponential Model - Bayesian Statistics and Functional Programming ">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/tomorrow-night-eighties.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/picture_cropped.jpg"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/">Blog</a></li>
+    
+    <li><a href="https://github.com/jonnylaw">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/lawsy">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">7 min read</span>
+    
+
+    <h1 class="article-title">Bayesian Survival Analysis: Exponential Model</h1>
+
+    
+    <span class="article-date">2019/08/09</span>
+    
+
+    <div class="article-content">
+      
+
+
+<div id="poisson-distribution" class="section level1">
+<h1>Poisson Distribution</h1>
+<p>Consider an arbitrary interval where the expected number of events in the interval is denoted as <span class="math inline">\(\lambda\)</span>. The number of events in this interval is Poisson distributed with rate <span class="math inline">\(\lambda\)</span>. To see this, proceed to subdivide the interval into <span class="math inline">\(n\)</span> smaller intervals <span class="math inline">\(t_1, \dots, t_n\)</span> in which the probability of an event occuring in each small interval is <span class="math inline">\(\lambda / n\)</span> and can be represented as an independent Bernoulli trial. The number of events in the entire interval is distributed according to a Binomial distribution with number of trials <span class="math inline">\(n\)</span> and probability of success <span class="math inline">\(\lambda / n\)</span>. If the intervals are infinitessimally small, in the limit as <span class="math inline">\(n \rightarrow \infty\)</span>, then number of trials increases and the Binomial distribution tends to the Poisson distribution:</p>
+<p><span class="math display">\[\begin{align*}
+f(k) &amp;= \lim_{n\rightarrow\infty} {n \choose k}\left(\frac{\lambda}{n}\right)^k\left(1-\left(\frac{\lambda}{n}\right)\right)^{n-k}, \\
+&amp;= \lim_{n\rightarrow\infty} \frac{n!}{(n-k)!k!}\left(\frac{\lambda}{n}\right)^k\left(1-\left(\frac{\lambda}{n}\right)\right)^{n}\left(1-\left(\frac{\lambda}{n}\right)\right)^{-k}, \\
+&amp;= \lim_{n\rightarrow\infty}\frac{n(n-1)\dots(n-k+1)(n-k)!}{(n-k)!n^k}\frac{\lambda^ke^{-\lambda}}{k!} \cdot 1, \\
+&amp;= 1 \cdot \frac{\lambda^ke^{-\lambda}}{k!}.
+\end{align*}\]</span></p>
+<p>This is the probability mass function of the Poisson distribution and corresponds to the probability of observing exactly <span class="math inline">\(k\)</span> events in an interval with expected number of events <span class="math inline">\(\lambda\)</span>. The Poisson probability mass function can be plotted for various values of <span class="math inline">\(\lambda\)</span>:</p>
+<pre class="r"><code>tibble(
+  x = rep(0:20, times = 3),
+  lambda = rep(c(1, 3, 10), each = 21),
+  probability = dpois(x = x, lambda = lambda)
+) %&gt;% 
+ggplot(aes(x = x, y = probability, colour = as.factor(lambda))) +
+  geom_point() +
+  geom_line() +
+  labs(title = &quot;Probability Mass Function (pmf) for three values of lambda&quot;, colour = &quot;lambda&quot;)</code></pre>
+<p><img src="/post/bayesian_survival_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+</div>
+<div id="exponential-survival-model" class="section level1">
+<h1>Exponential Survival Model</h1>
+<p>The inter-arrival times of a poisson process are distributed according to an exponential distribution with density <span class="math inline">\(f(t) = \lambda e^{-\lambda t}\)</span>. The CDF of the exponential distribution is <span class="math inline">\(F(t) = \int_0^\infty f(s) ds = 1 - e^{-\lambda t}.\)</span> The cumulative distribution function (CDF) is defined as <span class="math inline">\(\textrm{Pr}(T \leq t) = F(t)\)</span>, where <span class="math inline">\(T\)</span> is a random variable representing the failure time and <span class="math inline">\(t\)</span> is time period, hence the CDF defines the probability of the event occuring before time <span class="math inline">\(t\)</span>. The survival function is the complement of the CDF and is defined as <span class="math inline">\(S(t) = 1 - \textrm{Pr}(T \leq t) = \textrm{Pr}(T &gt; t)\)</span>, the probability of the event happening after the elapsed time <span class="math inline">\(t\)</span> given that the event hasn’t happened before <span class="math inline">\(t\)</span>. The survival function for the exponential distribution is <span class="math inline">\(S(t) = \exp(-\lambda t)\)</span> and the hazard function is <span class="math inline">\(h(t) = \lambda\)</span>. The hazard is defined as the probability of an event happening in a small interval <span class="math inline">\((t_0, t_0 + \delta t]\)</span> given that the event has not yet happened:</p>
+<p><span class="math display">\[\begin{align*}
+h(t) &amp;= \lim_{\delta t \rightarrow 0} \frac{\textrm{Pr}(t &lt; T \leq t + \delta t|T &gt; t)}{\delta t}, \\
+&amp;= \lim_{\delta t \rightarrow 0}\frac{\textrm{Pr}(t &lt; T \leq t + \delta t)}{\delta t S(t)}, \\
+&amp;= \frac{f(t)}{S(t)}, \\
+&amp;= -\frac{\textrm{d}}{\textrm{d}t}\ln(S(t)), \\
+&amp;= -\frac{\textrm{d}}{\textrm{d}t}(-\lambda t), \\
+&amp;= \lambda.
+\end{align*}\]</span></p>
+<p>Observations consist of the triple <span class="math inline">\(\{y, x, \nu\}\)</span> where <span class="math inline">\(y \in \mathbb{R}^n\)</span> is a vector of followup times, <span class="math inline">\(x \in \mathbb{R}^{n\times p}\)</span> is a matrix of covariates where the <span class="math inline">\(i^{th}\)</span> row is associated with the <span class="math inline">\(i^{th}\)</span> entry of the followup time vector <span class="math inline">\(y\)</span>, finally <span class="math inline">\(\nu\)</span> is a <span class="math inline">\(n\)</span> dimensional vector where each entry is 1 if the event is a death and 0 if the event is censored at the followup time.</p>
+<p>To determine the rate parameter of the exponential survival, <span class="math inline">\(\lambda\)</span> and learn about the survival function then we first need to specify the likelihood. The likelihood for a parametric survival model can be written as:</p>
+<p><span class="math display">\[p(y|x, \theta) = \prod_{i=1}^n f(y_i|x, \theta)^{\nu_i}S(y_i|x, \theta)^{1-\nu_i}.\]</span></p>
+<p>This means for a censored individual, when <span class="math inline">\(\nu = 0\)</span>, then only the survival function has a contribution to the likelihood since the event happens sometime after the followup time <span class="math inline">\(y\)</span>. For the exponential model the likelihood can be written as:</p>
+<p><span class="math display">\[p(y|x, \theta) = \prod_{i=1}^n  (\lambda e^{-\lambda y_i})^{\nu_i}(e^{-\lambda y_i})^{1-\nu_i}\]</span></p>
+<p>For the following derivation assume that the model has no covariates and hence <span class="math inline">\(\lambda\)</span> is a parameter of interest. If the prior for the hazard is <span class="math inline">\(\lambda \sim \textrm{Gamma}(\alpha, \beta)\)</span> then the posterior for lambda is:</p>
+<p><span class="math display">\[\begin{align}
+p(\lambda|y, x) &amp;= \frac{\beta^\alpha}{\Gamma(\alpha)}\lambda^{\alpha-1}e^{-\beta \lambda}\prod_{i=1}^n  (\lambda e^{-\lambda y_i})^{\nu_i}(e^{-\lambda y_i})^{1-\nu_i}, \\
+&amp;\propto \lambda^{(\alpha-1+\sum_{i=1}^n\nu_i)}e^{-\lambda(\beta + \sum_{i=1}^ny_i)}.
+\end{align}\]</span></p>
+<p>This can be recognised as a Gamma distribution with shape <span class="math inline">\(\alpha-\sum_{i=1}^n\nu_i\)</span> and scale <span class="math inline">\(\beta + \sum_{i=1}^ny_i\)</span>.</p>
+<p>To test this method, we will use the ovarian cancer data from the survival package. The ovarian cancer data contains the followup time, <code>futime</code> and censoring, <code>fustat</code>.</p>
+<pre class="r"><code>library(survival)
+data(&quot;ovarian&quot;)
+
+ovarian %&gt;% 
+  select(followup_time = futime, censored = fustat)</code></pre>
+<pre><code>##    followup_time censored
+## 1             59        1
+## 2            115        1
+## 3            156        1
+## 4            421        0
+## 5            431        1
+## 6            448        0
+## 7            464        1
+## 8            475        1
+## 9            477        0
+## 10           563        1
+## 11           638        1
+## 12           744        0
+## 13           769        0
+## 14           770        0
+## 15           803        0
+## 16           855        0
+## 17          1040        0
+## 18          1106        0
+## 19          1129        0
+## 20          1206        0
+## 21          1227        0
+## 22           268        1
+## 23           329        1
+## 24           353        1
+## 25           365        1
+## 26           377        0</code></pre>
+<pre class="r"><code>alpha &lt;- 3.0
+beta &lt;- 2.0
+
+posterior_shape &lt;- alpha + sum(ovarian$fustat)
+posterior_rate &lt;- beta + sum(ovarian$futime)
+mean &lt;- posterior_shape / posterior_rate
+ci &lt;- qgamma(p = c(0.025, 0.975), shape = posterior_shape, rate = posterior_rate)
+
+ggplot(data = data.frame(x = c(0, 0.01)), aes(x)) +
+  stat_function(fun = ~dgamma(., shape = posterior_shape, rate = posterior_rate)) +
+  labs(title = &quot;Posterior distribution of the hazard&quot;)</code></pre>
+<p><img src="/post/bayesian_survival_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>The posterior predictive distribution can be calculated as:</p>
+<p><span class="math display">\[f(t|\theta) = \int f(t|\theta)p(\theta|y) d\theta\]</span></p>
+<p>And the predictive survival:</p>
+<p><span class="math display">\[S(t|\theta) = \int S(t|\theta)p(\theta|y) d\theta\]</span></p>
+<p>These can be calculated analytically for the exponential model:</p>
+<p><span class="math display">\[\begin{align}
+S(t|\lambda) &amp;= \int_0^\infty e^{-\lambda t}\frac{(\beta + \sum_{i=1}^ny_i)^{\alpha+\sum_{i=1}^n\nu_i}}{\Gamma(\alpha+\sum_{i=1}^n\nu_i)}\lambda^{(\alpha-1+\sum_{i=1}^n\nu_i)}e^{-\lambda(\beta + \sum_{i=1}^ny_i)} d\lambda, \\
+&amp;= \frac{(\beta + \sum_{i=1}^ny_i)^{\alpha+\sum_{i=1}^n\nu_i}}{\Gamma(\alpha+\sum_{i=1}^n\nu_i)}\int_0^\infty e^{-\lambda(t + \beta + \sum_{i=1}^ny_i)}\lambda^{(\alpha-1+\sum_{i=1}^n\nu_i)}d\lambda, \\
+&amp;= \frac{(\beta + \sum_{i=1}^ny_i)^{\alpha+\sum_{i=1}^n\nu_i}}{\Gamma(\alpha+\sum_{i=1}^n\nu_i)}\frac{\Gamma(\alpha+\sum_{i=1}^n\nu_i)}{(t + \beta + \sum_{i=1}^ny_i)^{\alpha+\sum_{i=1}^n\nu_i}}, \\
+&amp;= \left(\frac{\beta + \sum_{i=1}^ny_i}{t + \beta + \sum_{i=1}^ny_i}\right)^{\alpha+\sum_{i=1}^n\nu_i}.
+\end{align}\]</span></p>
+<p>Now the survival curve can be plotted for the ovarian data:</p>
+<pre class="r"><code>exponential_survival &lt;- function(alpha, beta, y, nu)
+  function(t) {
+    nnu &lt;- sum(nu)
+    ssy &lt;- sum(y)
+    x &lt;- (beta + ssy) / (t + beta + ssy)
+    x^(alpha + nnu)
+  }
+
+analytic &lt;- ggplot(data = data.frame(x = c(0, 1250)), aes(x)) +
+  stat_function(fun = exponential_survival(beta, alpha, ovarian$futime, ovarian$fustat)) +
+  ylim(0, 1) +
+  xlim(0, 1250)
+
+analytic</code></pre>
+<p><img src="/post/bayesian_survival_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<div id="fitting-the-exponential-model-using-brms" class="section level2">
+<h2>Fitting the exponential model using BRMS</h2>
+<p>In general, parametric survival models can be fitted using sampling based methods such as MCMC. The package <a href="https://github.com/paul-buerkner/brms">brms</a> can be used as a straightforward interface to <a href="https://mc-stan.org">stan</a>.</p>
+<p>To express this model using <code>brms</code>, we model the followup time directly while considering censoring. The event is considered right-censored if a death has not occurred, hence <code>death = 0</code> and the formula to specify the followup time is right sensored is <code>futime | cens(fustat)</code>. This is followed by distributed by <code>~</code> and the covariates of interest. To compare it to the analytic result above we consider the model with only an intercept and no covariates. Note that this model is not exacly the same since the prior is on specified on the log of the rate, <span class="math inline">\(\lambda\)</span>.</p>
+<pre class="r"><code>fit_exponential &lt;-
+  brm(
+    futime | cens(fustat) ~ 1,
+    data = ovarian,
+    family = brmsfamily(&quot;exponential&quot;),
+    cores = 4,
+    prior = prior(&quot;normal(0.0, 3.0)&quot;, &quot;Intercept&quot;)
+  )</code></pre>
+<pre class="r"><code>summary(fit_exponential)</code></pre>
+<pre><code>##  Family: exponential 
+##   Links: mu = log 
+## Formula: futime | cens(fustat) ~ 1 
+##    Data: ovarian (Number of observations: 26) 
+## Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup samples = 4000
+## 
+## Population-Level Effects: 
+##           Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+## Intercept     6.85      0.25     6.41     7.37       1744 1.00
+## 
+## Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
+## is a crude measure of effective sample size, and Rhat is the potential 
+## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+<pre class="r"><code>times &lt;- 1:max(ovarian$futime)
+
+draws &lt;- fit_exponential %&gt;% 
+  tidy_draws() %&gt;% 
+  mutate(lambda = exp(-b_Intercept))
+
+last_time &lt;- max(times)
+
+survival_exponential &lt;- tibble(time = rep(1:last_time, times = nrow(draws)),
+       draw = rep(draws$.draw, times = last_time),
+       lambda = rep(draws$lambda, times = last_time)) %&gt;% 
+  mutate(survival = exp(-lambda * time)) %&gt;% 
+  group_by(time) %&gt;% 
+  mutate(median = median(survival), 
+         upper = quantile(survival, probs = 0.975),
+         lower = quantile(survival, probs = 0.025))
+
+sampling &lt;- survival_exponential %&gt;% 
+  filter(draw &lt; 100) %&gt;% 
+  ggplot() +
+  geom_line(aes(x = time, y = survival, group = draw), size = 0.1, alpha = 0.1) +
+  geom_line(aes(x = time, y = median)) +
+  geom_line(aes(x = time, y = upper), linetype = &quot;dotted&quot;, size = 0.5) +
+  geom_line(aes(x = time, y = lower), linetype = &quot;dotted&quot;, size = 0.5) +
+  ylim(0, 1) +
+  xlim(0, 1250) +
+  theme(legend.position = &quot;none&quot;)
+
+gridExtra::grid.arrange(analytic, sampling, ncol = 2)</code></pre>
+<div class="figure">
+<img src="/post/bayesian_survival_files/figure-html/exponential_survival_curve-1.png" alt="(Left) Analytic survival function for the exponential model (Right) Sampling based survival function using 100 draws from the posterior distribution" width="672" />
+<p class="caption">
+(#fig:exponential_survival_curve)(Left) Analytic survival function for the exponential model (Right) Sampling based survival function using 100 draws from the posterior distribution
+</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/scala.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+
