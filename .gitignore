@@ -8,6 +8,10 @@
 *.bbl
 *.blg
 
+# Modelling Files
+static/models/*
+docs/models/*
+
 # Content HTML Files
 content/post/*.html
 
