@@ -22,7 +22,7 @@ theme_set(theme_minimal())
 
 ## Introduction
 
-Determining the posterior distribution for the parameters of a real-world Bayesian model inevitably requires calculating high-dimensional integrals. Often these are tedious or impossible to calculate by hand. Markov chain Monte Carlo (MCMC) algorithms are popular approaches, samplers such as the [Gibbs sampler](2019/06/14/bayesian-linear-regression-gibbs) can be used to sample from models with conditionally [conjugate](https://en.wikipedia.org/wiki/Conjugate_prior) specifications and the [Metropolis-Hastings algorithm](2019/02/11/efficient_mcmc_using_rcpp) can be used when the conditionally conjugate form is not present. 
+Determining the posterior distribution for the parameters of a real-world Bayesian model inevitably requires calculating high-dimensional integrals. Often these are tedious or impossible to calculate by hand. Markov chain Monte Carlo (MCMC) algorithms are popular approaches, samplers such as the [Gibbs sampler](/2019/06/14/bayesian-linear-regression-gibbs) can be used to sample from models with conditionally [conjugate](https://en.wikipedia.org/wiki/Conjugate_prior) specifications and the [Metropolis-Hastings algorithm](/2019/02/11/efficient_mcmc_using_rcpp/) can be used when the conditionally conjugate form is not present. 
 
 There are downsides to these established methods, Gibbs sampling puts a restrictive form on the prior distribution. Although Metropolis-Hastings (MH) allows any prior distribution from which the probability density function can be evaluaten, the proposal distribution is often a multivariate Normal distribution with mean corresponding to the previous value of the parameters. This proposal results in random walk behaviour and although the MH algorithm is guaranteed to converge it can take a long time to get satisfactory draws from the posterior distribution.
 
@@ -99,7 +99,7 @@ hmc <- function(log_posterior, gradient, step_size, l, initP, m) {
 
 ## An Example Model: Bivariate Normal Model
 
-The same bivariate Normal model from a [previous post implementing the Metropolis algorithm](2019/02/11/efficient_mcmc_rcpp) is used. See that post for details of deriving the log-likelihood and choice of prior distributions for the parameters.
+The same bivariate Normal model from a [previous post implementing the Metropolis algorithm](/2019/02/11/efficient_mcmc_using_rcpp) is used. See that post for details of deriving the log-likelihood and choice of prior distributions for the parameters.
 
 ```{r, echo=F}
 bivariate_normal <- function(theta, n) {
