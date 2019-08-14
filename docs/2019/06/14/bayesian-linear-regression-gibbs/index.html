@@ -61,7 +61,7 @@
 
   <article class="article">
     
-    <span class="article-duration">8 min read</span>
+    <span class="article-duration">7 min read</span>
     
 
     <h1 class="article-title">Bayesian Linear Regression with Gibbs Sampling in R</h1>
@@ -74,41 +74,32 @@
       
 
 
-<pre><code>## ── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
-<pre><code>## ✔ ggplot2 3.2.0     ✔ purrr   0.3.2
-## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
-## ✔ tidyr   0.8.3     ✔ stringr 1.4.0
-## ✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
-<pre><code>## ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
-## ✖ dplyr::filter() masks stats::filter()
-## ✖ dplyr::lag()    masks stats::lag()</code></pre>
 <p>Linear regression models are commonly used to explain relationships between predictor variables and outcome variables. The data consists of pairs of independent observations <span class="math inline">\((y_i, x_i)\)</span> where <span class="math inline">\(y_i \in \mathbb{R}^p\)</span> represents the outcome variable of the <span class="math inline">\(i^{th}\)</span> observation and <span class="math inline">\(x_i \in \mathbb{R}^{m \times 1}\)</span> represents the predictor variable of the <span class="math inline">\(i^{th}\)</span> observation. The specification for this model is:</p>
 <p><span class="math display">\[y_i = \beta^T x_i + \varepsilon_i, \quad \varepsilon_i \sim \mathcal{N}(0, \Sigma).\]</span></p>
 <p>The parameters of the model include the coefficients of the predictor variables, <span class="math inline">\(\beta \in \mathbb{R}^{1 \times m}\)</span> and the variance of the unmodelled noise, <span class="math inline">\(\Sigma \in \mathbb{R}^{p \times p}\)</span>.</p>
 <div id="the-model-as-a-data-generating-process" class="section level2">
 <h2>The Model as a Data Generating Process</h2>
 <p>In order to manufacture a deeper understand of linear regression it is useful to explore the model as a data generating process. This allows us to understand when linear regression is applicable, how to effectively perform parameter inference and how to assess the model fit. If the model is suitable for the application, then synthetic data from the model with appropriately chosen parameters should be indistinguishable from real observed data. The parameters used to generate the simulated data are known and hence inference algorithms should be able to reliably recover these parameters using the simulated data.</p>
-<p>First consider a simple linear regression (a regression where there is only one predictor variable) which links height to weight. We assume that height will be of adults and measured in cms. This is a continuous variable and we might think that this could be modelled using a Normal distribution with a mean of <span class="math inline">\(150\)</span> and a standard deviation of <span class="math inline">\(20\)</span>. Let’s simulate some values:</p>
+<p>First consider a simple linear regression (a regression where there is only one predictor variable) which links height to weight. We assume that height will be of adults and measured in cm. This is a continuous variable and we might think that this could be modelled using a Normal distribution with a mean of <span class="math inline">\(150\)</span> and a standard deviation of <span class="math inline">\(20\)</span>. Let’s simulate some values:</p>
 <pre class="r"><code>heights &lt;- rnorm(100, mean = 150, sd = 20)
 qplot(heights, geom = &quot;histogram&quot;)</code></pre>
-<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <p>We have simulated 100 heights and plotted them on a histogram. The tallest adults are 200cm and the smallest are 100cm. Now that we have our heights, it remains to choose a suitable value for the parameter <span class="math inline">\(\alpha\)</span> which will be the intercept and the coefficient <span class="math inline">\(\beta\)</span> which will be multiplied by height to determine the weight in kilograms. In addition, a value of the unmodelled noise <span class="math inline">\(\sigma\)</span> must be chosen, this seems reasonable since we know that other factors apart from height determine an individuals weight.</p>
 <pre class="r"><code>alpha &lt;- 60
 beta &lt;- 0.3
 sigma &lt;- 5
 weights &lt;- purrr::map_dbl(heights, ~ rnorm(1, mean = alpha + beta * ., sd = sigma))
 qplot(weights, geom = &quot;histogram&quot;)</code></pre>
-<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>For every height, we have simulated an associated weight using <a href="https://purrr.tidyverse.org">purrrs</a> <code>map_dbl</code>. We can plot the height against the weight and see that there is a generally increasing trend, this is expected since our chosen value of the coefficient <span class="math inline">\(\beta = 0.5\)</span>.</p>
 <pre class="r"><code>qplot(heights, weights)</code></pre>
-<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>When performing an applied analysis in a business context, it might be tempting to stop here after plotting the relationship between height and weight. However these heights and weights are only a sample of a population - we wish to make statements which pertain to the entire population. If we consider the sample representative of the population then a properly fitted statistical model will allow us to make statements about the population which this sample is drawn from. As an example of a common business problem, this could include sales of a product - we wish to make statements about future sales which we can’t possibly have seen and hence a statistical model is important.</p>
 </div>
 <div id="fitting-the-model" class="section level2">
 <h2>Fitting the model</h2>
-<p>** Details</p>
 <p>A parametric model is described by a distribution <span class="math inline">\(p(y|\theta)\)</span> where <span class="math inline">\(y\)</span> represents the observed data and <span class="math inline">\(\theta\)</span> represents the parameters. These parameters are unknown, but represent properties of the model. The distribution of the observed data is controlled by the values of the parameters, <span class="math inline">\(\theta\)</span>. The goal of Bayesian inference is to learn which values of the parameters are consistent with the observed data. The parameters are unknown and can’t be determined precisely, however the more data collected the more accurate the posterior inferences can be.</p>
-<p>In the Bayesian paradigm, the parameters also have a distribution. Before the data is observed, this is referred to as the prior distribution <span class="math inline">\(p(\theta)\)</span> which can incorporate the hypothesis of the analyst. The goal is to determine the posterior distribution of the parameters given the observed data, this can be acheived using Bayes threorem:</p>
+<p>In the Bayesian paradigm, the parameters also have a distribution. Before the data is observed, this is referred to as the prior distribution <span class="math inline">\(p(\theta)\)</span> which can incorporate the hypothesis of the analyst. The goal is to determine the posterior distribution of the parameters given the observed data, this can be achieved using Bayes theorem:</p>
 <p><span class="math inline">\(p(\theta|y) = \frac{p(\theta)p(y|\theta)}{\int_\theta p(\theta)p(y|\theta)d\theta}\)</span></p>
 <p>The likelihood for linear regression with <span class="math inline">\(n\)</span> univariate observations, <span class="math inline">\(\textbf{y} = y_1,\dots,y_n\)</span> is written as</p>
 <p><span class="math display">\[p(\textbf{y}|\psi) = \prod_{i=1}^n\mathcal{N}(\beta^Tx_i, \tau),\]</span></p>
@@ -231,7 +222,7 @@ p2 &lt;- iters %&gt;%
   facet_wrap(~key, scales = &quot;free&quot;)
 
 p1 / p2</code></pre>
-<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <p>*** Posterior fitted values</p>
 <pre class="r"><code>ggplot() +
   geom_point(data = ys, aes(x = x, y = y)) +
@@ -242,7 +233,7 @@ p1 / p2</code></pre>
     alpha = 0.02,
     colour = &quot;pink&quot;
   )</code></pre>
-<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <p>This can be sped up even more using <a href="2019/02/11/efficient_mcmc_rcpp">RCpp</a>.</p>
 </div>
 </div>

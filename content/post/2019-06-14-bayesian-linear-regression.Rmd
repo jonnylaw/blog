@@ -7,7 +7,7 @@ categories: [R, Bayesian]
 tags: []
 ---
 
-```{r echo=FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(tidyverse)
 library(patchwork)
@@ -24,7 +24,7 @@ The parameters of the model include the coefficients of the predictor variables,
 
 In order to manufacture a deeper understand of linear regression it is useful to explore the model as a data generating process. This allows us to understand when linear regression is applicable, how to effectively perform parameter inference and how to assess the model fit. If the model is suitable for the application, then synthetic data from the model with appropriately chosen parameters should be indistinguishable from real observed data. The parameters used to generate the simulated data are known and hence inference algorithms should be able to reliably recover these parameters using the simulated data.
 
-First consider a simple linear regression (a regression where there is only one predictor variable) which links height to weight. We assume that height will be of adults and measured in cms. This is a continuous variable and we might think that this could be modelled using a Normal distribution with a mean of $150$ and a standard deviation of $20$. Let's simulate some values: 
+First consider a simple linear regression (a regression where there is only one predictor variable) which links height to weight. We assume that height will be of adults and measured in cm. This is a continuous variable and we might think that this could be modelled using a Normal distribution with a mean of $150$ and a standard deviation of $20$. Let's simulate some values: 
 
 ```{r}
 heights <- rnorm(100, mean = 150, sd = 20)
@@ -51,11 +51,9 @@ When performing an applied analysis in a business context, it might be tempting 
 
 ## Fitting the model
 
-** Details
-
 A parametric model is described by a distribution $p(y|\theta)$ where $y$ represents the observed data and $\theta$ represents the parameters. These parameters are unknown, but  represent properties of the model. The distribution of the observed data is controlled by the values of the parameters, $\theta$. The goal of Bayesian inference is to learn which values of the parameters are consistent with the observed data. The parameters are unknown and can't be determined precisely, however the more data collected the more accurate the posterior inferences can be. 
 
-In the Bayesian paradigm, the parameters also have a distribution. Before the data is observed, this is referred to as the prior distribution $p(\theta)$ which can incorporate the hypothesis of the analyst. The goal is to determine the posterior distribution of the parameters given the observed data, this can be acheived using Bayes threorem:
+In the Bayesian paradigm, the parameters also have a distribution. Before the data is observed, this is referred to as the prior distribution $p(\theta)$ which can incorporate the hypothesis of the analyst. The goal is to determine the posterior distribution of the parameters given the observed data, this can be achieved using Bayes theorem:
 
 $p(\theta|y) = \frac{p(\theta)p(y|\theta)}{\int_\theta p(\theta)p(y|\theta)d\theta}$
 
