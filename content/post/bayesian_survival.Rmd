@@ -107,31 +107,31 @@ $$f(t|\theta) = \int f(t|\theta)p(\theta|y) d\theta$$
 And the predictive survival:
 
 $$S(t|\theta) = \int S(t|\theta)p(\theta|y) d\theta$$
-
-These can be calculated analytically for the exponential model:
-
-$$\begin{align}
-S(t|\lambda) &= \int_0^\infty e^{-\lambda t}\frac{(\beta + \sum_{i=1}^ny_i)^{\alpha+\sum_{i=1}^n\nu_i}}{\Gamma(\alpha+\sum_{i=1}^n\nu_i)}\lambda^{(\alpha-1+\sum_{i=1}^n\nu_i)}e^{-\lambda(\beta + \sum_{i=1}^ny_i)} d\lambda, \\
-&= \frac{(\beta + \sum_{i=1}^ny_i)^{\alpha+\sum_{i=1}^n\nu_i}}{\Gamma(\alpha+\sum_{i=1}^n\nu_i)}\int_0^\infty e^{-\lambda(t + \beta + \sum_{i=1}^ny_i)}\lambda^{(\alpha-1+\sum_{i=1}^n\nu_i)}d\lambda, \\
-&= \frac{(\beta + \sum_{i=1}^ny_i)^{\alpha+\sum_{i=1}^n\nu_i}}{\Gamma(\alpha+\sum_{i=1}^n\nu_i)}\frac{\Gamma(\alpha+\sum_{i=1}^n\nu_i)}{(t + \beta + \sum_{i=1}^ny_i)^{\alpha+\sum_{i=1}^n\nu_i}}, \\
-&= \left(\frac{\beta + \sum_{i=1}^ny_i}{t + \beta + \sum_{i=1}^ny_i}\right)^{\alpha+\sum_{i=1}^n\nu_i}.
-\end{align}$$
-
-Now the survival curve can be plotted for the ovarian data:
+Now the survival curve can be plotted by simulating the rate, $\lambda$ from the posterior distribution and calculating the survival $e^{-\lambda t}$ for discrete values of $t$.
 
 ```{r, echo=FALSE}
-exponential_survival <- function(alpha, beta, y, nu)
-  function(t) {
-    nnu <- sum(nu)
-    ssy <- sum(y)
-    x <- (beta + ssy) / (t + beta + ssy)
-    x^(alpha + nnu)
-  }
+exponential_survival <- function(lambda, time) 
+  exp(-lambda * time)
 
-analytic <- ggplot(data = data.frame(x = c(0, 1250)), aes(x)) +
-  stat_function(fun = exponential_survival(beta, alpha, ovarian$futime, ovarian$fustat)) +
-  ylim(0, 1) +
-  xlim(0, 1250)
+m <- 500
+
+analytic <- tibble(
+  time = rep(x = seq(from = 0, to = 1250, length.out = 100), each = m),
+  draw = rep(seq_len(m), times = 100),
+  lambda = rep(replicate(n = m, expr = rgamma(n = 1, shape = posterior_shape, rate = posterior_rate)), times = 100),
+  survival = exponential_survival(lambda, time)
+  ) %>% 
+    group_by(time) %>% 
+  mutate(median = median(survival), 
+         upper = quantile(survival, probs = 0.975),
+         lower = quantile(survival, probs = 0.025)) %>% 
+    ggplot(aes(x = time, y = survival)) +
+    geom_line(aes(x = time, y = survival, group = draw), size = 0.1, alpha = 0.1) +
+    geom_line(aes(x = time, y = median)) +
+    geom_line(aes(x = time, y = upper), linetype = "dotted", size = 0.5) +
+    geom_line(aes(x = time, y = lower), linetype = "dotted", size = 0.5) +
+    ylim(0, 1) +
+    xlim(0, 1250)
 
 analytic
 ```

@@ -128,15 +128,8 @@ p(\lambda|y, x) &amp;= \frac{\beta^\alpha}{\Gamma(\alpha)}\lambda^{\alpha-1}e^{-
 <p>The posterior predictive distribution can be calculated as:</p>
 <p><span class="math display">\[f(t|\theta) = \int f(t|\theta)p(\theta|y) d\theta\]</span></p>
 <p>And the predictive survival:</p>
-<p><span class="math display">\[S(t|\theta) = \int S(t|\theta)p(\theta|y) d\theta\]</span></p>
-<p>These can be calculated analytically for the exponential model:</p>
-<p><span class="math display">\[\begin{align}
-S(t|\lambda) &amp;= \int_0^\infty e^{-\lambda t}\frac{(\beta + \sum_{i=1}^ny_i)^{\alpha+\sum_{i=1}^n\nu_i}}{\Gamma(\alpha+\sum_{i=1}^n\nu_i)}\lambda^{(\alpha-1+\sum_{i=1}^n\nu_i)}e^{-\lambda(\beta + \sum_{i=1}^ny_i)} d\lambda, \\
-&amp;= \frac{(\beta + \sum_{i=1}^ny_i)^{\alpha+\sum_{i=1}^n\nu_i}}{\Gamma(\alpha+\sum_{i=1}^n\nu_i)}\int_0^\infty e^{-\lambda(t + \beta + \sum_{i=1}^ny_i)}\lambda^{(\alpha-1+\sum_{i=1}^n\nu_i)}d\lambda, \\
-&amp;= \frac{(\beta + \sum_{i=1}^ny_i)^{\alpha+\sum_{i=1}^n\nu_i}}{\Gamma(\alpha+\sum_{i=1}^n\nu_i)}\frac{\Gamma(\alpha+\sum_{i=1}^n\nu_i)}{(t + \beta + \sum_{i=1}^ny_i)^{\alpha+\sum_{i=1}^n\nu_i}}, \\
-&amp;= \left(\frac{\beta + \sum_{i=1}^ny_i}{t + \beta + \sum_{i=1}^ny_i}\right)^{\alpha+\sum_{i=1}^n\nu_i}.
-\end{align}\]</span></p>
-<p>Now the survival curve can be plotted for the ovarian data:</p>
+<p><span class="math display">\[S(t|\theta) = \int S(t|\theta)p(\theta|y) d\theta\]</span>
+Now the survival curve can be plotted by simulating the rate, <span class="math inline">\(\lambda\)</span> from the posterior distribution and calculating the survival <span class="math inline">\(e^{-\lambda t}\)</span> for discrete values of <span class="math inline">\(t\)</span>.</p>
 <p><img src="/post/bayesian_survival_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <div id="fitting-the-exponential-model-using-brms" class="section level2">
 <h2>Fitting the exponential model using BRMS</h2>
