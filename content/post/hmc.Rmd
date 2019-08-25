@@ -11,7 +11,6 @@ tags: []
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(numDeriv)
 library(furrr)
@@ -36,7 +35,7 @@ Hamilton's equations are discretised and a "leapfrog" update is used. These leap
 leapfrog_step <- function(gradient, step_size, position, momentum, d) {
   momentum1 <- momentum + gradient(position) * 0.5 * step_size
   position1 <- position + step_size * momentum1
-  momentum2 <- momentum + gradient(position1) * 0.5 * step_size
+  momentum2 <- momentum1 + gradient(position1) * 0.5 * step_size
 
   matrix(c(position1, momentum2), ncol = d*2)
 }

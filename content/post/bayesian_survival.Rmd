@@ -102,11 +102,11 @@ ggplot(data = data.frame(x = c(0, 0.01)), aes(x)) +
 
 The posterior predictive distribution can be calculated as:
 
-$$f(t|\theta) = \int f(t|\theta)p(\theta|y) d\theta$$
+$$f(t|y) = \int f(t|\theta)p(\theta|y) d\theta$$
 
 And the predictive survival:
 
-$$S(t|\theta) = \int S(t|\theta)p(\theta|y) d\theta$$
+$$S(t|y) = \int S(t|\theta)p(\theta|y) d\theta$$
 Now the survival curve can be plotted by simulating the rate, $\lambda$ from the posterior distribution and calculating the survival $e^{-\lambda t}$ for discrete values of $t$.
 
 ```{r, echo=FALSE}
