@@ -242,6 +242,7 @@ Then the function is used in `future_map_dfr`:
 
 ```{r hmc, eval=FALSE}
 future::plan(future::multiprocess)
+start_time <- Sys.time()
 out_hmc <-
   furrr::future_map_dfr(
     .x = 1:2,
@@ -257,17 +258,21 @@ out_hmc <-
       ),
     .id = "chain"
   )
+end_time <- Sys.time()
+hmc_time <- end_time - start_time
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
 write_rds(out_hmc, "~/git/blog/static/models/hmc_bivariate.Rds")
+write_rds(hmc_time, "~/git/blog/static/models/hmc_time.Rds")
 ```
 
 ```{r, echo=FALSE}
 out_hmc <- read_rds("~/git/blog/static/models/hmc_bivariate.Rds")
+hmc_time <- read_rds("~/git/blog/static/models/hmc_time.Rds")
 ```
 
-The traceplots of the chains both chains are plotted below.
+The traceplots of both chains are plotted below.
 
 ```{r, echo=FALSE}
 actual_values = tibble(
@@ -277,20 +282,21 @@ actual_values = tibble(
 
 out_hmc %>% 
   mutate_at(vars(contains("sigma")), exp) %>% 
-  gather(key = "parameter", value, -chain, -iteration) %>% 
+  gather(key = "Parameter", value, -chain, -iteration) %>% 
   traceplot()
 ```
 
-## Evaluating the efficiency of a markov chain:
+## Evaluating the efficiency
 
-In order to compare between Markov chain Monte Carlo algorithms the amount of information from each correlated sample can be measured. This is termed the effective sample size, corresponding to the number of effectively independent draws from the posterior distribution. The code below calculates the ESS of each parameter in the chain using `ess_bulk` from the R interface to stan `rstan` library. 
+In order to compare between Markov chain Monte Carlo algorithms the amount of information from each correlated sample can be measured. This is termed the effective sample size, corresponding to the number of effectively independent draws from the posterior distribution. The code below calculates the ESS of each parameter in the chain using `ess_bulk` from the R interface to stan `rstan` library. The ESS per second can be calculated which is a measure of the efficiency of the sampler
 
 ```{r}
 out_hmc %>% 
-  summarise_at(2:5, rstan::ess_bulk)
+  summarise_at(2:5, rstan::ess_bulk) %>% 
+  mutate_all(~ . / as.numeric(hmc_time))
 ```
 
-This could be compared to a similar method, such as the [Metropolis algorithm](2019/02/11/efficient_mcmc_rcpp).
+This could be compared to a similar method, such as the [Metropolis algorithm](2019/02/11/efficient_mcmc_rcpp). To determine which algorithm is the most efficient for sampling from the posterior distribution of the bivariate Normal model.
 
 ```{r, eval=FALSE}
 proposal <- function(x) {
@@ -298,19 +304,27 @@ proposal <- function(x) {
   c(x[1] + z[1], x[2] * exp(z[2]),
     x[3] + z[3], x[4] * exp(z[4]))
 }
-out_met <- metropolis(theta, log_posterior(xs), proposal, 10000, chains = 2, parallel = TRUE)
+
+start_time <- Sys.time()
+out_met <- metropolis(theta, log_posterior(xs), proposal, 1e4, chains = 2, parallel = TRUE)
+end_time <- Sys.time()
+metropolis_time <- end_time - start_time
 ```
 
-```{r}
-out_met <- read_rds("~/git/blog/static/models/metropolis_parallel.Rds")
+```{r, eval=FALSE, echo=FALSE}
+write_rds(metropolis_time, "~/git/blog/static/models/metropolis_timing.Rds")
 ```
 
+
+```{r, echo=FALSE}
+out_met <- read_rds(path = "~/git/blog/static/models/metropolis_parallel.Rds")
+metropolis_time <- read_rds("~/git/blog/static/models/metropolis_timing.Rds")
+```
 
 The ESS can be computed using:
 
 ```{r}
 out_met %>% 
-    summarise_at(2:5, rstan::ess_bulk)
+  summarise_at(2:5, rstan::ess_bulk) %>% 
+  mutate_all(~ . / as.numeric(metropolis_time))
 ```
-
-

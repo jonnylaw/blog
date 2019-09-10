@@ -61,7 +61,7 @@
 
   <article class="article">
     
-    <span class="article-duration">6 min read</span>
+    <span class="article-duration">7 min read</span>
     
 
     <h1 class="article-title">Hamiltonian Monte Carlo in R</h1>
@@ -86,7 +86,7 @@
 <pre class="r"><code>leapfrog_step &lt;- function(gradient, step_size, position, momentum, d) {
   momentum1 &lt;- momentum + gradient(position) * 0.5 * step_size
   position1 &lt;- position + step_size * momentum1
-  momentum2 &lt;- momentum + gradient(position1) * 0.5 * step_size
+  momentum2 &lt;- momentum1 + gradient(position1) * 0.5 * step_size
 
   matrix(c(position1, momentum2), ncol = d*2)
 }</code></pre>
@@ -213,6 +213,7 @@ bounded_gradient &lt;- function(xs) {
 }</code></pre>
 <p>Then the function is used in <code>future_map_dfr</code>:</p>
 <pre class="r"><code>future::plan(future::multiprocess)
+start_time &lt;- Sys.time()
 out_hmc &lt;-
   furrr::future_map_dfr(
     .x = 1:2,
@@ -227,30 +228,37 @@ out_hmc &lt;-
         c(&quot;mu1&quot;, &quot;sigma1&quot;, &quot;mu2&quot;, &quot;sigma2&quot;)
       ),
     .id = &quot;chain&quot;
-  )</code></pre>
-<p>The traceplots of the chains both chains are plotted below.</p>
+  )
+end_time &lt;- Sys.time()
+hmc_time &lt;- end_time - start_time</code></pre>
+<p>The traceplots of both chains are plotted below.</p>
 <p><img src="/post/hmc_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 </div>
-<div id="evaluating-the-efficiency-of-a-markov-chain" class="section level2">
-<h2>Evaluating the efficiency of a markov chain:</h2>
-<p>In order to compare between Markov chain Monte Carlo algorithms the amount of information from each correlated sample can be measured. This is termed the effective sample size, corresponding to the number of effectively independent draws from the posterior distribution. The code below calculates the ESS of each parameter in the chain using <code>ess_bulk</code> from the R interface to stan <code>rstan</code> library.</p>
+<div id="evaluating-the-efficiency" class="section level2">
+<h2>Evaluating the efficiency</h2>
+<p>In order to compare between Markov chain Monte Carlo algorithms the amount of information from each correlated sample can be measured. This is termed the effective sample size, corresponding to the number of effectively independent draws from the posterior distribution. The code below calculates the ESS of each parameter in the chain using <code>ess_bulk</code> from the R interface to stan <code>rstan</code> library. The ESS per second can be calculated which is a measure of the efficiency of the sampler</p>
 <pre class="r"><code>out_hmc %&gt;% 
-  summarise_at(2:5, rstan::ess_bulk)</code></pre>
+  summarise_at(2:5, rstan::ess_bulk) %&gt;% 
+  mutate_all(~ . / as.numeric(hmc_time))</code></pre>
 <pre><code>##        mu1   sigma1      mu2   sigma2
-## 1 12435.88 11126.64 1215.503 4702.777</code></pre>
-<p>This could be compared to a similar method, such as the <a href="2019/02/11/efficient_mcmc_rcpp">Metropolis algorithm</a>.</p>
+## 1 228.2251 60.61627 28.71163 101.1706</code></pre>
+<p>This could be compared to a similar method, such as the <a href="2019/02/11/efficient_mcmc_rcpp">Metropolis algorithm</a>. To determine which algorithm is the most efficient for sampling from the posterior distribution of the bivariate Normal model.</p>
 <pre class="r"><code>proposal &lt;- function(x) {
   z = rnorm(4, sd = 0.05)
   c(x[1] + z[1], x[2] * exp(z[2]),
     x[3] + z[3], x[4] * exp(z[4]))
 }
-out_met &lt;- metropolis(theta, log_posterior(xs), proposal, 10000, chains = 2, parallel = TRUE)</code></pre>
-<pre class="r"><code>out_met &lt;- read_rds(&quot;~/git/blog/static/models/metropolis_parallel.Rds&quot;)</code></pre>
+
+start_time &lt;- Sys.time()
+out_met &lt;- metropolis(theta, log_posterior(xs), proposal, 1e4, chains = 2, parallel = TRUE)
+end_time &lt;- Sys.time()
+metropolis_time &lt;- end_time - start_time</code></pre>
 <p>The ESS can be computed using:</p>
 <pre class="r"><code>out_met %&gt;% 
-    summarise_at(2:5, rstan::ess_bulk)</code></pre>
+  summarise_at(2:5, rstan::ess_bulk) %&gt;% 
+  mutate_all(~ . / as.numeric(metropolis_time))</code></pre>
 <pre><code>##        mu1   sigma1      mu2   sigma2
-## 1 1898.709 1445.094 509.2378 1374.012</code></pre>
+## 1 33.01946 25.13087 8.855888 23.89473</code></pre>
 </div>
 
     </div>

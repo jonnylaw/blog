@@ -61,7 +61,7 @@
 
   <article class="article">
     
-    <span class="article-duration">7 min read</span>
+    <span class="article-duration">8 min read</span>
     
 
     <h1 class="article-title">Bayesian Linear Regression with Gibbs Sampling in R</h1>
@@ -114,7 +114,7 @@ p(\beta) &amp;= \mathcal{N}(\mu_\beta, \sigma^2_\beta).
 <p>Gibbs sampling works by alternately sampling from the conditional conjugate distribution. It can often be faster for models which are specified using the conjugate structure, however the choice of prior distribution is not flexible (but the parameterisation is). The algebra below is not required to implement a Gibbs sampling algorithm as there are probabilistic programming languages such as BUGS and JAGS which work out the required maths.</p>
 <p>Using the likelihood and priors from the section above we can derive the conditionally conjugate posterior distributions:</p>
 <p><span class="math display">\[\begin{align*}
-p(\tau|\textbf{y}, \textbf{x}, \psi^{(-\tau)}) &amp;= p(\tau)\prod_{i=1}^np(y_i|\psi), \\
+p(\tau|\textbf{y}, \textbf{x}, \beta, \alpha) &amp;= p(\tau)\prod_{i=1}^np(y_i|\psi), \\
 &amp;= \textrm{Gamma}(\tau|\alpha_\sigma, \beta_\sigma)\prod_{i=1}^n\mathcal{N}(y_i|\beta^Tx_i, \sigma^2), \\
 &amp;\propto \tau^{\alpha_\tau-1}e^{-\beta_\tau\tau}\tau^{\frac{n}{2}}\exp\left\{-\frac{\tau}{2}\sum_{i=1}^n(y_i-\beta^Tx_i)^2\right\}, \\
 &amp;= \tau^{\alpha_\tau-1 + \frac{n}{2}}\exp\left\{-\beta_\tau\tau-\frac{\tau}{2}\sum_{i=1}^n(y_i-\beta^Tx_i)^2\right\},\\
@@ -128,7 +128,7 @@ p(\alpha|\textbf{y}, \textbf{x}, \beta, \tau) &amp;= \mathcal{N}(\alpha|\mu_\alp
 &amp;= \mathcal{N}\left((\tau_\alpha + n\tau)^{-1}\left(\tau_\alpha + \tau\sum_{i=1}^n (y_i - \beta x_i)\right), \tau_\alpha + n\tau\right).
 \end{align*}\]</span></p>
 <p><span class="math display">\[\begin{align*}
-p(\beta|\textbf{y}, \textbf{x}, \beta, \tau) &amp;= \mathcal{N}(\beta|\mu_\beta, \tau_\beta)\prod_{i=1}^n\mathcal{N}(y_i|\alpha + \beta x_i, \tau), \\
+p(\beta|\textbf{y}, \textbf{x}, \alpha, \tau) &amp;= \mathcal{N}(\beta|\mu_\beta, \tau_\beta)\prod_{i=1}^n\mathcal{N}(y_i|\alpha + \beta x_i, \tau), \\
 &amp;\propto \tau^{\frac{1}{2}}_\beta\exp\left\{-\frac{\tau_\beta}{2}(\beta-\mu_\beta)^2\right\}\tau^\frac{n}{2}\exp\left\{-\frac{\tau}{2}\sum_{i=1}^n(y_i-\alpha-\beta x_i)^2\right\}, \\
 &amp;= \exp\left\{-\frac{\tau_\beta}{2}(\beta-\mu_\beta)^2-\frac{\tau}{2}\sum_{i=1}^n(y_i-\alpha-\beta x_i)^2\right\}, \\
 &amp;= \exp \left\{ -\frac{1}{2}\left(\beta^2(\tau_\beta + \tau\sum_{i=1}^nx_i^2) + \beta(-2\tau_\beta\mu_\beta - 2\tau\sum_{i=1}^n (y_i - \alpha) x_i) \right) + C \right\}, \\
@@ -137,105 +137,147 @@ p(\beta|\textbf{y}, \textbf{x}, \beta, \tau) &amp;= \mathcal{N}(\beta|\mu_\beta,
 <p>This allows us to construct a Gibbs Sampler for the linear regression model by alternating sampling from the precision, <span class="math inline">\(\tau\)</span> given the latest value of the coefficient vector <span class="math inline">\(\beta\)</span> and vice versa. The functions to sample from the conditional posterior distributions are written in <code>R</code> as:</p>
 <pre class="r"><code>sample_tau &lt;- function(ys, alpha, beta, alpha0, beta0) {
   rgamma(1,
-         shape = alpha0 + nrow(ys) / 2,
-         rate = beta0 + 0.5 * sum((ys$y - (alpha + ys$x * beta)) ^ 2))
+    shape = alpha0 + nrow(ys) / 2,
+    rate = beta0 + 0.5 * sum((ys$y - (alpha + ys$x * beta))^2)
+  )
 }
 
 sample_alpha &lt;- function(ys, beta, tau, mu0, tau0) {
   prec &lt;- tau0 + tau * nrow(ys)
-  mean = (tau0 + tau * sum(ys$y - beta * ys$x)) / prec
+  mean &lt;- (tau0 + tau * sum(ys$y - beta * ys$x)) / prec
   rnorm(1, mean = mean, sd = 1 / sqrt(prec))
 }
 
 sample_beta &lt;- function(ys, alpha, tau, mu0, tau0) {
   prec &lt;- tau0 + tau * sum(ys$x * ys$x)
-  mean = (tau0 + tau * sum((ys$y - alpha) * ys$x)) / prec
+  mean &lt;- (tau0 + tau * sum((ys$y - alpha) * ys$x)) / prec
   rnorm(1, mean = mean, sd = 1 / sqrt(prec))
 }</code></pre>
 <p>Then a function which loops through each conditional distribution in turn is defined using the three functions defined above. Each conditional distribution is dependent on the parameter draw made immediately above.</p>
-<pre class="r"><code>gibbs_sample &lt;-
-  function(ys,
-           tau0,
-           alpha0,
-           beta0,
-           m,
-           alpha_tau,
-           beta_tau,
-           mu_alpha,
-           tau_alpha,
-           mu_beta,
-           tau_beta) {
-    tau = numeric(m)
-    alpha &lt;- numeric(m)
-    beta &lt;- numeric(m)
-    tau[1] &lt;- tau0
-    alpha[1] &lt;- alpha0
-    beta[1] &lt;- beta0
-    
-    for (i in 2:m) {
-      tau[i] &lt;-
-        sample_tau(ys, alpha[i - 1], beta[i - 1], alpha_tau, beta_tau)
-      alpha[i] &lt;- sample_alpha(ys, beta[i - 1], tau[i], mu_alpha, tau_alpha)
-      beta[i] &lt;- sample_beta(ys, alpha[i], tau[i], mu_beta, tau_beta)
-    }
-    
-    tibble(draw = seq_len(m),
-           tau,
-           alpha,
-           beta)
-  }</code></pre>
-<p>It is often useful to transform the data, in this instance we use the function <code>scale</code> to centre and scale the data by subtracting the mean and dividing by the standard deviation. This can be recovered</p>
-<pre class="r"><code>ys &lt;- tibble(y = scale(weights), x = scale(heights))</code></pre>
-<pre class="r"><code>iters &lt;- map_dfr(
+<pre class="r"><code>gibbs_sample &lt;- function(ys,
+                         tau0,
+                         alpha0,
+                         beta0,
+                         m,
+                         alpha_tau,
+                         beta_tau,
+                         mu_alpha,
+                         tau_alpha,
+                         mu_beta,
+                         tau_beta) {
+  tau &lt;- numeric(m)
+  alpha &lt;- numeric(m)
+  beta &lt;- numeric(m)
+  tau[1] &lt;- tau0
+  alpha[1] &lt;- alpha0
+  beta[1] &lt;- beta0
+
+  for (i in 2:m) {
+    tau[i] &lt;- sample_tau(ys, alpha[i - 1], beta[i - 1], alpha_tau, beta_tau)
+    alpha[i] &lt;- sample_alpha(ys, beta[i - 1], tau[i], mu_alpha, tau_alpha)
+    beta[i] &lt;- sample_beta(ys, alpha[i], tau[i], mu_beta, tau_beta)
+  }
+
+  tibble(
+    iteration = seq_len(m),
+    tau,
+    alpha,
+    beta
+  )
+}</code></pre>
+<pre class="r"><code>ys &lt;- tibble(y = weights, 
+             x = heights)</code></pre>
+<pre class="r"><code>plan(multiprocess)
+iters &lt;- future_map_dfr(
   .x = 1:2,
   .f = function(x) gibbs_sample(
-    ys,
-    tau0 = 0.5,
-    alpha0 = 60,
-    beta0 = 0.3,
-    m = 10000,
-    alpha_tau = 3,
-    beta_tau = 2,
-    mu_alpha = 0,
-    tau_alpha = 0.01,
-    mu_beta = 0,
-    tau_beta = 0.01
-  ),
+      ys,
+      tau0 = 0.5,
+      alpha0 = 60,
+      beta0 = 0.3,
+      m = 1e4,
+      alpha_tau = 3,
+      beta_tau = 2,
+      mu_alpha = 0,
+      tau_alpha = 0.01,
+      mu_beta = 0,
+      tau_beta = 0.01
+    ),
   .id = &quot;chain&quot;
 )</code></pre>
-<pre class="r"><code>p1 &lt;- iters %&gt;% 
-  filter(draw &gt; 5000) %&gt;% 
-  mutate(sigma = sqrt(1 / tau)) %&gt;%
-  select(-tau) %&gt;% 
-  gather(key, value, -draw, -chain) %&gt;% 
-  ggplot(aes(x = draw, y = value, colour = chain)) +
-  geom_line() +
-  facet_wrap(~key, scales = &quot;free_y&quot;)
-
-p2 &lt;- iters %&gt;%  
-  filter(draw &gt; 5000) %&gt;% 
-  mutate(sigma = sqrt(1 / tau)) %&gt;%
-  select(-tau) %&gt;% 
-  gather(key, value, -draw, -chain) %&gt;% 
-  ggplot(aes(x = value, fill = chain)) +
-  geom_density(alpha = 0.5) + 
-  facet_wrap(~key, scales = &quot;free&quot;)
-
-p1 / p2</code></pre>
 <p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
-<p>*** Posterior fitted values</p>
-<pre class="r"><code>ggplot() +
-  geom_point(data = ys, aes(x = x, y = y)) +
-  geom_abline(
-    data = iters %&gt;%
-      filter(draw &gt; 9000),
-    aes(intercept = alpha, slope = beta),
-    alpha = 0.02,
-    colour = &quot;pink&quot;
-  )</code></pre>
-<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
-<p>This can be sped up even more using <a href="/2019/02/11/efficient_mcmc_using_rcpp/">RCpp</a>.</p>
 </div>
+</div>
+<div id="making-the-markov-chain-more-efficient" class="section level2">
+<h2>Making the Markov chain more efficient</h2>
+<p>In order to get this chain to mix better, the predictor (the height, <span class="math inline">\(x\)</span>) can be centered by subtracting the mean. This will result in the intercept being higher than when using the untransformed data, since the outcome variable (the weight, <span class="math inline">\(y\)</span>) is not transformed. In order to recover the value of the parameter</p>
+<pre class="r"><code>gibbs_sample_centered &lt;- function(ys,
+                         tau0,
+                         alpha0,
+                         beta0,
+                         m,
+                         alpha_tau,
+                         beta_tau,
+                         mu_alpha,
+                         tau_alpha,
+                         mu_beta,
+                         tau_beta) {
+  tau &lt;- numeric(m)
+  alpha &lt;- numeric(m)
+  beta &lt;- numeric(m)
+  tau[1] &lt;- tau0
+  alpha[1] &lt;- alpha0
+  beta[1] &lt;- beta0
+  
+  mean_x = mean(ys$x)
+  ys$x = ys$x - mean_x
+
+  for (i in 2:m) {
+    tau[i] &lt;- sample_tau(ys, alpha[i - 1], beta[i - 1], alpha_tau, beta_tau)
+    alpha[i] &lt;- sample_alpha(ys, beta[i - 1], tau[i], mu_alpha, tau_alpha)
+    beta[i] &lt;- sample_beta(ys, alpha[i], tau[i], mu_beta, tau_beta)
+  }
+
+  tibble(
+    iteration = seq_len(m),
+    tau,
+    alpha = alpha - mean_x * beta,
+    beta
+  )
+}</code></pre>
+<pre class="r"><code>iters_centered &lt;- future_map_dfr(
+  .x = 1:2,
+  .f = function(x) gibbs_sample_centered(
+      ys,
+      tau0 = 0.5,
+      alpha0 = 60,
+      beta0 = 0.3,
+      m = 1e4,
+      alpha_tau = 3,
+      beta_tau = 2,
+      mu_alpha = 0,
+      tau_alpha = 0.01,
+      mu_beta = 0,
+      tau_beta = 0.01
+    ),
+  .id = &quot;chain&quot;
+)</code></pre>
+<pre class="r"><code>p1 &lt;- iters_centered %&gt;% 
+  filter(iteration &gt; 1000) %&gt;% 
+  gather(key = &quot;Parameter&quot;, value, -chain, -iteration) %&gt;% 
+  inner_join(actual_values) %&gt;%
+  traceplot() +
+  geom_hline(aes(yintercept = actual_value), linetype = &quot;dashed&quot;)
+
+p2 &lt;- iters_centered %&gt;%
+  filter(iteration &gt; 1000) %&gt;% 
+  gather(key = &quot;Parameter&quot;, value,-chain,-iteration) %&gt;%
+  density_plot()
+
+gridExtra::grid.arrange(p1, p2)</code></pre>
+<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>The draws from the Gibbs sampling algorithm are draws from the posterior distribution which can be used to produce summaries required for inference using the linear model. Posterior fitted values, ie. a straight line, can be plotted by sampling pairs of values (<span class="math inline">\(\alpha, \beta\)</span>) from the MCMC output and plotting them using the equation of a straight line (<span class="math inline">\(y = \alpha + \beta x\)</span>). This gives an indication of the uncertainty in the parameter estimates.</p>
+<p><img src="/post/2019-06-14-bayesian-linear-regression_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 
     </div>

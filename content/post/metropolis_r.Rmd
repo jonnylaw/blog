@@ -265,7 +265,8 @@ out_cpp %>%
   mcmc() %>%
   ggs() %>%
   ggs_traceplot() +
-  geom_hline(data = actual_values, aes(yintercept = actual_value), linetype = "dashed")
+  geom_hline(data = actual_values, aes(yintercept = actual_value), linetype = "dashed") +
+  facet_wrap(~Parameter, ncol = 2, scales="free_y")
 ```
 
 # Performance Improvements
