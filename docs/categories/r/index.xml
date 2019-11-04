@@ -6,10 +6,20 @@
     <description>Recent content in R on Bayesian Statistics and Functional Programming </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 09 Aug 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 04 Nov 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Analysing .fit files in R</title>
+      <link>/2019/11/04/analysing-fit-files-in-r/</link>
+      <pubDate>Mon, 04 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/11/04/analysing-fit-files-in-r/</guid>
+      <description>Garmin running watches output a file type called .fit, the developer SDK can be downloaded from the ANT website. There is aalso Python library named fitparse which has been written to parse .fit files. This blog post will show you how to use reticulate to parse a .fit file.
+Parsing reticulate::py_install(&amp;quot;fitparse&amp;quot;, method = &amp;quot;auto&amp;quot;, conda = &amp;quot;auto&amp;quot;) ## Using virtual environment &amp;#39;~/.virtualenvs/r-reticulate&amp;#39; ... The library can be imported as an R object.</description>
+    </item>
     
     <item>
       <title>Bayesian Survival Analysis: Exponential Model</title>
