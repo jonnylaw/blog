@@ -17,7 +17,7 @@
       <pubDate>Tue, 16 Apr 2019 00:00:00 +0000</pubDate>
       
       <guid>/2019/04/16/multi-armed-bandits/</guid>
-      <description>Setting up the Environment This post uses Almond in order to run Scala code in a Jupyter notebook. See my previous post for my setup of Jupyter, Ammonite and Almond. That post examined using the Scala libraries EvilPlot (including inline plotting in the Jupyter notebook) and Rainier for Bayesian inference in a simple linear model.
+      <description>Setting up the Environment This post uses Almond in order to run Scala code in a Jupyter notebook. See my previous post to learn how to setup Jupyter, Ammonite and Almond. That post examined using the Scala libraries EvilPlot (including inline plotting in the Jupyter notebook) and Rainier for Bayesian inference in a simple linear model.
 The imports required for this post are:
 import coursier.MavenRepository interp.repositories() ++= Seq(MavenRepository( &amp;quot;http://dl.bintray.com/cibotech/public&amp;quot; )) import $ivy.</description>
     </item>

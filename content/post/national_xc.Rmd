@@ -1,5 +1,5 @@
 ---
-title: National Cross Country
+title: "A Statistical Model for Finishing Positions at the National Cross Country"
 author: Jonny Law
 date: '2019-02-22'
 slug: national-cross-country
@@ -22,7 +22,7 @@ theme_set(theme_tufte())
 
 Download the results from Power of ten for northern, midlands, southern and national.
 
-```{r}
+```{r cache=TRUE}
 parse_po10 <- function(url, page) {
   if (page == 1) {
     out = htmltab(paste0(url, "&pagenum=", page), 
@@ -61,11 +61,13 @@ national_northern <- national_results  %>%
   inner_join(mens_northern_results %>% select(Name, position_northern = Pos), 
             by = "Name") %>%
   mutate_at(vars(starts_with("position")), funs(as.numeric))
+
 national_midlands <- national_results  %>%
   select(Name, position_national = Pos) %>%
   inner_join(mens_midlands_results %>% select(Name, position_midlands = Pos), 
             by = "Name") %>%
   mutate_at(vars(starts_with("position")), funs(as.numeric))
+
 national_southern <- national_results  %>%
   select(Name, position_national = Pos) %>%
   inner_join(mens_southern_results %>% select(Name, position_southern = Pos), 
@@ -75,20 +77,20 @@ national_southern <- national_results  %>%
 
 The goal is to fit a model, where the outcome is the position at the national and the input is the position at the northern XC. This then allows us to determine the quality of the field at each XC and determine what position you are likely to finish in the National this season given a result in the area championships. A simple linear model has each observation (runner) considered independent with normally distributed errors.
 
-$$Y_i = \beta^T x_i + \varepsilon_i, \quad \mathcal{N}(0, \sigma).$$
+$$Y_i = \beta^T x_i + \varepsilon_i, \quad \mathcal{N}(0, \sigma^2).$$
 
 Three separate models are fit, one for each area championship under consideration. To construct the dataset for each of the models we join the results together from the area and nationals in 2018 by name and exclude those who didn't participate in both. We fit the model using least squares and see that the coefficient associated with the finishing position in the northerns is 2.23 and the intercept is 95. This means that given your finishing position in the Northern XC, just add 95 and multiple by 2.23 to get an approximate finishing position in the 2018 National XC. 
 
 ```{r}
 fit_northern <- lm(position_national ~ position_northern, data = national_northern)
-broom::tidy(fit_northern) %>% knitr::kable()
+broom::tidy(fit_northern) %>% knitr::kable(digits = 1)
 fit_midlands <- lm(position_national ~ position_midlands, data = national_midlands)
 fit_southern <- lm(position_national ~ position_southern, data = national_southern)
 ```
 
 Next we plot a Normal Q-Q plot to check the residuals are Normally distributed. If the residuals (the errors, $Y_i - \varepsilon_i, i = 1,\dots,N$) are Normally distributed the conclusions drawn from the model are valid. The Q-Q plots look reasonable (except maybe the midlands (centre)) with only a few outliers identified by R.
 
-```{r, fig.cap="Normal Q-Q plots (Left) Northern (Centre) Midlands (Right) Southerns"}
+```{r, fig.cap="Normal Q-Q plots (Left) Northern. (Centre) Midlands. (Right) Southerns."}
 par(mfrow = c(1, 3))
 plot(fit_northern, which = 2)
 plot(fit_midlands, which = 2)
@@ -113,7 +115,7 @@ p3 <- national_southern %>%
   geom_point() +
   geom_abline(intercept = fit_southern$coefficients[1], slope = fit_southern$coefficients[2])
 
-grid.arrange(p1, p2, p3, ncol = 3)
+grid.arrange(p1, p2, p3, ncol = 1)
 ```
 
 Looking at the line of best fit, the data appears to be linear, however exceptional performances in both competitions are not accurately modelled. 
@@ -122,18 +124,20 @@ The coefficients for the midlands and the southerns simple linear regression are
 
 ```{r}
 broom::tidy(fit_midlands) %>%
-  knitr::kable()
+  knitr::kable(digits = 1)
 broom::tidy(fit_southern) %>%
-  knitr::kable()
+  knitr::kable(digits = 1)
 ```
 
 # Predict 2019 National placing using the linear model
 
 Now we'd like to use this data in order to predict a performance in 2019. I ran in the Northern XC, finished 289th. The linear model predicts a mean finishing position of 742, given by the equation:
 
-$$Y = 95 + 2.239 * 289$$
-
+$$\textrm{finish_nationals} = 95 + 2.239 * 289$$
 
 ```{r}
 predict(fit_northern, newdata = tibble(position_northern = 289))
 ```
+
+My actual finishing position was `r national_results[national_results$Name == "Jonathan Law",]$Pos`.
+

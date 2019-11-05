@@ -116,7 +116,7 @@ DisplayData.png(renderBytes(plot)).show()
 
 The actual code used to build the scatter plot is within the function `renderBytes`, you should now see a plot which looks like:
 
-<img src="/post/2019-04-15-scala-and-jupyter-notebook-with-almond_files/Screenshot 2019-04-15 at 15.55.29.png" alt="linear model" width="500"/>
+<img src="/post/2019-04-15-scala-and-jupyter-notebook-with-almond_files/simulated_data.png" alt="linear model" width="500"/>
 
 The code required to sample from the posterior distribution is similar to that required to simulate the model:
 
@@ -139,6 +139,6 @@ First prior distributions are chosen for the static parameters, then the functio
 ```scala
 val iters = linearModel(sims).sample(HMC(5), 5000, 100000, 100)
 ```
-<img src="/post/2019-04-15-scala-and-jupyter-notebook-with-almond_files/Screenshot 2019-04-15 at 16.09.10.png" alt="parameter diagnostics" width="500" />
+<img src="/post/2019-04-15-scala-and-jupyter-notebook-with-almond_files/traceplots.png" alt="parameter diagnostics" width="500" />
 
 The full notebook can be viewed on Github [here](https://github.com/jonnylaw/blog/blob/master/notebooks/rainier_linear_model.ipynb).
