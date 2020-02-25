@@ -13,7 +13,7 @@ tags: []
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(tidyverse)
+library(tidyr); library(dplyr); library(readr); library(ggplot2); library(jonnylaw);
 library(ggthemes)
 theme_set(theme_tufte())
 ```
