@@ -29,7 +29,8 @@ Imports:
     parallel,
     Rcpp,
     readr,
-    tibble
+    tibble,
+    tidybayes
 URL: https://github.com/jonnylaw/blog
 BugReports: https://github.com/jonnylaw/blog/issues
 LinkingTo: 
