@@ -110,7 +110,8 @@ dlm_gibbs <- function(ys, mod, shape_v, rate_v, shape_w, rate_w, iters, progress
   w <- matrix(NA_real_, nrow = iters, ncol = d)
   v[1,] <- 1 / rgamma(p, shape = shape_v, rate = rate_v)
   w[1,] <- 1 / rgamma(d, shape = shape_w, rate = rate_w)
-  theta <- c(w[1,], v[1,])
+  mod$V <- diag(v[1, ])
+  mod$W <- diag(w[1, ])
   if (progress) {
     pb <- progress::progress_bar$new(
       format = "sampling [:bar] :current / :total eta: :eta",
@@ -119,9 +120,9 @@ dlm_gibbs <- function(ys, mod, shape_v, rate_v, shape_w, rate_w, iters, progress
   for (i in seq_len(iters)) {
     sampled <- ffbs(ys, mod)
     v[i, ] <- sample_v(ys, sampled, mod, shape_v, rate_v)
-    mod$V <- v[i, ]
+    mod$V <- diag(v[i, ])
     w[i, ] <- sample_w(sampled, mod, shape_w, rate_w)
-    mod$W <- w[i, ]
+    mod$W <- diag(w[i, ])
     if (progress) pb$tick()
   }
   out <- tibble::as_tibble(cbind(w, v))
