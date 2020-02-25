@@ -30,7 +30,8 @@ Imports:
     Rcpp,
     readr,
     tibble,
-    tidybayes
+    tidybayes,
+    lubridate
 URL: https://github.com/jonnylaw/blog
 BugReports: https://github.com/jonnylaw/blog/issues
 LinkingTo: 
