@@ -15,7 +15,7 @@ jobs:
       - name: Install Stan and Deps
         run: |-
          apt-get update \
-          && apt-get install -y --no-install-recommends r-cran-rstan \
+          && apt-get install -y --no-install-recommends r-cran-rstan curl \
           libxml2-dev \
           libssl-dev \
           libcurl4-openssl-dev \
