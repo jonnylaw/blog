@@ -1,17 +1,17 @@
 #' Title
 #'
 #' @param ys 
-#' @param model 
+#' @param mod 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-ffbs <- function(ys, model) {
-  f <- model$FF; g <- model$GG; v <- model$V; w <- model$W
-  m0 <- model$m0; c0 <- model$C0
+ffbs <- function(ys, mod) {
+  f <- mod$FF; g <- mod$GG; v <- mod$V; w <- mod$W
+  m0 <- mod$m0; c0 <- mod$C0
   filtered <- kalmanFilter(ys, f, g, v, w, m0, c0)
-  backwardSample(model$GG, model$W, filtered$mt, filtered$ct, filtered$at, filtered$rt)
+  backwardSample(mod$GG, mod$W, filtered$mt, filtered$ct, filtered$at, filtered$rt)
 }
 
 #' Title
@@ -28,7 +28,7 @@ ffbs <- function(ys, model) {
 sample_w <- function(theta, mod, shape_w, rate_w) {
   n <- ncol(theta) - 1
   d <- nrow(theta)
-  theta_center <- t(theta[, -1, drop = FALSE]) - crossprod(theta[, -(n + 1), drop = FALSE], model$GG)
+  theta_center <- t(theta[, -1, drop = FALSE]) - crossprod(theta[, -(n + 1), drop = FALSE], mod$GG)
   SStheta <- drop(sapply(1:d, function(i) crossprod(theta_center[i, ])))
   
   1 / rgamma(d, shape = shape_w + 0.5 * n,
@@ -117,16 +117,16 @@ dlm_gibbs <- function(ys, mod, shape_v, rate_v, shape_w, rate_w, iters, progress
       total = iters, clear = FALSE, width= 60)  
   }
   for (i in seq_len(iters)) {
-    sampled <- ffbs(ys, model)
+    sampled <- ffbs(ys, mod)
     v[i, ] <- sample_v(ys, sampled, mod, shape_v, rate_v)
     mod$V <- v[i, ]
     w[i, ] <- sample_w(sampled, mod, shape_w, rate_w)
     mod$W <- w[i, ]
     if (progress) pb$tick()
   }
-  out <- as_tibble(cbind(w, v))
+  out <- tibble::as_tibble(cbind(w, v))
   colnames(out) <- c(paste0("w", seq_len(d)), paste0("v", seq_len(p)))
-  add_column(out, iteration = seq_len(iters))
+  tibble::add_column(out, iteration = seq_len(iters))
 }
 
 #' Gibbs sample DLM in parallel

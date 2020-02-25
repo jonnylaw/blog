@@ -28,7 +28,7 @@ jobs:
           Rscript -e "remotes::install_deps(dependencies = TRUE, repos = 'https://demo.rstudiopm.com/all/__linux__/bionic/latest')"
       - name: Render Site
         run: |-
-          Rscript -e "blogdown::build_site(encoding = 'UTF-8')"
+          Rscript -e "blogdown::build_site()"
           echo "::set-env name=DEPLOY_PATH::'docs'"
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/master'

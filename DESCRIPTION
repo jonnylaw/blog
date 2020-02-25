@@ -25,13 +25,15 @@ Imports:
     janitor,
     knitr,
     magrittr,
+    microbenchmark,
     parallel,
     Rcpp,
     readr,
-    microbenchmark
+    tibble
 URL: https://github.com/jonnylaw/blog
 BugReports: https://github.com/jonnylaw/blog/issues
 LinkingTo: 
-    Rcpp
+    Rcpp,
+    RcppArmadillo
 Suggests: 
     testthat
