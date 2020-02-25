@@ -18,20 +18,24 @@ Imports:
     furrr,
     ggmcmc,
     ggplot2,
+    ggthemes,
     gridExtra,
     hedgehog,
     here,
     htmltab,
     janitor,
     knitr,
+    leaflet,
     magrittr,
     microbenchmark,
     parallel,
     Rcpp,
     readr,
+    reticulate,
     tibble,
     tidybayes,
-    lubridate
+    lubridate,
+    numDeriv
 URL: https://github.com/jonnylaw/blog
 BugReports: https://github.com/jonnylaw/blog/issues
 LinkingTo: 

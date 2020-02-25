@@ -15,12 +15,22 @@ library(leaflet)
 theme_set(theme_minimal())
 ```
 
-Garmin running watches output a file type called .fit, the developer SDK can be downloaded from the [ANT website](https://www.thisisant.com/developer/fit-sdk-release-notes). There is aalso Python library named [fitparse](https://github.com/dtcooper/python-fitparse) which has been written to parse .fit files. This blog post will show you how to use [reticulate](https://rstudio.github.io/reticulate/) to parse a .fit file.
+Garmin running watches output a file type called .fit, the developer SDK can be downloaded from the [ANT website](https://www.thisisant.com/developer/fit-sdk-release-notes). There is also Python library named [fitparse](https://github.com/dtcooper/python-fitparse) which has been written to parse .fit files. This blog post will show you how to use [reticulate](https://rstudio.github.io/reticulate/) to parse a .fit file.
+
+First create a Python virtual environment, this is commonly used to store a projects' package collection together to enable more straightforward reproducibility. A virtual environment also contains its own Python and the python package manager pip for installing and managing packages. `reticulate` has a function to create a virtual environment:
+
+```{r}
+virtualenv_create("parse-strava")
+```
+
 
 ## Parsing 
 
+The virtual environment can be used to install the Python package `fitparse`
+
 ```{r}
-reticulate::py_install("fitparse", method = "auto", conda = "auto")
+use_virtualenv("parse-strava")
+py_install("fitparse")
 ```
 
 The library can be imported as an R object.
@@ -61,7 +71,7 @@ We want to transform this list of lists into a dataframe. The most straightforwa
 
 ```{r}
 (activity_tibble <- activity %>%
-  map_dfr(function(x) tibble(
+  purrr::map_dfr(function(x) tibble(
     timestamp = readr::parse_datetime(as.character(x$timestamp)),
     latitude = x$position_lat,
     longitude = x$position_long,
@@ -172,7 +182,7 @@ zones <- c(
 ```
 
 ```{r, echo=FALSE}
-knitr::kable(rownames_to_column(data.frame(heart_rate = round(zones, 0)), var = "zone"))
+knitr::kable(tibble::rownames_to_column(data.frame(heart_rate = round(zones, 0)), var = "zone"))
 ```
 
 Then the time in zones can be plotted for the given activity.
