@@ -13,6 +13,7 @@ Imports:
     bench,
     blogdown,
     brms,
+    broom,
     coda,
     dplyr,
     furrr,
@@ -28,15 +29,14 @@ Imports:
     leaflet,
     magrittr,
     microbenchmark,
+    numDeriv,
     parallel,
     Rcpp,
     readr,
     reticulate,
     tibble,
     tidybayes,
-    lubridate,
-    numDeriv,
-    broom
+    lubridate
 URL: https://github.com/jonnylaw/blog
 BugReports: https://github.com/jonnylaw/blog/issues
 LinkingTo: 

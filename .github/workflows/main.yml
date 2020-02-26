@@ -6,7 +6,7 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@master
-      - name: Install Stan and Deps
+      - name: Install Stan, Python, R packages and Deps
         run: |-
          apt-get update \
           && apt-get install -y --no-install-recommends \
@@ -29,6 +29,7 @@ jobs:
           r-cran-reticulate \
           r-cran-tibble \
           r-cran-lubridate \
+          python3-venv \
           curl \
           default-jdk \
           libxml2-dev \
