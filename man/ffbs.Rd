@@ -4,12 +4,12 @@
 \alias{ffbs}
 \title{Title}
 \usage{
-ffbs(ys, model)
+ffbs(ys, mod)
 }
 \arguments{
 \item{ys}{}
 
-\item{model}{}
+\item{mod}{}
 }
 \value{
 

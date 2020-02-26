@@ -35,7 +35,6 @@ sample_w <- function(theta, mod, shape_w, rate_w) {
              rate = rate_w + 0.5 * SStheta)
 }
 
-
 #' Title
 #' 
 #' Centre the observations
