@@ -36,21 +36,17 @@ parse_po10 <- function(url, page) {
   out[-1,]
 }
 northern_url = "https://www.thepowerof10.info/results/results.aspx?meetingid=215941&event=12KXC&venue=Harewood&date=27-Jan-18"
-mens_northern_results = lapply(1:4, function(i) parse_po10(northern_url, i)) %>%
-  reduce(bind_rows)
+mens_northern_results = purrr::map_dfr(1:4, function(i) parse_po10(northern_url, i))
 
 midlands_url <- "https://www.thepowerof10.info/results/results.aspx?meetingid=218332&event=12KXC"
-mens_midlands_results <- lapply(1:2, function(i) parse_po10(midlands_url, i)) %>%
-  reduce(bind_rows)
+mens_midlands_results <- purrr::map_dfr(1:2, function(i) parse_po10(midlands_url, i))
 
 southern_url <- "https://www.thepowerof10.info/results/results.aspx?meetingid=215848&event=15KXC"
 
-mens_southern_results <- lapply(1:3, function(i) parse_po10(southern_url, i)) %>%
-  reduce(bind_rows)
+mens_southern_results <- purrr::map_dfr(1:3, function(i) parse_po10(southern_url, i))
 
 national_url <- "https://www.thepowerof10.info/results/results.aspx?meetingid=195112&event=12KXC"
-national_results <- lapply(1:4, function(i) parse_po10(national_url, i)) %>%
-  reduce(bind_rows)
+national_results <- purrr::map_dfr(1:4, function(i) parse_po10(national_url, i))
 ```
 
 # A linear model

@@ -9,7 +9,28 @@ jobs:
       - name: Install Stan and Deps
         run: |-
          apt-get update \
-          && apt-get install -y --no-install-recommends r-cran-rstan curl default-jdk \
+          && apt-get install -y --no-install-recommends \
+          r-cran-rstan \
+          r-cran-brms \
+          r-cran-coda \
+          r-cran-dplyr \
+          r-cran-furrr \
+          r-cran-ggmcmc \
+          r-cran-ggplot2 \
+          r-cran-ggthemes \
+          r-cran-here \
+          r-cran-htmltab \
+          r-cran-janitor \
+          r-cran-knitr \
+          r-cran-leaflet \
+          r-cran-magrittr \
+          r-cran-microbenchmark \
+          r-cran-readr \
+          r-cran-reticulate \
+          r-cran-tibble \
+          r-cran-lubridate \
+          curl \
+          default-jdk \
           libxml2-dev \
           libssl-dev \
           libcurl4-openssl-dev \
