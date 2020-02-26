@@ -8,6 +8,13 @@ categories:
 tags: []
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyr); library(dplyr); library(readr); library(ggplot2); library(jonnylaw);
+library(jonnylaw) # My personal R library containing code from this blog
+theme_set(theme_minimal())
+```
+
 Typically, when programming with Scala I use a combination of [ensime](https://ensime.github.io/) in emacs, [sbt](https://www.scala-sbt.org/) and the Scala repl. However, sometimes when working on a new project which requires a lot of data exploration and graphics it is sometimes more useful to have a notebook where figures are rendered inline with descriptions of why each figure has been generated and what it shows for future reference. Jupyter notebooks have long been the standard in Python (although I prefer rmarkdown and knitr when using R). 
 
 Jupyter notebooks can be initialised with many different kernels to serve a wide array of users. Recently there has been a release which combines the power of the [Ammonite](https://ammonite.io/) scala repl which empowers users to write small Scala scripts where dependencies can be stored in the same script file and are fetched using coursier without the need for a large SBT project. Ammonite has many more features besides this, however scripting is one of my favourites. It also allows us to write self-contained Jupyter notebooks with dependencies by utilising Ammonite as the kernel of the Jupyter notebook using [Almond](https://almond.sh/). 
