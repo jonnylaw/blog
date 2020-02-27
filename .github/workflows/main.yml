@@ -6,6 +6,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@master
+      - name: Install Pandoc
+        uses: r-lib/actions/setup-pandoc@master
       - name: Install Stan, Python and R dependencies
         run: |-
          apt-get update \
@@ -40,7 +42,6 @@ jobs:
         run: |-
           Rscript -e "renv::restore()"
       - name: Render Site
-        uses: r-lib/actions/setup-pandoc@master
         run: |-
           Rscript -e "blogdown::install_hugo(); blogdown::build_site()"
       - name: Deploy to GitHub Pages
