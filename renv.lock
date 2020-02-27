@@ -528,8 +528,13 @@
     "jonnylaw": {
       "Package": "jonnylaw",
       "Version": "0.1.0",
-      "Source": "unknown",
-      "Hash": "b66b039d062023db103ed659cd9278c5"
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "jonnylaw",
+      "RemoteUsername": "jonnylaw",
+      "RemoteRef": "master",
+      "RemoteSha": "8532aceb0eae5e3528958097f809fa5132041982"
     },
     "jsonlite": {
       "Package": "jsonlite",
