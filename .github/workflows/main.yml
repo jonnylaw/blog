@@ -6,31 +6,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@master
-      - name: Install Stan, Python, R packages and Deps
+      - name: Install Stan, Python and R dependencies
         run: |-
          apt-get update \
           && apt-get install -y --no-install-recommends \
-          r-cran-rstan \
-          r-cran-brms \
-          r-cran-coda \
-          r-cran-dplyr \
-          r-cran-furrr \
-          r-cran-ggmcmc \
-          r-cran-ggplot2 \
-          r-cran-ggthemes \
-          r-cran-here \
-          r-cran-htmltab \
-          r-cran-janitor \
-          r-cran-knitr \
-          r-cran-leaflet \
-          r-cran-magrittr \
-          r-cran-microbenchmark \
-          r-cran-readr \
-          r-cran-reticulate \
-          r-cran-rmarkdown \
-          r-cran-sp \
-          r-cran-tibble \
-          r-cran-lubridate \
           libpython3-dev \
           python3-venv \
           curl \
@@ -40,17 +19,26 @@ jobs:
           libcurl4-openssl-dev \
           && apt-get clean \
           && rm -rf /var/lib/apt/lists/
-      - name: Install Ammonite
+      - name: Install Ammonite 2.12
         run: |-
           sh -c '(echo "#!/usr/bin/env sh" && curl -L https://github.com/lihaoyi/Ammonite/releases/download/2.0.4/2.12-2.0.4) > /usr/local/bin/amm && chmod +x /usr/local/bin/amm'
-      - name: Run Scala examples
+      - name: Run Scala notebooks 
         run: |-
           ./notebooks/run_scala.sh
-      - name: Install Package Dependencies
+      - uses: actions/cache@v1
+        if: startsWith(runner.os, 'Linux')
+        with:
+          path: ~/.local/share/renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
+      - name: Install blog package
         run: |-
           Rscript -e "install.packages('remotes', repos = 'https://demo.rstudiopm.com/all/__linux__/bionic/latest')"
-          Rscript -e "remotes::install_deps(dependencies = TRUE, repos = 'https://demo.rstudiopm.com/all/__linux__/bionic/latest')"
-          Rscript -e "pkgbuild::build(path = '.', dest_path = '.'); install.packages('jonnylaw_0.1.0.tar.gz', type = 'source', repos = NULL)"
+          Rscript -e "remotes::install_github("jonnylaw/jonnylaw", dependencies = TRUE)"
+      - name: Install R package dependencies
+        run: |-
+          Rscript -e "renv::restore()"
       - name: Render Site
         run: |-
           Rscript -e "blogdown::install_hugo(); blogdown::build_site()"
