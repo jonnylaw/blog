@@ -40,6 +40,7 @@ jobs:
         run: |-
           Rscript -e "renv::restore()"
       - name: Render Site
+      - uses: r-lib/actions/setup-pandoc@master
         run: |-
           Rscript -e "blogdown::install_hugo(); blogdown::build_site()"
       - name: Deploy to GitHub Pages
