@@ -33,10 +33,6 @@ jobs:
           key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
           restore-keys: |
             ${{ runner.os }}-renv-
-      - name: Install blog package
-        run: |-
-          Rscript -e "install.packages('remotes', repos = 'https://demo.rstudiopm.com/all/__linux__/bionic/latest')"
-          Rscript -e "remotes::install_github('jonnylaw/jonnylaw', dependencies = TRUE)"
       - name: Install R package dependencies
         run: |-
           Rscript -e "renv::restore()"

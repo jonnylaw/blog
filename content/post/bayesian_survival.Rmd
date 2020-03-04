@@ -37,7 +37,7 @@ tibble(
   lambda = rep(c(1, 3, 10), each = 21),
   probability = dpois(x = x, lambda = lambda)
 ) %>% 
-ggplot(aes(x = x, y = probability, colour = as.factor(lambda))) +
+  ggplot(aes(x = x, y = probability, colour = as.factor(lambda))) +
   geom_point() +
   geom_line() +
   labs(title = "Probability Mass Function (pmf) for three values of lambda", colour = "lambda")

@@ -11,7 +11,6 @@ tags: []
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(tidyr); library(dplyr); library(readr); library(ggplot2); library(jonnylaw);
 library(furrr)
-library(jonnylaw)
 theme_set(theme_minimal())
 ```
 
@@ -187,23 +186,14 @@ iters <- future_map_dfr(
 
 ```{r, echo=FALSE}
 actual_values <- tibble(
-  Parameter = c("alpha", "beta", "tau"),
+  parameter = c("alpha", "beta", "tau"),
   actual_value = c(alpha, beta, 1 / sigma^2)
 )
 
-p1 <- iters %>% 
+iters %>% 
   filter(iteration > 1000) %>% 
-  gather(key = "Parameter", value, -chain, -iteration) %>% 
-  inner_join(actual_values) %>%
-  traceplot() +
-  geom_hline(aes(yintercept = actual_value), linetype = "dashed")
-
-p2 <- iters %>%
-  filter(iteration > 1000) %>% 
-  gather(key = "Parameter", value,-chain,-iteration) %>%
-  density_plot()
-
-gridExtra::grid.arrange(p1, p2)
+  gather(key = "parameter", value, -chain, -iteration) %>% 
+  plot_diagnostics_sim(actual_values)
 ```
 
 ## Making the Markov chain more efficient
@@ -268,19 +258,10 @@ iters_centered <- future_map_dfr(
 ```
 
 ```{r}
-p1 <- iters_centered %>% 
+iters_centered %>% 
   filter(iteration > 1000) %>% 
-  gather(key = "Parameter", value, -chain, -iteration) %>% 
-  inner_join(actual_values) %>%
-  traceplot() +
-  geom_hline(aes(yintercept = actual_value), linetype = "dashed")
-
-p2 <- iters_centered %>%
-  filter(iteration > 1000) %>% 
-  gather(key = "Parameter", value,-chain,-iteration) %>%
-  density_plot()
-
-gridExtra::grid.arrange(p1, p2)
+  gather(key = "parameter", value,-chain,-iteration) %>%
+  plot_diagnostics_sim(actual_values)
 ```
 
 The draws from the Gibbs sampling algorithm are draws from the posterior distribution which can be used to produce summaries required for inference using the linear model. Posterior fitted values, ie. a straight line, can be plotted by sampling pairs of values ($\alpha, \beta$) from the MCMC output and plotting them using the equation of a straight line ($y = \alpha + \beta x$). This gives an indication of the uncertainty in the parameter estimates.
