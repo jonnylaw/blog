@@ -1,8 +1,11 @@
 ---
 title: "Releasing Harrier League Data"
 author: "Jonny Law"
-date: "04/03/2020"
-output: html_document
+date: "2020-03-04"
+slug: harrier_league_open_data
+categories:
+  - R
+tags: []
 ---
 
 ```{r setup, include=FALSE}
