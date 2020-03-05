@@ -41,4 +41,13 @@ content/post/*cache*
 # ensime
 **/\#*
 **/~*
+
+# R Stuff
 .Rproj.user
+
+# renv
+renv/library
+
+# Generated website
+docs
+static
