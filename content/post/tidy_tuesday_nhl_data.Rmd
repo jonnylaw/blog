@@ -153,7 +153,7 @@ ggplot(cumulative_goals, aes(x = age_years, y = cumulative_goals)) +
 
 Now use the [twitteR](https://cran.r-project.org/web/packages/twitteR/README.html) library to post the plots directly to Twitter without leaving R. You must connect to the Twitter API using OAuth as described in the README for twitteR, I set the Twitter application keys in my `.Renviron` file which is never committed to public version control (this can be easily edited using `usethis::edit_r_environ()`).
 
-```{r}
+```{r eval=FALSE}
 library(twitteR)
 oauth <- setup_twitter_oauth(
   Sys.getenv("TWITTER_API_KEY"),
@@ -165,11 +165,11 @@ oauth <- setup_twitter_oauth(
 
 With twitteR we can get the most recent #tidytuesday posts
 
-```{r}
+```{r eval=FALSE}
 searchTwitter('#tidytuesday', n = 10)
 ```
 
-Unfortunately the twitteR API is a little outdated and requires tweets to be less than 140 characters (however this can be bypassed using `bypassCharLimit = TRUE`) and we can't post multiple images in the same tweet using the `mediaPath` argument. So unfortunately I had to resort to posting my graphs manually!
+Unfortunately the twitteR API (I think people tend to use [rtweet](https://rtweet.info) now!) is a little outdated and requires tweets to be less than 140 characters (however this can be bypassed using `bypassCharLimit = TRUE`) and we can't post multiple images in the same tweet using the `mediaPath` argument. So unfortunately I had to resort to posting my graphs manually!
 
 ```{r eval=FALSE}
 updateStatus(
