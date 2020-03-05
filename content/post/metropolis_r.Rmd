@@ -13,7 +13,6 @@ tags: []
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 library(tidyr); library(dplyr); library(readr); library(ggplot2); library(jonnylaw);
 library(ggthemes)
-library(ggmcmc)
 library(coda)
 library(furrr)
 library(Rcpp)
@@ -136,21 +135,17 @@ out = metropolis(theta, log_posterior(xs), proposal, 10000)
 
 ```{r, echo=FALSE}
 actual_values = tibble(
-  Parameter = c("mu1", "sigma1", "mu2", "sigma2"),
+  parameter = c("mu1", "sigma1", "mu2", "sigma2"),
   actual_value = c(5.0, 0.5, 2.0, 1.5)
 )
 
 out <- as_tibble(out)
-colnames(out) <- actual_values$Parameter
+colnames(out) <- actual_values$parameter
 
 out %>%
   mutate(iteration = row_number()) %>%
-  gather(key = Parameter, value, -iteration) %>%
-  inner_join(actual_values) %>%
-  ggplot(aes(x = iteration, y = value)) +
-  geom_line(alpha = 0.5) +
-  geom_hline(aes(yintercept = actual_value), linetype = "dashed") +
-  facet_wrap(~Parameter, scales = "free_y")
+  gather(parameter, value, -iteration) %>%
+  plot_diagnostics_sim(actual_values)
 ```
 
 # Parallel Chains in R
@@ -173,23 +168,20 @@ Then `future_map_dfr` is used which performs the function `.f` for each element 
 plan(multiprocess)
 mh_samples <- future_map_dfr(
   .x = 1:2,
-  .f = metropolis_df(theta, log_posterior(xs), proposal, 10000, actual_values$Parameter),
+  .f = metropolis_df(theta, log_posterior(xs), proposal, 10000, actual_values$parameter),
   .id = "chain"
 )
 ```
 
-The figure below shows the trace plots from 10,000 draws of the parallel Metropolis hastings algorithm.
+The figure below shows the trace plots and marginal densities from 10,000 draws of the parallel Metropolis hastings algorithm.
 
 ```{r parallel-diagnostics, echo=FALSE}
 mh_samples %>%
   group_by(chain) %>% 
   mutate(iteration = row_number()) %>%
-  gather(key = Parameter, value, -iteration, -chain) %>%
-  inner_join(actual_values) %>%
-  ggplot(aes(x = iteration, y = value, colour = chain)) +
-  geom_line(alpha = 0.5) +
-  geom_hline(aes(yintercept = actual_value), linetype = "dashed") +
-  facet_wrap(~Parameter, scales = "free_y")
+  ungroup() %>% 
+  gather(key = parameter, value, -iteration, -chain) %>%
+  plot_diagnostics_sim(actual_values)
 ```
 
 # Rcpp implementation
@@ -236,14 +228,13 @@ out_cpp <- metropolis(theta, function(p) logDensity(xs, p), function(p) proposal
 
 ```{r, echo=FALSE}
 out_cpp <- as_tibble(out_cpp)
-colnames(out_cpp) <- actual_values$Parameter
+colnames(out_cpp) <- actual_values$parameter
 
 out_cpp %>%
-  mcmc() %>%
-  ggs() %>%
-  ggs_traceplot() +
+  gather(key = "parameter", value, -iteration) %>% 
+  jonnylaw::traceplot() +
   geom_hline(data = actual_values, aes(yintercept = actual_value), linetype = "dashed") +
-  facet_wrap(~Parameter, ncol = 2, scales="free_y")
+  facet_wrap(~parameter, ncol = 2, scales="free_y")
 ```
 
 # Performance Improvements

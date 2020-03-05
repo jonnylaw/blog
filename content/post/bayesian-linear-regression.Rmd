@@ -187,20 +187,20 @@ iters <- future_map_dfr(
 
 ```{r, echo=FALSE}
 actual_values <- tibble(
-  Parameter = c("alpha", "beta", "tau"),
+  parameter = c("alpha", "beta", "tau"),
   actual_value = c(alpha, beta, 1 / sigma^2)
 )
 
 p1 <- iters %>% 
   filter(iteration > 1000) %>% 
-  gather(key = "Parameter", value, -chain, -iteration) %>% 
+  gather(key = "parameter", value, -chain, -iteration) %>% 
   inner_join(actual_values) %>%
   traceplot() +
   geom_hline(aes(yintercept = actual_value), linetype = "dashed")
 
 p2 <- iters %>%
   filter(iteration > 1000) %>% 
-  gather(key = "Parameter", value,-chain,-iteration) %>%
+  gather(key = "parameter", value,-chain,-iteration) %>%
   density_plot()
 
 gridExtra::grid.arrange(p1, p2)
@@ -270,14 +270,14 @@ iters_centered <- future_map_dfr(
 ```{r}
 p1 <- iters_centered %>% 
   filter(iteration > 1000) %>% 
-  gather(key = "Parameter", value, -chain, -iteration) %>% 
+  gather(key = "parameter", value, -chain, -iteration) %>% 
   inner_join(actual_values) %>%
   traceplot() +
   geom_hline(aes(yintercept = actual_value), linetype = "dashed")
 
 p2 <- iters_centered %>%
   filter(iteration > 1000) %>% 
-  gather(key = "Parameter", value,-chain,-iteration) %>%
+  gather(key = "parameter", value,-chain,-iteration) %>%
   density_plot()
 
 gridExtra::grid.arrange(p1, p2)

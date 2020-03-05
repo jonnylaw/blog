@@ -1,4 +1,4 @@
-baseurl = "/"
+baseurl = "https://jonnylaw.rocks/"
 publishdir = "docs"
 languageCode = "en-us"
 title = "Bayesian Statistics and Functional Programming "
@@ -6,7 +6,7 @@ theme = "hugo-lithium-theme"
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 [permalinks]
-    post = "/:year/:month/:day/:slug/"
+    post = "/:slug/"
     
 [[menu.main]]
     name = "Blog"
@@ -33,7 +33,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     MathJaxCDN = "//cdn.bootcss.com"
     MathJaxVersion = "2.7.1"
 
-    [params.logo]
+[params.logo]
     url = "picture_cropped.jpg"
     width = 50
     height = 50
