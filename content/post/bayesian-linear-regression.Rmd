@@ -193,20 +193,7 @@ actual_values <- tibble(
 iters %>% 
   filter(iteration > 1000) %>% 
   gather(key = "parameter", value, -chain, -iteration) %>% 
-<<<<<<< HEAD
-  inner_join(actual_values) %>%
-  traceplot() +
-  geom_hline(aes(yintercept = actual_value), linetype = "dashed")
-
-p2 <- iters %>%
-  filter(iteration > 1000) %>% 
-  gather(key = "parameter", value,-chain,-iteration) %>%
-  density_plot()
-
-gridExtra::grid.arrange(p1, p2)
-=======
   plot_diagnostics_sim(actual_values)
->>>>>>> 31b2f114ccb3d933816dadd6eb88aa7be8717d82
 ```
 
 ## Making the Markov chain more efficient
@@ -273,22 +260,8 @@ iters_centered <- future_map_dfr(
 ```{r}
 iters_centered %>% 
   filter(iteration > 1000) %>% 
-<<<<<<< HEAD
-  gather(key = "parameter", value, -chain, -iteration) %>% 
-  inner_join(actual_values) %>%
-  traceplot() +
-  geom_hline(aes(yintercept = actual_value), linetype = "dashed")
-
-p2 <- iters_centered %>%
-  filter(iteration > 1000) %>% 
-  gather(key = "parameter", value,-chain,-iteration) %>%
-  density_plot()
-
-gridExtra::grid.arrange(p1, p2)
-=======
-  gather(key = "parameter", value,-chain,-iteration) %>%
+  gather(key = "parameter", value, -chain, -iteration) %>%
   plot_diagnostics_sim(actual_values)
->>>>>>> 31b2f114ccb3d933816dadd6eb88aa7be8717d82
 ```
 
 The draws from the Gibbs sampling algorithm are draws from the posterior distribution which can be used to produce summaries required for inference using the linear model. Posterior fitted values, ie. a straight line, can be plotted by sampling pairs of values ($\alpha, \beta$) from the MCMC output and plotting them using the equation of a straight line ($y = \alpha + \beta x$). This gives an indication of the uncertainty in the parameter estimates.
