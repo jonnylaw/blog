@@ -14,7 +14,6 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyr); library(dplyr); library(readr); library(ggplot2); library(jonnylaw);
 library(numDeriv)
 library(furrr)
-library(jonnylaw) # My personal R library containing code from this blog
 
 theme_set(theme_minimal())
 ```

@@ -58,12 +58,26 @@
       "Repository": "CRAN",
       "Hash": "9efe80472b21189ebab1b74169808c26"
     },
+    "MCMCpack": {
+      "Package": "MCMCpack",
+      "Version": "1.4-6",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "adddd38f08bb729015ad31bd93e77d6e"
+    },
     "Matrix": {
       "Package": "Matrix",
       "Version": "1.2-18",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "08588806cba69f04797dab50627428ed"
+    },
+    "MatrixModels": {
+      "Package": "MatrixModels",
+      "Version": "0.4-1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "d57ac35220b39c591388ab3a080f9cbe"
     },
     "R6": {
       "Package": "R6",
@@ -99,6 +113,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "c6faf038ba4346b1de19ad7c99b8f94a"
+    },
+    "SparseM": {
+      "Package": "SparseM",
+      "Version": "1.78",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "fbe4ac267bf42a91e495cc68ad3f8b63"
     },
     "StanHeaders": {
       "Package": "StanHeaders",
@@ -581,6 +602,18 @@
       "Repository": "CRAN",
       "Hash": "5b1dd03e95bfdec3ef8d010801345426"
     },
+    "jonnylaw": {
+      "Package": "jonnylaw",
+      "Version": "0.1.0",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteUsername": "jonnylaw",
+      "RemoteRepo": "jonnylaw",
+      "RemoteRef": "master",
+      "RemoteSha": "893033fbe3185cd59d9695af6582d1e1ca2c0dfa",
+      "RemoteHost": "api.github.com",
+      "Hash": "95d82e12eaedb90ee4ffc0567dfbda38"
+    },
     "jsonlite": {
       "Package": "jsonlite",
       "Version": "1.6.1",
@@ -685,6 +718,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "1270d684b417c455fae69ad025153f90"
+    },
+    "mcmc": {
+      "Package": "mcmc",
+      "Version": "0.9-6.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "0e521131b9ddbb8f91fc7cd15c0886f8"
     },
     "mgcv": {
       "Package": "mgcv",
@@ -867,6 +907,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "22aca7d1181718e927d403a8c2d69d62"
+    },
+    "quantreg": {
+      "Package": "quantreg",
+      "Version": "5.54",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "12895b7bc4cd4f5209aa8ff52f6cf6b3"
     },
     "rappdirs": {
       "Package": "rappdirs",
