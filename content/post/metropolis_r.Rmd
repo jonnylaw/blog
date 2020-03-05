@@ -231,6 +231,7 @@ out_cpp <- as_tibble(out_cpp)
 colnames(out_cpp) <- actual_values$parameter
 
 out_cpp %>%
+  mutate(iteration = row_number()) %>% 
   gather(key = "parameter", value, -iteration) %>% 
   jonnylaw::traceplot() +
   geom_hline(data = actual_values, aes(yintercept = actual_value), linetype = "dashed") +
