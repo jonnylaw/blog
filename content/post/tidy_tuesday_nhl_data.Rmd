@@ -1,7 +1,7 @@
 ---
 title: "Tidy Tuesday"
 author: "Jonny Law"
-date: "04/03/2020"
+date: "2020-03-04"
 output: html_document
 ---
 
