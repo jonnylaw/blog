@@ -6,14 +6,13 @@ Jonny Law is a data scientist at the [National Innovation Centre for Data](https
 
 ## Skills
 
-* Scala
 * R
+* Scala
 * Python
 * SQL
 * Bayesian Modelling
 * Time series analysis
 * Machine Learning
-* Natural Language Processing
 
 ## Projects
 
