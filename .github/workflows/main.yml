@@ -38,7 +38,7 @@ jobs:
           Rscript -e "renv::restore()"
       - name: Render Site
         run: |-
-          Rscript -e "blogdown::install_hugo(); blogdown::build_site()"
+          Rscript -e "options(blogdown.subdir = 'post'); blogdown::install_hugo(); blogdown::build_site()"
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/master'
         uses: maxheld83/ghpages@v0.2.0
