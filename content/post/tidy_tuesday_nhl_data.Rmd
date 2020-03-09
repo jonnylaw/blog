@@ -1,7 +1,7 @@
 ---
-title: "Tidy Tuesday"
+title: "Tidy Tuesday: NHL Goalscorers"
 author: "Jonny Law"
-date: "2020-03-04"
+date: "2020-03-03"
 slug: tidy-tuesday/
 aliases: [tidy-tuesday]
 ---
