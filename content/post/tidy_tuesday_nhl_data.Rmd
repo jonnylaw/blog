@@ -2,7 +2,8 @@
 title: "Tidy Tuesday"
 author: "Jonny Law"
 date: "2020-03-04"
-output: html_document
+slug: tidy-tuesday/
+aliases: [tidy-tuesday]
 ---
 
 ```{r setup, include=FALSE}
