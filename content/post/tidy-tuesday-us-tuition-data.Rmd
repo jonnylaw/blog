@@ -1,0 +1,236 @@
+---
+title: 'Tidy Tuesday: US Tuition Data'
+author: Jonny Law
+date: '2020-03-10'
+slug: tidy-tuesday-us-tuition-data
+categories: [tidy-tuesday, R]
+tags: []
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(jonnylaw)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gghighlight)
+library(tidybayes)
+theme_set(theme_minimal())
+```
+
+```{r}
+tuesdata <- tidytuesdayR::tt_load(2020, week = 11)
+```
+
+This weeks data consists of tuition costs, salary potential and diversity information of US colleges. This includes 2 year colleges which offer associate degrees, certificates and diplomas and 4 year colleges which offer bachelors and masters degrees. These are further split by private institutions, public and for profit. Additionally, Universities in the US charge different tuition fees for in-state or out-of-state students. Also, the ticket price is not always reflective of the students costs. The fees can be wholly or partially subsidised by scholarships and financial aid.
+
+The first question which I wanted to answer is which universities have the highest tuition cost and what type of institution are they.
+
+```{r}
+tuition_cost <- tuesdata$tuition_cost
+
+tuition_cost %>% 
+  top_n(30, wt = in_state_tuition) %>%
+  mutate(name = forcats::fct_reorder(name, in_state_tuition)) %>%
+  ggplot(aes(x = name, y = in_state_tuition, fill = type)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  labs(title = "Top 30 most expensive colleges") +
+  ylab("College") +
+  xlab("In State Tuition")
+```
+
+[tidybayes](https://github.com/mjskay/tidybayes) can be used to plot the distribution of in state costs and out of state costs.
+
+```{r}
+tuition_cost %>% 
+  group_by(type) %>% 
+  pivot_longer(c("out_of_state_total", "in_state_total"), names_to = "tuition_type", values_to = "tuition") %>% 
+  ggplot(aes(x = tuition, y = tuition_type)) +
+  geom_halfeyeh() +
+  scale_x_continuous(labels = scales::dollar_format()) +
+  labs(title = "")
+```
+
+## Historical Tuition Data
+
+Another dataset contains the historical tuition values in adjusted US dollars. We can see that private and public tuitions have doubled for four year courses since 1985. It's quite a lot more expensive to attend college in the US now than it was 35 years ago!
+
+```{r}
+tuesdata$historical_tuition %>% 
+  mutate(year = substr(year, 1, 4) %>% as.numeric()) %>% 
+  ggplot(aes(x = year, y = tuition_cost, colour = tuition_type)) +
+  geom_line() +
+  facet_wrap(~type, ncol = 3) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  labs(title = "Tuition cost in 2016/17 dollars")
+```
+
+## State tuition map
+
+The package [urbnmapr](https://github.com/UrbanInstitute/urbnmapr) allows us to plot US states and overlay information at a state level.
+
+```{r}
+library(urbnmapr)
+
+tuition_cost <- tuesdata$tuition_cost
+
+states_sf <- get_urbn_map("states", sf = TRUE)
+
+tuition_by_state <- states_sf %>% 
+  rename(state_code = state_abbv) %>% 
+  inner_join(tuition_cost, by = "state_code") %>% 
+  filter(degree_length == "4 Year") %>% 
+  group_by(state_code) %>% 
+  summarise_if(is.numeric, list(~mean(.), ~median(.)))
+
+tuition_by_state %>% 
+  ggplot() +
+  geom_sf(color = "#ffffff", aes(fill = out_of_state_tuition_median)) +
+  scale_fill_gradient2(labels = scales::dollar_format()) +
+  coord_sf(datum = NA)
+```
+
+## Most cost effective Universities
+
+To quantify the most cost effective university to attend, divide the mid career pay by the total tuition paid for a 4-year degree (bachelors or masters degree).
+
+```{r}
+salary <- tuesdata$salary_potential
+
+salary %>% 
+  left_join(tuesdata$tuition_cost %>% filter(degree_length == "4 Year")) %>% 
+  pivot_longer(c("out_of_state_total", "in_state_total"), names_to = "tuition_type", values_to = "tuition") %>% 
+  mutate(ratio = mid_career_pay / tuition,
+         name_cost = paste(name, scales::dollar(tuition))) %>%
+  ggplot(aes(x = ratio, y = tuition)) +
+  geom_point() +
+  facet_wrap(~tuition_type, ncol = 1) +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  xlab("Mid Career Earnings / Tuition Fee") +
+  ylab("Tuition") +
+  labs(title = "Yearly Tuition Costs and Mid Career Earnings")
+```
+
+# Net cost by income bracket
+
+Using tidybayes again to view the distribution of the net-costs by income bracket. The data has a peak at zero for those receiveing full scholarships. Interesting they seem most prevelant for those with an income over £110,000!
+
+```{r}
+tuesdata$tuition_income %>% 
+  ggplot(aes(y = income_lvl, x = net_cost)) +
+  geom_halfeyeh() +
+  scale_x_continuous(labels = scales::dollar_format()) +
+  labs(title = "Distribution of tuition cost paid by income level")
+```
+
+# Diversity of top 20 Forbes Colleges
+
+To create a chart of diversity such as that on the [priceonomics](https://priceonomics.com/ranking-the-most-and-least-diverse-colleges-in/) blog I took the top 20 colleges according to Forbes [from wikipedia](https://en.wikipedia.org/wiki/Rankings_of_universities_in_the_United_States#Forbes_college_rankings). I copied the table to an R tribble using [data pasta](https://cran.r-project.org/web/packages/datapasta/vignettes/how-to-datapasta.html).
+
+```{r}
+
+top_unis <- tibble::tribble(
+                              ~name, ~ranking,
+                     "Harvard University", 1,
+                    "Stanford University", 2,
+                        "Yale University", 3,
+  "Massachusetts Institute of Technology", 4,
+                   "Princeton University", 5,
+             "University of Pennsylvania", 6,
+                       "Brown University", 7,
+     "California Institute of Technology", 8,
+                        "Duke University", 9,
+                      "Dartmouth College", 10,
+                     "Cornell University", 11,
+                         "Pomona College", 12,
+     "University of California, Berkeley", 13,
+                    "Columbia University", 14,
+                  "Georgetown University", 15,
+                  "University of Chicago", 16,
+                "Northwestern University", 17,
+               "University of Notre Dame", 18,
+       "Rensselaer Polytechnic Institute", 19,
+                 "University of Michigan", 20
+  )
+
+```
+
+The [Herfindahl-Hirschman index](https://en.wikipedia.org/wiki/Herfindahl%E2%80%93Hirschman_Index) is used as a measure of diversity at each college. The general formula is:
+
+$$HHI = \sum_{i=1}^Na^2_i$$
+
+Where $a_i$ represents the proportion of the $i^{th}$ race and $N = 5$ consisting of the number of races under consideration: White, Black, Hispanic, Asian and other. So for a completely homogeneous population $a_1 = 1$ and $a_{2:5} = 0$, hence $HHI = 1^2 + 0^2 + 0^2 + 0^2 + 0^2 = 1$. The following plot shows the Forbes top 20 univesities ordered by diversity according to the HHI.
+
+```{r}
+diversity <- tuesdata$diversity_school
+
+racial_diversity <- diversity %>% 
+  filter(!is.na(name)) %>% 
+  filter(category %in% c("White", "Black", "Hispanic", "Asian")) %>% 
+  pivot_wider(names_from = category, values_from = enrollment) %>% 
+  mutate(other = total_enrollment - White - Black - Hispanic - Asian) %>% 
+  pivot_longer(4:8, names_to = "category", values_to = "enrollment") %>% 
+  group_by(name) %>% 
+  mutate(hhi = sum((enrollment / total_enrollment) ** 2))
+
+racial_diversity %>% 
+  inner_join(top_unis) %>% 
+  ungroup() %>% 
+  mutate(
+    name_hhi = paste(ranking, name, round(hhi, 2)),
+    name_hhi = forcats::fct_reorder(name_hhi, desc(hhi))) %>% 
+  filter(ranking <= 20) %>% 
+  ggplot() +
+  geom_col(aes(y = name_hhi, x = enrollment, fill = category), position = "fill")
+```
+
+The next plot considers diversity as measured by HHI against potential earnings at mid career. This is the plot I chose to tweet for tidy tuesday.
+
+```{r}
+racial_diversity %>%
+  inner_join(salary, by = c("name")) %>%
+  distinct(name, hhi, mid_career_pay) %>%
+  ggplot(aes(x = hhi, y = mid_career_pay, colour = name)) +
+  geom_point() +
+  gghighlight(mid_career_pay > 1.55e5 |
+                hhi > 0.9, use_direct_label = TRUE) +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  labs(
+    title = "Expected Pay and Racial Diversity at US Universities",
+    subtitle = "Racial Diversity is calculated using HHI\nwhich ranges from 0.2 (most diverse) to 1 (least diverse).") +
+    ylab("Mid Career Pay") +
+    xlab("Herfindahl-Hirschman index")
+
+# ggsave("diversity.png")
+```
+
+# Tweet
+
+Now use the [rtweet](https://rtweet.info/) library to post the plots directly to Twitter without leaving R. You must connect to the Twitter API using OAuth as described in [this vignette](https://rtweet.info/articles/auth.html), I set the Twitter application keys in my `.Renviron` file which is never committed to public version control (this can be easily edited using `usethis::edit_r_environ()`).
+
+
+```{r eval=FALSE}
+library(rtweet)
+
+token <- create_token(
+  app = "rstats",
+  consumer_key = Sys.getenv("TWITTER_API_KEY"), 
+  consumer_secret = Sys.getenv("TWITTER_API_SECRET_KEY"),
+  access_token = Sys.getenv("TWITTER_ACCESS_TOKEN"),
+  access_secret = Sys.getenv("TWITTER_ACCESS_TOKEN_SECRET"))
+```
+
+The function `post_tweet` can be used to post a new tweet.
+
+```{r eval=FALSE}
+post_tweet(
+  status = "This week's #TidyTuesday features diversity, tuition costs and expected salaries at US universities. It appears more diverse colleges tend to have higher earning graduates. #rstats",
+  media = c("diversity.png", "carbon.png"),
+  token = token
+)
+```
+
