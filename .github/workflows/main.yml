@@ -9,6 +9,7 @@ jobs:
       - name: Install Stan, Python and R dependencies
         run: |-
          apt-get update \
+          && add-apt-repository ppa:ubuntugis/ppa \
           && apt-get install -y --no-install-recommends \
           libpython3-dev \
           python3-venv \
@@ -18,7 +19,7 @@ jobs:
           libxml2-dev \
           libssl-dev \
           libudunits2-dev \
-          libgdal1-dev \
+          libgdal-dev \
           libcurl4-openssl-dev \
           && apt-get clean \
           && rm -rf /var/lib/apt/lists/
