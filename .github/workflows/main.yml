@@ -18,6 +18,7 @@ jobs:
           libxml2-dev \
           libssl-dev \
           libudunits2-dev \
+          libgdal1-dev \
           libcurl4-openssl-dev \
           && apt-get clean \
           && rm -rf /var/lib/apt/lists/
