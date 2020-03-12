@@ -42,7 +42,7 @@ fitparse <- reticulate::import("fitparse")
 Then methods and classes defined in the fitparse Python libary can be accessed using the `$` notation. Typing `$` after fitparse (and hitting the `TAB` key) in the RStudio IDE gives a list of top-level methods and classes defined in the fitparse library. 
 
 ```{r, echo=FALSE}
-fit_file <- here::here("content/post/1001800515.fit")
+fit_file <- here::here("content/blog/1001800515.fit")
 ```
 
 ```{r}
