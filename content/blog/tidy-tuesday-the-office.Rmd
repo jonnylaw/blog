@@ -90,7 +90,7 @@ Next, I would like to see which writers produce the highest rated episodes. Dete
 
 Steve Carell appears to have the highest median episode rating, however he has written only two episodes! It looks like Greg Daniels is the real MVP, with many consistently well received episodes.
 
-```{r}
+```{r , fig.width = 5, fig.height = 8}
 writers_by_episode <- writers %>% 
   ungroup() %>% 
   pivot_longer(-c(1:4), names_to = "writer", values_to = "written") %>% 
@@ -138,7 +138,7 @@ The model is fit using Hamiltonian Monte Carlo, the sampling code is written in 
 
 Next we plot the posterior fitted values using the [tidybayes package](https://mjskay.github.io/tidybayes/) and overlay the actual episode ratings using points. Those with fewer writing credits have a larger posterior credible interval.
 
-```{r, fig.width=5, fig.height=8}
+```{r, fig.width=7, fig.height=8}
 add_fitted_draws(newdata = model_data, model = fit) %>%
   mutate(fitted_rating = .value * 10) %>%
   median_qi(fitted_rating, .width = c(.95, .8, .5)) %>%
@@ -157,7 +157,7 @@ add_fitted_draws(newdata = model_data, model = fit) %>%
   theme(legend.position = "none") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
-# ggsave("brms_ratings_by_writer.png", width = 5, height = 8)
+# ggsave("brms_ratings_by_writer.png", width = 7, height = 8)
 ```
 
 # Tweet
@@ -180,7 +180,7 @@ The function `post_tweet` can be used to post a new tweet.
 
 ```{r eval=FALSE}
 post_tweet(
-  status = "This week's #TidyTuesday data includes ratings and lines from the Office. I've used it to fit a simple Bayesian hierarchical model using Stan BRMS to determine which writers produce the highest rated episodes. #rstats",
+  status = "This week's #TidyTuesday data is from the US Office TV series. I've fit a simple Bayesian hierarchical model using Stan and BRMS to determine which writers produce the highest rated episodes. Full code: https://jonnylaw.rocks/blog/tidy-tuesday-the-office/ #rstats",
   media = c("brms_ratings_by_writer.png", "ratings_by_writer.png"),
   token = token
 )
