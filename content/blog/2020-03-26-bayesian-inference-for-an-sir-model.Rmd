@@ -1,0 +1,295 @@
+---
+title: 'Bayesian Inference for an SIR Model'
+author: Jonny Law
+date: '2020-03-26'
+slug: bayesian-inference-for-an-sir-model
+categories:
+  - R
+  - Bayesian
+tags: []
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(jonnylaw)
+library(deSolve)
+theme_set(theme_minimal())
+```
+
+The ODE for the Susceptible Infected Recovered (SIR) model is given by
+
+$$\begin{align}
+& \frac{dS}{dt} = - \frac{\beta I S}{N}, \\
+& \frac{dI}{dt} = \frac{\beta I S}{N}- \gamma I, \\
+& \frac{dR}{dt} = \gamma I,\\
+& N = S + I + R.
+\end{align}$$
+
+Where $S$ is the number of susceptible, $I$ the total infected and $R$ the total recovered. $\gamma$ is the recovery rate ($1/\gamma$ is the infectious period), $\beta$ is the infection rate ($1/\beta$ is the time between contacts). These parameters are unobserved.
+
+Use `deSolve` to solve the ODE system.
+
+```{r}
+parameters <- c(beta = 0.5, gamma = 1/4.5)
+initial_state <- c(S = 60e6, I = 1, R = 0) 
+
+sir <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)), {
+    N <- sum(S, I, R)
+    dS = -beta * S * I / N
+    dI = beta * S * I / N - gamma * I
+    dR = gamma * I
+    
+    list(c(dS, dI, dR))
+  })  
+}
+
+times <- seq_len(100)
+out <- ode(y = initial_state, times = times, func = sir, parms = parameters)
+```
+
+```{r echo=FALSE}
+out %>% 
+  tibble::as_tibble() %>% 
+  gather(key = state, value, -time) %>% 
+  mutate(state = factor(state, levels = c("S", "I", "R"))) %>%
+  ggplot(aes(x = time, y = value, colour = state)) +
+  geom_line() +
+  labs(x = "Time (Days)", y = "Population") +
+  scale_y_continuous(labels = scales::number_format(big.mark = ","))
+```
+
+Consider the model in [this pre-print from Lourenco et al 2020](https://www.dropbox.com/s/oxmu2rwsnhi9j9c/Draft-COVID-19-Model%20%2813%29.pdf), which has since been criticised in [this response](https://www.bmj.com/content/bmj/368/bmj.m1216.full.pdf). We observe the cumulative deaths
+
+$$\Lambda_t = \rho\eta R_{t-\psi},$$
+
+where $\rho$ is the proportion of the population at risk of severe disease, $\theta$ is the probability of dying with the severe disease. $R_{t-\psi}$ is the removed population with a delay between the time of infection represented by $\psi$. The parameters are given prior distributions in the paper, we can simulate multiple trajectories of the cumulative deaths by first simulating from the prior distribution then solving the SIR system. The prior distributions as given in the paper are
+
+$$\begin{aligned}
+  \frac{1}{\gamma} &\sim \mathcal{N}(4.5, 1^2), \\
+  \psi &\sim \mathcal{n}(17, 2^2), \\
+  R_0 &\sim \mathcal{n}(2.25, 0.2^2), \\
+  \eta &\sim \mathcal{n}(0.14, 0.007^2), \\
+  \rho &\sim \text{Gamma}(5, 5/0.01).
+\end{aligned}$$
+
+```{r echo = FALSE}
+sim_prior <- function() {
+  r0 <- rnorm(1, mean = 2.25, sd = 0.2)
+  gamma <- 1/rnorm(1, mean = 4.5, sd = 1)
+  rho <- rgamma(1, shape = 5, rate = 5/0.01)
+  eta <- rnorm(1, mean = 0.14, sd = 0.007)
+  psi <- rnorm(1, mean = 17, sd = 2)
+  
+  c(r0 = r0, gamma = gamma, rho = rho, eta = eta, psi = psi, beta = r0 * gamma)
+}
+
+cumulative_deaths <- function(t, R, parameters) {
+  R[max(1, t - parameters["psi"])] * parameters["rho"] * parameters["eta"]
+}
+
+simulate_sir <- function(times, params) {
+  initial_state <- c(S = 60e6, I = 1, R = 0) 
+
+  sir <- function(t, state, parameters) {
+    with(as.list(c(state, parameters)), {
+      N <- sum(S, I, R)
+      dS = -beta * S * I / N
+      dI = beta * S * I / N - gamma * I
+      dR = gamma * I
+      
+      list(c(dS, dI, dR))
+    })  
+  }
+
+  sim <- ode(y = initial_state, times = times, func = sir, parms = params)
+  
+  sim %>% 
+    tibble::as_tibble() %>% 
+    tibble::add_column(cumulative_deaths = 
+                 purrr::map_dbl(sim[, 1], ~ cumulative_deaths(t = .x, sim[, 4], params)))
+}
+
+m <- 1e2
+sims <- purrr::map_dfr(.x = seq_len(m), ~ sim_prior() %>% simulate_sir(seq_len(100), .), .id = "replicate")
+
+sims %>% 
+  ggplot(aes(x = time, y = cumulative_deaths, group = replicate)) + 
+  geom_line(alpha = 0.5) +
+  labs(title = paste0(m, " simulations of the cumulative deaths")) +
+  scale_y_continuous(labels = scales::number_format(big.mark = ","))
+```
+
+We can simulate more times from the prior and calculate the empirical intervals instead of plotting raw trajectories.
+
+```{r echo=FALSE}
+m <- 1e3
+sims <- purrr::map_dfr(.x = seq_len(m), ~ sim_prior() %>% simulate_sir(), .id = "replicate")
+
+sims %>% 
+  group_by(time) %>% 
+  tidybayes::median_qi(cumulative_deaths, .width = 0.5) %>% 
+  ggplot(aes(x = time, y = cumulative_deaths)) + 
+  geom_line(alpha = 0.5) +
+  geom_ribbon(aes(ymin = .lower, ymax = .upper), alpha = 0.5, colour = NA) +
+  labs(title = "Prior simulations of cumulative deaths", 
+       subtitle = "The solid line is the prior median and the shaded area is a 50% credible interval")
+```
+
+## Inference method
+
+The inference method is explained clearly in [Lourenço et al (2017)](https://elifesciences.org/articles/29820), albeit with a different model. The Metropolis algorithm with a symmetric random walk proposal distribution is used, the likelihood is the product of independent Poisson distributions
+
+$$\mathcal{L}(y_{1:T}|\Lambda_{1:T}, \theta^\star) = \prod_{t=1}^T\left(\textrm{Poisson}(y_t;\Lambda_t)\right)$$
+
+The steps to perform inference for the static parameters are summarised below
+
+1. Propose new (log) parameters from a symmetric Normal distribution $\log(\theta^\star) \sim \mathcal{N}(\log\theta^\star\mid\log\theta, \sigma I_d)$
+2. Solve the ODE using the `deSolve` package using the proposed parameters
+3. Calculate the un-normalised log-posterior $\log p(\Lambda_{1:T}, \theta^\star\mid y_{1:T}) = \log p(\theta) +\sum_{t=1}^T\log\left(\textrm{Poisson}(y_t\mid\Lambda_t)\right)$
+3. Accept the new parameters with probability $\alpha$ where 
+
+$$\alpha = \min\left(1, \frac{p(\Lambda_{1:T}, \theta^\star\mid y_{1:T})}{p(\Lambda_{1:T}, \theta\mid y_{1:T})}\right).$$ 
+
+First we specify the likelihood in R.
+
+```{r specify-likelihood-prior}
+log_likelihood_sir <- function(parameters, ys) {
+  initial_state <- c(S = 60e6, I = 116, R = 8) 
+  
+  # Transition function
+  sir <- function(t, state, parameters) {
+    beta <- parameters[1] * parameters[2]
+    gamma <- parameters[2]
+    
+    with(as.list(state), {
+      N <- sum(S, I, R)
+      dS = -beta * S * I / N
+      dI = beta * S * I / N - gamma * I
+      dR = gamma * I
+      
+      list(c(dS, dI, dR))
+    })  
+  }
+  
+  sir_sim <-
+    deSolve::ode(
+      y = initial_state,
+      times = seq_along(ys),
+      func = sir,
+      parms = parameters
+    )
+  
+  cumulative_deaths <- function(t, R, parameters) {
+    R[max(1, t - parameters[5])] * parameters[3] * parameters[4]
+  }
+  
+  lambdas <- purrr::map_dbl(sir_sim[, 1], ~ cumulative_deaths(t = .x, sir_sim[, 4], parameters))
+  
+  ll <- sum(dpois(x = ys, lambda = lambdas, log = TRUE))
+  
+  if_else(is.nan(ll) || is.na(ll), -Inf, ll)
+}
+```
+
+Then we specify the prior distributions.
+
+```{r}
+log_prior <- function(parameters) {
+  r0 = parameters[1]; gamma = parameters[2]; rho = parameters[3]
+  eta = parameters[4]; psi = parameters[5]
+  
+  dnorm(1/gamma, mean = 4.5, sd = 1, log = TRUE) +
+    dnorm(psi, mean = 17, sd = 2, log = TRUE) +
+    dnorm(r0, mean = 2.25, sd = 0.2, log = TRUE) +
+    dnorm(eta, mean = 0.14, sd = 0.007, log = TRUE) +
+    dgamma(rho, shape = 5, rate = 5/0.01, log = TRUE)
+}
+
+proposal <- function(p) {
+  p * exp(rnorm(5, sd = c(0.02, 0.02, 0.02, 0.02, 0.05)))
+}
+```
+
+We will fit the model to UK data acquired from the [JHU repository](https://github.com/CSSEGISandData/COVID-19). We initialise the parameters at the mean of the prior distributions and simulate 1 million iterations from the Metropolis algorithm. The first half are discarded and every 100th iteration is retained in an attempt to reduce auto-correlation in the chain.
+
+```{r read-covid-data, echo=FALSE}
+load(here::here("data/covid_deaths.Rda"))
+
+united_kingdom <- covid_deaths %>% 
+  filter(country_region == "United Kingdom") %>% 
+  group_by(country_region, date) %>% 
+  summarise_at(vars(deaths), sum, na.rm = TRUE) %>% 
+  ungroup() %>% 
+  arrange(date)
+
+ys <- united_kingdom %>% filter(deaths > 0) %>% pull(deaths)
+```
+
+```{r metropolis-samples}
+iters <-
+  jonnylaw:::metropolis(
+    theta = c(r0 = 2.25, gamma = 1/4.5, rho = 0.01, eta = 0.14, psi = 17), 
+    function(p) log_likelihood_sir(ys = ys, parameters = p) + log_prior(p),
+    proposal = proposal,
+    1e6, 
+    chains = 2, 
+    parallel = TRUE
+  )
+```
+
+```{r traceplots, echo=FALSE}
+actual_values <- tibble::tibble(
+  actual_value = parameters, 
+  parameter = names(parameters))
+
+iters_adapt %>% 
+  filter(iteration > 1e6 / 2) %>%
+  filter(iteration %% 100 == 0) %>% 
+  group_by(chain) %>% 
+  mutate(iteration = row_number()) %>% 
+  pivot_longer(-c("chain", "log_likelihood", "iteration", "accepted"), names_to = "parameter") %>% 
+  ggplot(aes(x = iteration, y = value, colour = chain)) +
+  geom_line() +
+  geom_hline(data = actual_values, aes(yintercept = actual_value), linetype  = "dashed") +
+  facet_wrap(~parameter, scales = "free_y", ncol = 1) +
+  theme(legend.position = "none")
+```
+
+```{r densities, echo=FALSE}
+iters %>% 
+  filter(iteration > 1e6 / 2) %>% 
+  filter(iteration %% 100 == 0) %>% 
+  pivot_longer(-c("chain", "log_likelihood", "iteration", "accepted"), names_to = "parameter") %>% 
+  ggplot(aes(x = value, colour = parameter, fill = parameter)) +
+  geom_histogram(alpha = 0.5, position = "identity") +
+  geom_vline(data = actual_values, aes(xintercept = actual_value), linetype  = "dashed") +
+  facet_wrap(~parameter, scales = "free") +
+  theme(legend.position = "none")
+```
+
+Now plot the posterior cumulative death curve.
+
+```{r}
+apply(iters, 1, function(row) {
+  params <- as.numeric(row[-1])
+  names(params) <- colnames(iters[, -1])
+  beta = params["r0"] * params["gamma"]
+  simulate_sir(times = seq_len(nrow(united_kingdom)), params = c(params, beta = beta))
+}) %>% 
+  dplyr::bind_rows(.id = "replicate") %>% 
+  group_by(time) %>% 
+  tidybayes::median_qi(cumulative_deaths, .width = 0.5) %>% 
+  bind_cols(united_kingdom) %>% 
+  ggplot(aes(x = time)) + 
+  geom_line(aes(y = cumulative_deaths), alpha = 0.5) +
+  geom_ribbon(aes(ymin = .lower, ymax = .upper), alpha = 0.5, colour = NA) +
+  geom_point(aes(y = deaths)) +
+  labs(title = "Posterior simulations of cumulative deaths", 
+       subtitle = "The solid line is the posterior median and the shaded area is a 50% credible interval.\nThe points indicate the observed cumulative deaths in the UK")
+```
+
