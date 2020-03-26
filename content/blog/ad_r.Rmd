@@ -4,6 +4,7 @@ author: "Jonny Law"
 date: "2019-08-05"
 slug: forward-mode-automatic-differentiation-R
 output: html_document
+categories: [R]
 ---
 
 ```{r setup, include=FALSE}

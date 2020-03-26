@@ -1,0 +1,120 @@
+---
+title: Building a classification model with tidymodels
+author: Jonny Law
+date: '2020-03-26'
+slug: building-a-classification-model-with-tidymodels
+categories: [R]
+tags: []
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(recipes)
+library(parsnip)
+library(rsample)
+library(workflows)
+library(yardstick)
+library(tune)
+theme_set(theme_minimal())
+```
+
+This blog post aims to introduce the various `R` packages making up the [tidymodels](https://github.com/tidymodels/tidymodels) metapackage by classfying Iris flower species from the Iris dataset. The Iris dataset is so famous it has its own [Wikipedia Page](https://en.wikipedia.org/wiki/Iris_flower_data_set). It consists of measurements of sepal and petal lengths and widths and the corresponding species name. A traditional machine learning task is to idetify the species from the other measurements.
+
+The current workflow for a typical classification (or regression) model in tidymodels is:
+
+* Split the data into training and test sets
+* Define pre-processing steps using [recipes](https://tidymodels.github.io/recipes/)
+* Create a model using [parsnip](https://tidymodels.github.io/parsnip/)
+* Combine the model and recipe into a [workflow](https://tidymodels.github.io/workflows/)
+* Perform hyper-parameter tuning using cross validation on the training data using [tune](https://tidymodels.github.io/tune/)
+* Select the hyper-parameters which minimise (or maximise) a selected metric using cross validation on the training data
+* Fit the selected model to the training data
+* Evaluate the model on the test set
+
+It is worth noting that tidymodels is in active development and hence the user facing API is not stable.
+
+To begin, we load in the Iris data. The data is available in the `datasets` `R` package which comes with a base installation of `R` and so can be loaded using the `data` function.
+
+```{r}
+data(iris)
+```
+
+Typically we would explore the data before beginning modelling. We can produce a plot of the Iris data.
+
+```{r}
+iris %>% 
+  ggplot(aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
+  geom_point()
+```
+
+Now, split the iris data into training and test sets. We use `initial_split` to perform stratifed sampling using the outcome variable `Species`. This ensures we have examples of each class in our test set and training set. `prop` is set to 4/5 meaning that we keep approximately 80% (= 4/5) of the data for training and 20% of the data in the testing set. The purpose of splitting the data into training and testing sets is to avoid overfitting and let us understand how our chosen model will perform on new, unseen data. For that reason the test set is not used in selecting the model or model hyper-parameter tuning. 
+
+```{r}
+set.seed(1) # Set a seed to get reproducible splits
+split <- rsample::initial_split(iris, strata = Species, prop = 4/5)
+train <- rsample::training(split)
+test <- rsample::testing(split)
+```
+
+Next a recipe us used to pre-process the data. In the Iris dataset there is no missing data, however we could specify imputation techniques here or choose to omit examples with missing values. We decide to centre and scale the predictors. This will help when fitting a regression model since all the predictors will be on the same scale resulting in a stable design matrix.
+
+```{r}
+rec <- recipe(Species ~ ., data = train) %>% 
+  step_center(all_predictors()) %>% 
+  step_scale(all_predictors())
+```
+
+Next we specify a multinomial regression model using the engine [glmnet](https://cran.r-project.org/web/packages/glmnet/index.html). `glmnet` is an `R` package for fitting generalised linear models using an elastic net penalty. The elastic net penalty is a combination of lasso, or L1 regularization (for feature selection) and ridge, or L2 regularization (for coefficient shrinking). We leave the penalty and mixture arguments unspecified and instead using the function `tune()`. This means we can learn these hyper-parameters by minimising a performance metric (such as accuracy) using $k$-fold cross validation on the training set.
+
+```{r}
+model <- multinom_reg() %>% 
+  set_engine("glmnet") %>% 
+  set_args(penalty = tune(), mixture = tune())
+```
+
+The recipe and model can be combined together into a workflow.
+
+```{r}
+wf <- workflow() %>% 
+  add_recipe(rec) %>% 
+  add_model(model)
+```
+
+Next, create a $k$-fold cross validation dataset using training data. This creates 10 random splits of the data which can be used to perform hyper-parameter optimisation.
+
+```{r}
+cv <- rsample::vfold_cv(train, strata = Species, v = 10)
+```
+
+Use grid search to find some good hyper-parameters. This evaluates different values of `penalty` and `mixture` for each of the folds and records the ROC-AUC and accuracy metrics for each model. Grid search becomes inefficient when then number of hyper-parameters becomes large and more sophisticated optimisation algorithms can be used.
+
+```{r}
+hyper_parameters <- tune::tune_grid(wf, resamples = cv)
+```
+
+We can view the metrics for a selection of the hyper-parameters.
+
+```{r}
+collect_metrics(hyper_parameters)
+```
+
+Select the best hyper-parameters, then fit the model using these parameters.
+
+```{r}
+best_hp <- select_best(hyper_parameters, metric = "roc_auc")
+best_model <- model %>% 
+  set_args(penalty = best_hp$penalty, trees = best_hp$mixture)
+fitted_model <- fit(best_model, Species ~ ., data = juice(prep(rec, train)))
+```
+
+We can now determine the performance of the algorithm using a selection of metrics. We choose accuracy, precision and f1-measure.
+
+```{r}
+predicted <- predict(fitted_model, new_data = bake(prep(rec, train), test))
+metrics <- metric_set(accuracy, precision, f_meas)
+metrics(data = bind_cols(predicted, test), truth = Species, estimate = .pred_class)
+```
+
+This test set performance is indicative of what we can expect on unseen iris examples.
