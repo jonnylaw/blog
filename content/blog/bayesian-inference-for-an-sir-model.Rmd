@@ -23,9 +23,9 @@ theme_set(theme_minimal())
 [Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19) have put together a repository containing confirmed cases of COVID19, deaths and recovered patients. Below we plot the confirmed cases, confirmed recovered and deaths.
 
 ```{r read-covid-data, echo=FALSE}
-load(here::here("data/covid_deaths.rda"))
-load(here::here("data/confirmed.rda"))
-load(here::here("data/recovered.Rda"))
+load(here::here("content/blog/covid_deaths.rda"))
+load(here::here("content/blog/confirmed.rda"))
+load(here::here("content/blog/recovered.Rda"))
 
 united_kingdom <- covid_deaths %>% 
   filter(country_region == "United Kingdom") %>% 
