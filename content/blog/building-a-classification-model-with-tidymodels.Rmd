@@ -17,6 +17,7 @@ library(rsample)
 library(workflows)
 library(yardstick)
 library(tune)
+library(glmnet)
 theme_set(theme_minimal())
 ```
 
