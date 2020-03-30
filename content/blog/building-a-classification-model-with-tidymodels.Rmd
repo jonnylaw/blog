@@ -21,7 +21,7 @@ library(glmnet)
 theme_set(theme_minimal())
 ```
 
-This blog post aims to introduce the various `R` packages making up the [tidymodels](https://github.com/tidymodels/tidymodels) metapackage by classfying Iris flower species from the Iris dataset. The Iris dataset is so famous it has its own [Wikipedia Page](https://en.wikipedia.org/wiki/Iris_flower_data_set). It consists of measurements of sepal and petal lengths and widths and the corresponding species name. A traditional machine learning task is to idetify the species from the other measurements.
+This blog post aims to introduce the various `R` packages making up the [tidymodels](https://github.com/tidymodels/tidymodels) metapackage by classifying Iris flower species from the Iris dataset. The Iris dataset is so famous it has its own [Wikipedia Page](https://en.wikipedia.org/wiki/Iris_flower_data_set). It consists of measurements of sepal and petal lengths and widths and the corresponding species name. A traditional machine learning task is to identify the species from the other measurements.
 
 The current workflow for a typical classification (or regression) model in tidymodels is:
 
@@ -50,7 +50,7 @@ iris %>%
   geom_point()
 ```
 
-Now, split the iris data into training and test sets. We use `initial_split` to perform stratifed sampling using the outcome variable `Species`. This ensures we have examples of each class in our test set and training set. `prop` is set to 4/5 meaning that we keep approximately 80% (= 4/5) of the data for training and 20% of the data in the testing set. The purpose of splitting the data into training and testing sets is to avoid overfitting and let us understand how our chosen model will perform on new, unseen data. For that reason the test set is not used in selecting the model or model hyper-parameter tuning. 
+Now, split the iris data into training and test sets. We use `initial_split` to perform stratified sampling using the outcome variable `Species`. Stratified sampling ensures that there are examples of each class in our test set and training set. The parameter `prop` specifies the proportion of data used to create the training set. We have chosen `prop` to be 4/5, meaning that we keep approximately 80% (= 4/5) of the data for training and 20% of the data for the testing set. The purpose of splitting the data into training and testing sets is to avoid over-fitting and allow us to understand how our chosen model will perform on new, unseen data. For that reason, the test set is not used in selecting the model or model hyper-parameter tuning. 
 
 ```{r}
 set.seed(1) # Set a seed to get reproducible splits
@@ -59,7 +59,7 @@ train <- rsample::training(split)
 test <- rsample::testing(split)
 ```
 
-Next a recipe us used to pre-process the data. In the Iris dataset there is no missing data, however we could specify imputation techniques here or choose to omit examples with missing values. We decide to centre and scale the predictors. This will help when fitting a regression model since all the predictors will be on the same scale resulting in a stable design matrix.
+Next a recipe is used to pre-process the data. In the Iris dataset there is no missing data. However we could specify imputation techniques here or choose to omit examples with missing values. We decide to centre and scale the predictors. This will help when fitting a regression model since all the predictors will be on the same scale resulting in a stable design matrix.
 
 ```{r}
 rec <- recipe(Species ~ ., data = train) %>% 
@@ -67,7 +67,7 @@ rec <- recipe(Species ~ ., data = train) %>%
   step_scale(all_predictors())
 ```
 
-Next we specify a multinomial regression model using the engine [glmnet](https://cran.r-project.org/web/packages/glmnet/index.html). `glmnet` is an `R` package for fitting generalised linear models using an elastic net penalty. The elastic net penalty is a combination of lasso, or L1 regularization (for feature selection) and ridge, or L2 regularization (for coefficient shrinking). We leave the penalty and mixture arguments unspecified and instead using the function `tune()`. This means we can learn these hyper-parameters by minimising a performance metric (such as accuracy) using $k$-fold cross validation on the training set.
+Next we specify a multinomial regression model using the engine [glmnet](https://cran.r-project.org/web/packages/glmnet/index.html). `glmnet` is an `R` package for fitting generalised linear models using an elastic net penalty. The elastic net penalty is a combination of lasso, or L1 regularisation (for feature selection) and ridge, or L2 regularisation (for coefficient shrinking). We leave the penalty and mixture arguments unspecified and instead using the function `tune()`. This means we can learn these hyper-parameters by minimising a performance metric (such as accuracy) using $k$-fold cross validation on the training set.
 
 ```{r}
 model <- multinom_reg() %>% 
@@ -97,25 +97,50 @@ hyper_parameters <- tune::tune_grid(wf, resamples = cv)
 
 We can view the metrics for a selection of the hyper-parameters.
 
-```{r}
+```{r, eval=FALSE}
 collect_metrics(hyper_parameters)
 ```
 
-Select the best hyper-parameters, then fit the model using these parameters.
+```{r, echo=FALSE}
+collect_metrics(hyper_parameters) %>% 
+  knitr::kable(digits = 2)
+```
+
+
+Use `select_best` to select the hyper-parameters which correspond to the highest value of ROC AUC. 
 
 ```{r}
 best_hp <- select_best(hyper_parameters, metric = "roc_auc")
-best_model <- model %>% 
-  set_args(penalty = best_hp$penalty, trees = best_hp$mixture)
-fitted_model <- fit(best_model, Species ~ ., data = juice(prep(rec, train)))
 ```
 
-We can now determine the performance of the algorithm using a selection of metrics. We choose accuracy, precision and f1-measure.
+We can use the function `tune::finalized_workflow` to select the best performing workflow using the selected hyper-parameters `best_hp`.
 
 ```{r}
-predicted <- predict(fitted_model, new_data = bake(prep(rec, train), test))
-metrics <- metric_set(accuracy, precision, f_meas)
-metrics(data = bind_cols(predicted, test), truth = Species, estimate = .pred_class)
+best_workflow <- tune::finalize_workflow(wf, best_hp)
 ```
 
-This test set performance is indicative of what we can expect on unseen iris examples.
+We can now determine the performance of the algorithm using a selection of metrics, we choose accuracy, precision and f1-measure. The test set performance is indicative of what we can expect on unseen iris examples. We fit on the entire training set using `tune::last_fit`, the first argument to the function is the best workflow selected using `finalized_workflow`, we also provide the `split` used to split the initial dataset into training and testing datasets and the set of metrics, `metrics`. The metric collection is specified using functions from [yardstick](https://tidymodels.github.io/yardstick/).
+
+```{r}
+metrics <- metric_set(accuracy, precision, f_meas)
+final_fit <- last_fit(object = best_workflow, split = split, metrics = metrics)
+```
+
+We can see the performance on the test-set using `collect_metrics`
+
+```{r, eval=FALSE}
+collect_metrics(final_fit)
+```
+
+```{r, echo=FALSE}
+collect_metrics(final_fit) %>% 
+  knitr::kable(digits = 2)
+```
+
+Finally, we fit the model to the full dataset to use for classifying future observations of Iris flowers.
+
+```{r}
+best_model <- extract_model(fit(best_workflow, iris))
+```
+
+

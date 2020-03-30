@@ -1,0 +1,146 @@
+---
+title: Deploying a Machine Learning Model Using Plumber and Docker
+author: Jonny Law
+date: '2020-03-25'
+slug: deploying-model-predictions-using-plumber-and-docker
+categories:
+  - R
+tags: []
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+```
+
+In this post, I will show how to deploy a machine learning model using Docker and plumber. This allows users and applications to consume model predictions using a REST API. The final result will be a web server which can be queried to get class predictions for new data, for example using curl
+
+```bash
+curl localhost:8000/getprediction --header "Content-Type: application/json" \
+  --request POST \
+  --data @data/example.json
+```
+
+We will deploy the toy classification model for the Iris dataset I developed in a [previous post](blog/building-a-classification-model-with-tidymodels). That post walked through the steps of developing a classification model using the collection of `R` packages named tidymodels. Tidymodels is a metapackage containing `R` packages which can be used to develop, tune and evaluate machine learning models in `R`.
+
+In the previous post, we developed a recipe for pre-processing the data and a tuned model. These components are required when performing predictions for new data. They can be saved using the function `save` or `readr::write_rds`. Saving the recipe allows us to use the same pre-processing steps on the new data as we used on the training data. Whereas saving the tuned model means we use the model we identified to perform best when performing cross-validation on the training data.
+
+## Plumber
+
+The first R package to introduce is [Plumber](https://www.rplumber.io). Plumber can be used to create a REST API with by adding decorators to the function. The first function we write is really the minimum requirement for a machine learning application. This function loads the recipe and trained model from a folder called models and performs a prediction on the new data. The new data is expected in a POST request in JSON format. The following is an example of a JSON object containing a single row of the Iris data
+
+```{r}
+jsonlite::toJSON(iris[1,])
+```
+
+The JSON object is parsed using `jsonlite`, the parsed example is combined with the prediction and returned.
+
+```{r eval=FALSE}
+#* Perform a prediction by submitting in the body of a POST request
+#* @post /getprediction 
+getprediction <- function(req) {
+  example <- req$postBody
+  parsed_example <- jsonlite::fromJSON(example)
+  model <- readr::read_rds(path = "models/glmnet.Rds")
+  rec <- readr::read_rds(path = "models/recipe.Rds")
+  prediction <- predict(model, new_data = bake(rec, parsed_example))
+
+  dplyr::bind_cols(parsed_example, prediction)
+}
+```
+
+We can also return the test performance of the model using another function. This time we use a GET request so we can navigate to localhost:8000/performance in our browser and see the test performance.
+
+```{r eval=FALSE}
+#* Get the performance on test data
+#* @get /performance
+performance <- function() {
+  readr::read_rds("models/test_performance.Rds")
+}
+```
+
+We can save these functions in a file called `api.R`. To test the predictions locally, we can create a runner script, `run.R` containing:
+
+```{r eval=FALSE}
+r <- plumber::plumb(here::here("R/api.R"))
+r$run(port = 8000)
+```
+
+This will run a local server on port 8000. We can test the server using curl from the terminal
+
+```bash
+curl localhost:8000/getprediction --header "Content-Type: application/json" \
+  --request POST \
+  --data @data/example.json
+```
+
+Where `data/example.json` is the path to a JSON file containing a row (or rows) from the Iris dataset. To create this file you can run the following line in the terminal.
+
+```bash
+Rscript -e "data(iris); jsonlite::toJSON(iris[1,])" > example.json
+```
+
+## Docker
+
+[Docker](https://www.docker.com/) can be used to build your machine learning application in a container. The container virtualises the whole operating system and hence holds everything required to produce the predictions for the machine learning model. Think of it as a tiny computer (or server) with only the bits required to run `R` and serve a webserver for our machine learning model. [R Open Sci](https://ropenscilabs.github.io/r-docker-tutorial/) has a good introduction to Docker for `R` users. There is a dedicated `R` repository of Docker containers called [Rocker](https://hub.docker.com/u/rocker), these include images for the following
+
+* [r-ver](https://hub.docker.com/r/rocker/r-ver/) - a base installation of a `R` locked at a specific version
+* [rstudio](https://hub.docker.com/r/rocker/rstudio) - installs RStudio server meaning that we can access the RStudio IDE through a web browser connected to the Docker images
+* [tidyverse](https://hub.docker.com/r/rocker/tidyverse) - installs the tidyverse packages on top of the rstudio image
+* [r-apt](https://hub.docker.com/r/rocker/r-apt) - installs a versioned `R` similar to r-ver but provides [Michael Rutter's Ubuntu PPA](https://launchpad.net/~marutter/+archive/ubuntu/rrutter3.5) (Personal Package Archive) containing pre-built binaries of `R` packages resulting in faster build times when installing pre-built software
+
+It is tempting to select the most feature-rich container, however, this results in a larger file size and hence cost more when deployed in the cloud. We will use `r-ver` and install packages using [renv](https://rstudio.github.io/renv/). Let's introduce the `Dockerfile` line by line.
+
+ The first line specifies the container we are building upon.
+
+```bash
+FROM rocker/r-ver:3.6.1
+```
+
+We start with a versioned `R` container, with `R` 3.6.1. Next, we specify the working directory inside the container
+
+```bash
+WORKDIR /usr/local/app
+```
+
+A few dependencies are installed using apt (Ubuntu's Advanced Packaging Tool). I typically don't know all of the dependencies required for given `R` packages so this is usually a bit of trial and error!
+
+```bash
+# Install binary packages from apt
+RUN apt-get update \
+  && apt-get install -y zlib1g-dev libxml2-dev \
+  && rm -rf /var/lib/apt/lists/*
+```
+
+Next, we copy over the contents of the current directory to the container.
+
+```bash
+COPY . .
+```
+
+The dependencies can be installed using `renv`. We can mount a shared firectory when building the Docker container to take advantage of the cached packages [as described here](https://rstudio.github.io/renv/articles/docker.html). The call to `renv::restore` installs all the packages specified in the `renv.lock` lockfile. To update the lockfile with the packages used in the current project use `renv::hydrate`. 
+
+```bash
+RUN Rscript -e "renv::restore()"
+```
+
+The scripts `model.R` and `test_performance.R` contain the code written in the [previous post](blog/building-a-classification-model-with-tidymodels). `model.R` contains the code to build the recipe and the model, perform hyper-parameter tuning and save the best workflow (a model combined with a recipe). `test_performance.R` contains the code to determine the model performance on the test set.
+
+```bash
+RUN Rscript R/model.R && Rscript R/test_performance.R
+```
+
+Finally, we expose port 8000 for API requests to the model and use the runner script we defined previously.
+
+```bash
+ENTRYPOINT ["Rscript", "/usr/local/app/R/run.R"]
+EXPOSE 8000/tcp
+```
+
+Now, we can build the Docker container by navigating to the directory containing the code and Dockerfile and running.
+
+```bash
+docker build .
+```
+
+A full working example of this project is [hosted on Github](https://github.com/jonnylaw/iris/).

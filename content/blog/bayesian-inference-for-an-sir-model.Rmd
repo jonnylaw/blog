@@ -305,6 +305,12 @@ iters <-
   )
 ```
 
+I have cached the results of the chunk running the Metropolis algorithm. The results can be loaded using `lazyLoad` - this is useful for long-running Rmarkdown chunks.
+
+```{r eval=FALSE}
+lazyLoad(here::here("content/blog/bayesian-inference-for-an-sir-model_cache/html/metropolis-samples_2dc7aa7ffb05056136d67d8c3b755b58"))
+```
+
 ```{r traceplots, echo=FALSE}
 # Add iteration number to the output for each chain
 iters <- iters %>% 
@@ -319,7 +325,7 @@ iters %>%
   pivot_longer(-c("chain", "iteration"), names_to = "parameter") %>% 
   ggplot(aes(x = iteration, y = value, colour = chain)) +
   geom_line() +
-  facet_wrap(~parameter, scales = "free_y", ncol = 1) +
+  facet_wrap(~parameter, scales = "free_y", ncol = 1, strip.position = "right") +
   theme(legend.position = "none")
 ```
 
@@ -335,13 +341,35 @@ iters %>%
   theme(legend.position = "none")
 ```
 
+The next plot shows both the prior and posterior distribution. The prior is the solid black line and the posterior samples are plotted in a histogram. Most of the prior distributions are narrow and hence have resulted in little change. The posterior mean of the infectious period, $1/gamma$ is approximately 4 days, down from the prior mean of 4.5. The posterior mean of $\psi$ is, 13.5, 3.5 days shorter than the prior mean. 
+
+```{r}
+prior_posterior <- function(parameter, prior, limits) {
+  iters %>%
+    filter(iteration > 1e6 / 2) %>%
+    filter(iteration %% 100 == 0) %>% 
+    ggplot(aes(x = !!enquo(parameter))) +
+    geom_histogram(aes(y = ..density.., colour = 'Posterior', fill = "Posterior"), alpha = 0.5) +
+    stat_function(fun = prior, xlim = limits) +
+    theme(legend.position = "none")
+}
+
+p1 <- prior_posterior(eta, ~dnorm(x = ., mean = 0.14, sd = 0.007), limits = c(0.1, 0.2))
+p2 <- prior_posterior(gamma, ~dnorm(x = 1/., mean = 4.5, sd = 1), limits = c(0.1, 0.5))
+p3 <- prior_posterior(psi, ~dnorm(x = ., mean = 17, sd = 2), limits = c(8, 25))
+p4 <- prior_posterior(r0, ~dnorm(x = ., mean = 2.25, sd = 0.2), limits = c(1.5, 3))
+p5 <- prior_posterior(rho, ~dgamma(x = ., shape = 5, rate = 5 / 0.01), limits = c(0, 0.1))
+
+(p1 | p2 | p3) / (p4 | p5)
+```
+
 Now plot the posterior cumulative death curve.
 
 ```{r plot-posterior, echo=FALSE}
 iters %>% 
   filter(iteration > 1e6 / 2) %>%
   filter(iteration %% 100 == 0) %>%
-  sample_n(size = 1000, replace = T) %>% 
+  sample_n(size = 1000) %>% 
   apply(1, function(row) {
     params <- as.numeric(row[c("r0", "gamma", "rho", "eta", "psi")])
     names(params) <- names(initial_parameters)
@@ -353,14 +381,14 @@ iters %>%
   }) %>% 
   dplyr::bind_rows(.id = "replicate") %>% 
   group_by(time) %>% 
-  tidybayes::median_qi(cumulative_deaths, .width = 0.5) %>% 
+  tidybayes::median_qi(cumulative_deaths, .width = 0.95) %>% 
   bind_cols(uk) %>% 
   ggplot(aes(x = date)) + 
   geom_line(aes(y = cumulative_deaths), alpha = 0.5) +
   geom_ribbon(aes(ymin = .lower, ymax = .upper), alpha = 0.5, colour = NA) +
   geom_point(aes(y = deaths)) +
   labs(title = "Posterior simulations of cumulative deaths", 
-       subtitle = "The solid line is the posterior median and the shaded area is a 50% credible interval.\nThe points indicate the observed cumulative deaths in the UK") +
+       subtitle = "The solid line is the posterior median and the shaded area is a 95% credible interval.\nThe points indicate the observed cumulative deaths in the UK") +
   scale_y_log10(labels = scales::number_format(big.mark = ",", accuracy = 1)) +
   scale_x_date(
     labels = scales::date_format(format = "%d %b"),
@@ -371,4 +399,36 @@ iters %>%
     )
   )
 ```
+
+Let's simulate forward 100 days from the hypothesised start date, 2020-01-26 using the posterior distribution.
+
+```{r}
+days <- 100
+
+iters %>% 
+  filter(iteration > 1e6 / 2) %>%
+  filter(iteration %% 100 == 0) %>% 
+  sample_n(size = 1000) %>% 
+  apply(1, function(row) {
+    params <- as.numeric(row[c("r0", "gamma", "rho", "eta", "psi")])
+    names(params) <- names(initial_parameters)
+    beta = params["r0"] * params["gamma"]
+    names(beta) <- "beta"
+    simulate_sir(times = seq_len(days), 
+                 initial_state = c(S = 66.44e6, I = 1, R = 0),
+                 params = c(params, beta)) %>% 
+    tibble::add_column(date = seq(from = as.Date("2020-01-26"), length.out = days, by = "day"))
+  }) %>% 
+  dplyr::bind_rows(.id = "replicate") %>% 
+  gather(key, value, S, I, R, cumulative_deaths) %>% 
+  group_by(date, key) %>% 
+  tidybayes::median_qi(value, .width = 0.95) %>% 
+  ggplot(aes(x = date)) + 
+  geom_line(aes(y = value, colour = key), alpha = 0.5) +
+  geom_ribbon(aes(ymin = .lower, ymax = .upper, fill = key), alpha = 0.5, colour = NA) +
+  scale_y_continuous(labels = scales::number_format(big.mark = ",")) +
+  facet_wrap(vars(key), scales = "free_y") +
+  theme(legend.position = "none")
+```
+
 
