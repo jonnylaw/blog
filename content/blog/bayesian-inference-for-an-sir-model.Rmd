@@ -17,6 +17,7 @@ library(readr)
 library(ggplot2)
 library(jonnylaw)
 library(deSolve)
+library(patchwork)
 theme_set(theme_minimal())
 ```
 
@@ -111,7 +112,7 @@ Consider the model in [this pre-print from Lourenco et al 2020](https://www.drop
 
 $$\Lambda_t = \rho\eta R_{t-\psi},$$
 
-where $\rho$ is the proportion of the population at risk of severe disease, $\theta$ is the probability of dying with the severe disease. $R_{t-\psi}$ is the removed population with a delay between the time of infection represented by $\psi$. The parameters are given prior distributions in the paper, we can simulate multiple trajectories of the cumulative deaths by first simulating from the prior distribution then solving the SIR system. The prior distributions as given in the paper are
+where $\rho$ is the proportion of the population at risk of severe disease, $\eta$ is the probability of dying with the severe disease. $R_{t-\psi}$ is the removed population with a delay between the time of infection represented by $\psi$. The parameters are given prior distributions in the paper, we can simulate multiple trajectories of the cumulative deaths by first simulating from the prior distribution then solving the SIR system. The prior distributions as given in the paper are
 
 $$\begin{aligned}
   \frac{1}{\gamma} &\sim \mathcal{N}(4.5, 1^2), \\

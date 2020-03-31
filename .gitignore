@@ -7,19 +7,15 @@
 *.fdb_latexmk
 *.bbl
 *.blg
-
 # Modelling Files
 static/models/*
 static/data/*
 docs/models/*
-
 # Content HTML Files
 content/post/*.html
-
 # Content cache
 content/post/*files*
 content/post/*cache*
-
 # Misc Files
 *.pptx
 *.nav
@@ -27,27 +23,22 @@ content/post/*cache*
 .Rhistory
 */.ipynb_checkpoints/*
 .DS_Store
-
 # LaTeX output files
 *.pdf
 *.dvi
 *.eps
 *concordance.tex
-
 # SyncTeX
 *.synctex.gz
 .ensime_cache
-
 # ensime
 **/\#*
 **/~*
-
 # R Stuff
 .Rproj.user
-
 # renv
 renv/library
-
 # Generated website
 docs
 static
+.httr-oauth
