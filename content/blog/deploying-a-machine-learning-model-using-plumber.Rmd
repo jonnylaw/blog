@@ -1,7 +1,7 @@
 ---
 title: Deploying a Machine Learning Model Using Plumber and Docker
 author: Jonny Law
-date: '2020-03-25'
+date: '2020-03-30'
 slug: deploying-model-predictions-using-plumber-and-docker
 categories:
   - R
@@ -21,7 +21,7 @@ curl localhost:8000/getprediction --header "Content-Type: application/json" \
   --data @data/example.json
 ```
 
-We will deploy the toy classification model for the Iris dataset I developed in a [previous post](blog/building-a-classification-model-with-tidymodels). That post walked through the steps of developing a classification model using the collection of `R` packages named tidymodels. Tidymodels is a metapackage containing `R` packages which can be used to develop, tune and evaluate machine learning models in `R`.
+We will deploy the toy classification model for the Iris dataset I developed in a [previous post](/blog/building-a-classification-model-with-tidymodels). That post walked through the steps of developing a classification model using the collection of `R` packages named tidymodels. Tidymodels is a metapackage containing `R` packages which can be used to develop, tune and evaluate machine learning models in `R`.
 
 In the previous post, we developed a recipe for pre-processing the data and a tuned model. These components are required when performing predictions for new data. They can be saved using the function `save` or `readr::write_rds`. Saving the recipe allows us to use the same pre-processing steps on the new data as we used on the training data. Whereas saving the tuned model means we use the model we identified to perform best when performing cross-validation on the training data.
 
