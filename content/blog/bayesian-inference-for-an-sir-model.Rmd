@@ -292,7 +292,7 @@ proposal <- function(p) {
 
 We initialise the parameters at the mean of the prior distributions and simulate 1 million iterations from the Metropolis algorithm. The first half are discarded and every 100th iteration is retained in an attempt to reduce auto-correlation in the chain.
 
-```{r metropolis-samples, cache=TRUE, eval=FALSE}
+```{r metropolis-samples, cache=TRUE}
 initial_parameters <- c(r0 = 2.25, gamma = 1/4.5, rho = 0.01, eta = 0.14, psi = 17)
 ys <- uk %>% pull(deaths)
 iters <-
@@ -308,7 +308,7 @@ iters <-
 
 I have cached the results of the chunk running the Metropolis algorithm. The results can be loaded using `lazyLoad` - this is useful for long-running Rmarkdown chunks.
 
-```{r }
+```{r eval=FALSE}
 lazyLoad(here::here("content/blog/bayesian-inference-for-an-sir-model_cache/html/metropolis-samples_4388ff8bda2e17c9d25302cfbbb94be8"))
 ```
 

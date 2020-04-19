@@ -338,9 +338,9 @@ The final line shows that the likelihood consists of the hazards of the observed
 
 This can be generalised:
 
-$$p(X_{i,t_{0:3}}|Q) = \prod_{j=1}^3\prod_{k=1,k\neq j}^3q_{jk}^{n_{jk}}\exp(-\tau_{ij}q_j)$$
+$$p(X_{i,t_{0:3}}|Q) = \prod_{j=1}^3\prod_{k=1,k\neq j}^3q_{jk}^{n_{ijk}}\exp(-\tau_{ij}q_j)$$
 
-Where $q_j = \sum_{j=1,j\neq k}^3q_{jk}$, $\tau_{ij}$ is the time in the $j^{\text{th}}$ state for patient $i$ and $n_{jk}$ is a matrix with a count of the number of transitions from state $j$ to state $k$. We can then calculate the likelihood for all patients:
+Where $q_j = \sum_{j=1,j\neq k}^3q_{jk}$, $\tau_{ij}$ is the time in the $j^{\text{th}}$ state for patient $i$ and $n_{ijk}$ is a matrix with a count of the number of transitions from state $j$ to state $k$. We can then calculate the likelihood for all patients:
 
 $$\begin{aligned}
 p(\textbf{X}_t|Q) &= \prod_{i=1}^N\prod_{j=1}^3\prod_{k=1,k\neq j}^3q_{jk}^{n_{ijk}}\exp(-\tau_{ij}q_j)\\
