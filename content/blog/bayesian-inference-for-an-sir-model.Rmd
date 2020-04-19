@@ -38,7 +38,7 @@ united_kingdom <- covid_deaths %>%
   arrange(date)
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.width=8, fig.height=5}
 united_kingdom %>%
   pivot_longer(deaths:recovered, names_to = "state", values_to = "value") %>%
   mutate(label = if_else(date == max(date), state, NA_character_)) %>%
@@ -76,7 +76,7 @@ $$\begin{align}
 
 Where $S$ is the number of susceptible, $I$ the total infected and $R$ the total recovered. $\gamma$ is the recovery rate ($1/\gamma$ is the infectious period), $\beta$ is the infection rate ($1/\beta$ is the time between contacts). These parameters are unobserved.
 
-We can Use `deSolve` to solve the ODE system startin with an initial state of 66.4 million people susceptible and one infected. This produces a simulation conditional on the parameters chosen. The parameters can change depending on each countries reaction to the virus. For instance the infection rate can be lowered by quarantine or social distancing, thus reducing 
+We can Use `deSolve` to solve the ODE system startin with an initial state of 66.4 million people susceptible and one infected. This produces a simulation conditional on the parameters chosen. The parameters can change depending on each countries reaction to the virus. For instance the infection rate can be lowered by quarantine or social distancing, thus reducing the contact rate $\beta$.
 
 ```{r}
 parameters <- c(beta = 0.5, gamma = 1/4.5)
@@ -292,7 +292,7 @@ proposal <- function(p) {
 
 We initialise the parameters at the mean of the prior distributions and simulate 1 million iterations from the Metropolis algorithm. The first half are discarded and every 100th iteration is retained in an attempt to reduce auto-correlation in the chain.
 
-```{r metropolis-samples, cache=TRUE}
+```{r metropolis-samples, cache=TRUE, eval=FALSE}
 initial_parameters <- c(r0 = 2.25, gamma = 1/4.5, rho = 0.01, eta = 0.14, psi = 17)
 ys <- uk %>% pull(deaths)
 iters <-
@@ -308,8 +308,8 @@ iters <-
 
 I have cached the results of the chunk running the Metropolis algorithm. The results can be loaded using `lazyLoad` - this is useful for long-running Rmarkdown chunks.
 
-```{r eval=FALSE}
-lazyLoad(here::here("content/blog/bayesian-inference-for-an-sir-model_cache/html/metropolis-samples_2dc7aa7ffb05056136d67d8c3b755b58"))
+```{r }
+lazyLoad(here::here("content/blog/bayesian-inference-for-an-sir-model_cache/html/metropolis-samples_4388ff8bda2e17c9d25302cfbbb94be8"))
 ```
 
 ```{r traceplots, echo=FALSE}
@@ -431,5 +431,3 @@ iters %>%
   facet_wrap(vars(key), scales = "free_y") +
   theme(legend.position = "none")
 ```
-
-
