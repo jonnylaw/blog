@@ -154,7 +154,7 @@ simulate_sir <- function(times, initial_state, params) {
   sim <- ode(y = initial_state, times = times, func = sir, parms = params)
   
   sim %>% 
-    tibble::as_tibble() %>% 
+    as.data.frame() %>% 
     tibble::add_column(cumulative_deaths = 
                  purrr::map_dbl(sim[, 1], ~ cumulative_deaths(t = .x, sim[, 4], params)))
 }
@@ -170,7 +170,9 @@ sims <-
     ),
     .id = "replicate"
   )
+```
 
+```{r}
 sims %>% 
   ggplot(aes(x = time, y = cumulative_deaths, group = replicate)) + 
   geom_line(alpha = 0.5) +
