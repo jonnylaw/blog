@@ -21,6 +21,7 @@ jobs:
           libudunits2-dev \
           libgdal-dev \
           libcurl4-openssl-dev \
+          libv8-dev \
           && apt-get clean \
           && rm -rf /var/lib/apt/lists/
       - name: Install Ammonite 2.12
