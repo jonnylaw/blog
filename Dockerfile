@@ -1,4 +1,4 @@
-FROM rocker/tidyverse:3.6.2
+FROM rocker/r-apt:disco
 
 RUN  apt-get update \
   && apt-get install software-properties-common \
@@ -18,15 +18,15 @@ RUN  apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/
   
-# Restore R packages from local cache
-RUN Rscript -e "Sys.setenv(RENV_PATHS_CACHE = "/renv/library/R-3.6/x86_64-apple-darwin15.6.0"); renv::restore()"
-
-# Install Ammonite
-RUN sh -c '(echo "#!/usr/bin/env sh" && curl -L https://github.com/lihaoyi/Ammonite/releases/download/2.0.4/2.12-2.0.4) > /usr/local/bin/amm && chmod +x /usr/local/bin/amm'
-
 # Copy directory
 # Including renv cache
 COPY . .
+  
+# Restore R packages from local cache
+RUN Rscript -e "Sys.setenv(RENV_PATHS_CACHE = '/renv/library/R-3.6/x86_64-apple-darwin15.6.0'); renv::restore()"
+
+# Install Ammonite
+RUN sh -c '(echo "#!/usr/bin/env sh" && curl -L https://github.com/lihaoyi/Ammonite/releases/download/2.0.4/2.12-2.0.4) > /usr/local/bin/amm && chmod +x /usr/local/bin/amm'
 
 # Run scala examples
 RUN ./notebooks/run_scala.sh

@@ -9,7 +9,10 @@ tags: []
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(tidyr); library(dplyr); library(readr); library(ggplot2);
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
 library(reticulate)
 library(leaflet)
 theme_set(theme_minimal())
@@ -121,13 +124,14 @@ activity_tibble %>%
   summarise(
     total_distance = sum(dist_to_prev),
     elapsed_time = max(timestamp) - min(timestamp),
-    moving_time = lubridate::seconds_to_period(sum(time_diff_to_prev) - sum(
+    moving_time = sum(time_diff_to_prev) - sum(
       ifelse(dist_to_prev == 0, time_diff_to_prev, 0)
-    )),
+    ),
     elevation_gain = sum(if_else(elevation_to_prev > 0, elevation_to_prev, 0), na.rm = TRUE),
     average_heart_rate = round(mean(heart_rate), 0)
   ) %>%
-  mutate(average_pace = hms::as_hms(as.numeric(moving_time) / total_distance)) %>% 
+  mutate(average_pace = hms::as_hms(as.numeric(moving_time) / total_distance),
+         moving_time = lubridate::seconds_to_period(moving_time)) %>% 
   knitr::kable()
 ```
 
