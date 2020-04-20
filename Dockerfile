@@ -1,54 +1,35 @@
-FROM rocker/r-apt:disco
+FROM rocker/tidyverse:3.6.2
 
-# Define environment variables for virtualenvs
-ENV WORKON_HOME /opt/virtualenvs
-ENV PYTHON_VENV_PATH $WORKON_HOME/r-reticulate
+RUN  apt-get update \
+  && apt-get install software-properties-common \
+  && add-apt-repository ppa:ubuntugis/ppa \
+  && apt-get install -y --no-install-recommends \
+  libpython3-dev \
+  python3-venv \
+  pandoc \
+  curl \
+  default-jdk \
+  libxml2-dev \
+  libssl-dev \
+  libudunits2-dev \
+  libgdal-dev \
+  libcurl4-openssl-dev \
+  libv8-dev \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/
+  
+# Restore R packages from local cache
+RUN Rscript -e "Sys.setenv(RENV_PATHS_CACHE = "/renv/library/R-3.6/x86_64-apple-darwin15.6.0"); renv::restore()"
 
-RUN apt-get update \
-      && apt-get install -y --no-install-recommends \
-      r-cran-rstan \
-      r-cran-brms \
-      r-cran-coda \
-      r-cran-dplyr \
-      r-cran-furrr \
-      r-cran-ggmcmc \
-      r-cran-ggplot2 \
-      r-cran-ggthemes \
-      r-cran-here \
-      r-cran-htmltab \
-      r-cran-janitor \
-      r-cran-knitr \
-      r-cran-leaflet \
-      r-cran-magrittr \
-      r-cran-microbenchmark \
-      r-cran-readr \
-      r-cran-reticulate \
-      r-cran-tibble \
-      r-cran-lubridate \
-      libpython3-dev \
-      python3-venv \
-      curl \
-      default-jdk \
-      libxml2-dev \
-      libssl-dev \
-      libcurl4-openssl-dev \
-      && apt-get clean \
-      && rm -rf /var/lib/apt/lists/
+# Install Ammonite
+RUN sh -c '(echo "#!/usr/bin/env sh" && curl -L https://github.com/lihaoyi/Ammonite/releases/download/2.0.4/2.12-2.0.4) > /usr/local/bin/amm && chmod +x /usr/local/bin/amm'
 
-# Add virtualenv to path
-# ENV PATH ${PYTHON_VENV_PATH}/bin:${PATH}
-## And set ENV for R! It doesn't read from the environment...
-#RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron && \
-#    echo "WORKON_HOME=${WORKON_HOME}" >> /usr/local/lib/R/etc/Renviron && \
-#    echo "RETICULATE_PYTHON_ENV=${PYTHON_VENV_PATH}" >> /usr/local/lib/R/etc/Renviron
+# Copy directory
+# Including renv cache
+COPY . .
 
-# Copy contents of repo to container
-COPY . blog/.
+# Run scala examples
+RUN ./notebooks/run_scala.sh
 
-# Install Dependencies
-RUN Rscript -e "install.packages('remotes', repos = 'https://demo.rstudiopm.com/all/__linux__/bionic/latest')"
-RUN Rscript -e "remotes::install_deps(pkg = 'blog', dependencies = TRUE, repos = 'https://demo.rstudiopm.com/all/__linux__/bionic/latest')"
-RUN Rscript -e "pkgbuild::build(path = 'blog'); install.packages('jonnylaw_0.1.0.tar.gz', type = 'source', repos = NULL)"
-
-# Compile Blog
-RUN cd blog && Rscript -e "blogdown::build_site()"
+# Render site
+RUN Rscript -e "options(blogdown.subdir = 'blog'); blogdown::install_hugo(); blogdown::build_site()"
