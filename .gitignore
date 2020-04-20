@@ -16,6 +16,7 @@ content/post/*.html
 # Content cache
 content/post/*files*
 content/post/*cache*
+blogdown/*
 # Misc Files
 *.pptx
 *.nav
