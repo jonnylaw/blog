@@ -10,7 +10,8 @@ tags: []
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(jonnylaw)
-library(dplyr); library(readr)
+library(dplyr)
+library(readr)
 library(ggplot2)
 library(brms)
 library(tidybayes)

@@ -21,7 +21,6 @@ jobs:
           libudunits2-dev \
           libgdal-dev \
           libcurl4-openssl-dev \
-          libv8-dev \
           && apt-get clean \
           && rm -rf /var/lib/apt/lists/
       - name: Install Ammonite 2.12
@@ -39,7 +38,7 @@ jobs:
             ${{ runner.os }}-renv-
       - name: Install R package dependencies
         run: |-
-          Rscript -e "renv::restore()"
+          Rscript -e "renv::restore(); tinytex::install_tinytex()"
       - name: Render Site
         run: |-
           Rscript -e "options(blogdown.subdir = 'blog'); blogdown::install_hugo(); blogdown::build_site()"

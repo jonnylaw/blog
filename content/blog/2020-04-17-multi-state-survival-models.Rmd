@@ -23,45 +23,20 @@ theme_set(theme_minimal())
 
 Multi-state models are used to model disease progression. The model is a continuous time Markov process. The states and time of transitions are fully observed. There are three states a patient can be in, "healthy", "illness" and "deceased". The possible pairs of transitions between these states include healthy -> illness, illness -> healthy, illness -> death and healthy -> death. The model can be expressed as a directed graph.
 
-```{r, echo=FALSE}
-library(ggdag)
+```{r, echo=FALSE, engine='tikz', out.width='90%', fig.ext=if (knitr:::is_latex_output()) 'pdf' else 'png'}
+\begin{tikzpicture}[->, node distance=2.5cm]
+  \tikzstyle{obs}=[rectangle,draw,auto,minimum size=10mm]
 
-node_details <- tibble::tribble(
-  ~name, ~label, ~x, ~y,
-  "h", "healthy", 1, 2,
-  "i", "illness", 2, 2,
-  "d", "death", 2, 1,
-)
+  \node[obs] (1) {$\text{healthy}$};
+  \node[obs] (2) [right of=1] {$\text{illness}$};
+  \node[obs] (3) [right of=2] {$\text{deceased}$};
 
-tidy_dag <- dagify(
-  h ~ i,
-  i ~ h,
-  d ~ i,
-  d ~ h,
-  outcome = "y",
-  exposure = "x",
-  coords = node_details,
-  labels = c(
-    h = "Healthy",
-    i = "Illness",
-    d = "Deceased"
-  )
-) %>% 
-  tidy_dagitty() %>%
-  node_status()   # Add column for exposure/outcome/latent
+  \path[every node/.style={font=\sffamily\small}]
+  (1) edge[bend right] node {} (2)
+  (2) edge[bend right] node {} (1)
+  (2) edge node {} (3);
 
-status_colors <- c(exposure = "#0074D9", outcome = "#FF4136", latent = "grey50")
-
-# Fancier graph
-ggplot(tidy_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
-  geom_dag_edges() +
-  geom_dag_point(aes(color = status)) +
-  geom_dag_label_repel(aes(label = label, fill = status), seed = 1234,
-                       color = "white", fontface = "bold") +
-  scale_color_manual(values = status_colors, na.value = "grey20") +
-  scale_fill_manual(values = status_colors, na.value = "grey20") +
-  guides(color = FALSE, fill = FALSE) + 
-  theme_dag()
+\end{tikzpicture}
 ```
 
 The state "Deceased" is an absorbing state, whereas the other two states are transient. This means we can't transition away from the Deceased state. 
@@ -327,7 +302,7 @@ sims %>%
 This layout explicitly allows us to see which state transitions are observed and which are censored. Patient 13 starts in state 1, as do all patients. The first observation at time $t = 3.92$ is a transition from $1 \rightarrow 2$, illness - this observation implies a censored observation for the transition $1 \rightarrow 3$. Then we transition from state 2 back to state 1 and never observe the terminal state.
 
 $$\begin{aligned}
-p(X_{i=13,t_{0:3}}|Q) &= Pr(X_{t_1} = 2|X_{t_0} = 1)Pr(X_{t>t_2} = 3)Pr(X_{t_2} = 1|X_{t_1} = 2)Pr(X_{t>t_2} = 3) \\
+p(X_{i=13,t_{0:3}}|Q) &= Pr(X_{t_1} = 2|X_{t_0} = 1)Pr(X_{t>t_1} = 3)Pr(X_{t_2} = 1|X_{t_1} = 2)Pr(X_{t>t_2} = 3) \\
 &=f_{12}(t_1-t_0)S_{13}(t_1-t_0)f_{21}(t_2-t_1)S_{23}(t_2-t_1) \\
 &=q_{12}\exp(-q_{12}(t_1-t_0))\exp(-(t_1-t_0)q_{13})q_{21}\exp(-q_{21}(t_2-t_1))\exp(-(t_2-t_1)q_{23}) \\
 &= q_{12}q_{21}\exp(-q_{12}(t_1-t_0) -(t_1-t_0)q_{13} -q_{21}(t_2-t_1) -(t_2-t_1)q_{23}) \\
@@ -404,12 +379,17 @@ log_likelihood <- function(rate_matrix, tau, observed_transitions) {
 }
 
 log_prior <- function(lambda) {
-  sum(dgamma(lambda, shape = 3, scale = 3 / 0.1))
+  sum(dgamma(lambda, shape = 3, scale = 3 / 0.1, log = TRUE))
 }
 
 proposal <- function(lambda) {
   lambda * exp(rnorm(4, sd = 0.01))
 }
+
+log_posterior <- function(lambda) {
+    Q <- build_rate_matrix(lambda)
+    log_likelihood(Q, tau, observed_transitions) + log_prior(lambda)
+  }
 ```
 
 We are ready to sample from the posterior distribution of the rate parameters using the Metropolis algorithm. We run four chains in parallel using [furrr](https://davisvaughan.github.io/furrr/) as explained in [my previous post](/blog/efficient_mcmc_using_rcpp/) on efficient MCMC in R.
@@ -417,10 +397,7 @@ We are ready to sample from the posterior distribution of the rate parameters us
 ```{r, cache=TRUE, echo=TRUE}
 iters <- jonnylaw::metropolis(
   lambda,
-  log_posterior = function(lambda) {
-    Q <- build_rate_matrix(lambda)
-    log_likelihood(Q, tau, observed_transitions) + log_prior(lambda)
-  },
+  log_posterior,
   proposal,
   m = 1e5, 
   chains = 4, 
