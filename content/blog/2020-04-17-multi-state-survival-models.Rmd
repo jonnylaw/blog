@@ -18,6 +18,8 @@ library(dplyr)
 library(readr)
 library(ggplot2)
 library(patchwork)
+library(pdftools)
+library(magick)
 theme_set(theme_minimal())
 ```
 
@@ -159,7 +161,19 @@ replicates <- apply(lambdas, 1, function(x) sim_markov(x, 0.1, 50)) %>%
 Simulating 1,000 trajectories for (50 * 0.1 = 5 days) transitions results in the following state transitions
 
 ```{r}
-msm::statetable.msm(state = state, subject = replicate, data = replicates)
+replicates %>% 
+  group_by(patient) %>% 
+  mutate(from = lag(state), to = state) %>% 
+  drop_na() %>% 
+  count(from, to) %>% 
+  arrange(to) %>% 
+  pivot_wider(names_from = "to", values_from = "n") %>% 
+  mutate_all(~replace_na(., 0)) %>% 
+  group_by(from) %>% 
+  summarise_at(vars(`1`:`3`), sum) %>% 
+  arrange(from) %>% 
+  select(-1) %>% 
+  as.matrix()
 ```
 
 Instead of simulating on a fine grid we can using discrete event simulation:
