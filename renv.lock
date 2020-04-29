@@ -72,13 +72,6 @@
       "Repository": "CRAN",
       "Hash": "e652f23d8b1807cc975c51410d05b72f"
     },
-    "RcppArmadillo": {
-      "Package": "RcppArmadillo",
-      "Version": "0.9.870.2.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "f7fee4557377d47093bd2b65f2642e52"
-    },
     "RcppEigen": {
       "Package": "RcppEigen",
       "Version": "0.3.3.7.0",
@@ -225,13 +218,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "f697db7d92b7028c4b3436e9603fb636"
-    },
-    "dlm": {
-      "Package": "dlm",
-      "Version": "1.1-5",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "92cdf6efe08efef722ec754f1c96c915"
     },
     "dplyr": {
       "Package": "dplyr",
@@ -396,15 +382,15 @@
     },
     "jonnylaw": {
       "Package": "jonnylaw",
-      "Version": "0.1.0",
+      "Version": "0.2.0",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "jonnylaw",
       "RemoteUsername": "jonnylaw",
       "RemoteRef": "master",
-      "RemoteSha": "93ccb312c85253b0091679276d64a49ea56a6bca",
-      "Hash": "81df07d20d1dde4b3429e74e700003d4"
+      "RemoteSha": "dd2e12cda975b0457a6b0e4dabbb18f73fe2398e",
+      "Hash": "f9748d19370d4b96a6ae6cdd89bd45a8"
     },
     "jsonlite": {
       "Package": "jsonlite",
