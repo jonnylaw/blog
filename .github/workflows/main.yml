@@ -15,6 +15,7 @@ jobs:
           python3-venv \
           pandoc \
           curl \
+          hugo \
           default-jdk \
           libxml2-dev \
           libssl-dev \
@@ -40,10 +41,10 @@ jobs:
             ${{ runner.os }}-renv-
       - name: Install R package dependencies
         run: |-
-          Rscript -e "renv::restore(); tinytex::install_tinytex()"
+          Rscript -e "renv::restore(); tinytex::install_tinytex(); install.packages('blogdown')"
       - name: Render Site
         run: |-
-          Rscript -e "options(blogdown.subdir = 'blog'); blogdown::install_hugo(); blogdown::build_site()"
+          Rscript -e "options(blogdown.subdir = 'blog'); blogdown::build_site()"
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/master'
         uses: maxheld83/ghpages@v0.2.0
