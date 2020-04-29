@@ -162,7 +162,7 @@ Simulating 1,000 trajectories for (50 * 0.1 = 5 days) transitions results in the
 
 ```{r}
 replicates %>% 
-  group_by(patient) %>% 
+  group_by(replicate) %>% 
   mutate(from = lag(state), to = state) %>% 
   drop_na() %>% 
   count(from, to) %>% 
@@ -171,9 +171,7 @@ replicates %>%
   mutate_all(~replace_na(., 0)) %>% 
   group_by(from) %>% 
   summarise_at(vars(`1`:`3`), sum) %>% 
-  arrange(from) %>% 
-  select(-1) %>% 
-  as.matrix()
+  arrange(from)
 ```
 
 Instead of simulating on a fine grid we can using discrete event simulation:
@@ -215,7 +213,19 @@ replicates <- apply(lambdas, 1, function(lambda) {
 }) %>% 
   bind_rows(.id = "replicate")
 
-qs <- msm::statetable.msm(state = state, subject = replicate, data = replicates)
+qs <- replicates %>% 
+  group_by(replicate) %>% 
+  mutate(from = lag(state), to = state) %>% 
+  drop_na() %>% 
+  count(from, to) %>% 
+  arrange(to) %>% 
+  pivot_wider(names_from = "to", values_from = "n") %>% 
+  mutate_all(~replace_na(., 0)) %>% 
+  group_by(from) %>% 
+  summarise_at(vars(`1`:`3`), sum) %>% 
+  arrange(from) %>% 
+  select(-1) %>% 
+  as.matrix()
 qs
 ```
 
@@ -375,7 +385,19 @@ tau <- time_in_state %>%
 Calculate the matrix of observed transitions. Note that no transitions occur from state 3, the absorbing state.
 
 ```{r}
-observed_transitions <- msm::statetable.msm(state, patient, sims)
+observed_transitions <- sims %>% 
+  group_by(patient) %>% 
+  mutate(from = lag(state), to = state) %>% 
+  drop_na() %>% 
+  count(from, to) %>% 
+  arrange(to) %>% 
+  pivot_wider(names_from = "to", values_from = "n") %>% 
+  mutate_all(~replace_na(., 0)) %>% 
+  group_by(from) %>% 
+  summarise_at(vars(`1`:`3`), sum) %>% 
+  arrange(from) %>% 
+  select(-1) %>% 
+  as.matrix
 (observed_transitions <- rbind(observed_transitions, c(0, 0, 0)))
 ```
 

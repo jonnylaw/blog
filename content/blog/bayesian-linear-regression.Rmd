@@ -9,7 +9,11 @@ tags: []
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-library(tidyr); library(dplyr); library(readr); library(ggplot2); library(jonnylaw);
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(jonnylaw)
 library(furrr)
 theme_set(theme_minimal())
 ```
