@@ -297,6 +297,7 @@ proposal <- function(x) {
   c(x[1] + z[1], x[2] * exp(z[2]),
     x[3] + z[3], x[4] * exp(z[4]))
 }
+names(theta) <- c("mu1", "sigma1", "mu2", "sigma2")
 
 start_time <- Sys.time()
 out_met <- metropolis(theta, log_posterior(xs), proposal, 1e4, chains = 2, parallel = TRUE)
@@ -304,10 +305,10 @@ end_time <- Sys.time()
 metropolis_time <- end_time - start_time
 ```
 
-The ESS can be computed using:
+The ESS/s can be computed using:
 
 ```{r}
 out_met %>% 
-  summarise_at(2:5, rstan::ess_bulk) %>% 
+  summarise_at(3:6, rstan::ess_bulk) %>% 
   mutate_all(~ . / as.numeric(metropolis_time))
 ```

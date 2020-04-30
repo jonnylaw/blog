@@ -449,7 +449,7 @@ iters %>%
   mutate(iteration = row_number()) %>% ## Add iteration number
   filter(iteration > 5e4) %>% 
   jonnylaw::thin(10) %>%  ## Reduce things to plot
-  pivot_longer(-c("chain", "iteration"), names_to = "parameter", values_to = "value") %>% 
+  pivot_longer(-c("chain", "iteration", "accepted"), names_to = "parameter", values_to = "value") %>% 
   jonnylaw::plot_diagnostics()
 ```
 
