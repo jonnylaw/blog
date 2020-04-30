@@ -11,12 +11,15 @@ tags: []
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
-library(tidyr); library(dplyr); library(readr); library(ggplot2); library(jonnylaw);
-library(ggthemes)
-library(coda)
+library(tidyr)
+library(dplyr)
+library(readr) 
+library(ggplot2)
+library(jonnylaw)
 library(furrr)
 library(Rcpp)
-library(microbenchmark)
+library(bench)
+library(ggbeeswarm)
 
 theme_set(theme_minimal())
 ```
@@ -240,24 +243,23 @@ out_cpp %>%
 
 # Performance Improvements
 
-But what about the performance, the relative speedup can be calculated using the [microbenchmark](https://github.com/joshuaulrich/microbenchmark/) package. The relative speedup of the C++ method used to generate 100 correlated samples from the posterior distribution is plotted below.
+But what about the performance, the relative speedup can be calculated using the [bench](http://bench.r-lib.org/) package. The plot below shows the absolute timings of the R implementation and the Rcpp implementation.
 
 ```{r, cache=TRUE}
-timings <- microbenchmark(metropolis(theta, log_posterior(xs), proposal, 100), 
-                          metropolis(theta, function(p) logDensity(xs, p), 
-                                     function(p) proposalCpp(p, 0.05), 100), times = 500)
+timings <-
+  bench::mark(
+    R = metropolis(theta, log_posterior(xs), proposal, 100),
+    Rcpp = metropolis(theta, function(p)
+      logDensity(xs, p),
+      function(p)
+        proposalCpp(p, 0.05), 100),
+    iterations = 500,
+    check = FALSE
+  )
 ```
 
-```{r relative-speedup, echo=FALSE}
-timings %>% 
-  as.data.frame() %>%
-  mutate(expr = ifelse(grepl("Cpp", x = expr), "C++", "R")) %>% 
-  group_by(expr) %>%
-  mutate(iteration = 1:n()) %>%
-  spread(expr, time) %>%
-  mutate(relative_speedup = R / `C++`) %>%
-  ggplot(aes(x = relative_speedup)) +
-  geom_histogram()
+```{r meteropolis-iteration-timing, echo=FALSE}
+plot(timings)
 ```
 
 
