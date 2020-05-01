@@ -175,7 +175,7 @@ sims <-
   )
 ```
 
-```{r}
+```{r echo=FALSE}
 sims %>% 
   ggplot(aes(x = time, y = cumulative_deaths, group = replicate)) + 
   geom_line(alpha = 0.5) +
@@ -293,13 +293,14 @@ log_prior <- function(parameters) {
 proposal <- function(p) {
   p * exp(rnorm(5, sd = c(0.02, 0.02, 0.02, 0.02, 0.05)))
 }
+
+initial_parameters <- c(r0 = 2.25, gamma = 1/4.5, rho = 0.01, eta = 0.14, psi = 17)
+ys <- uk %>% pull(deaths)
 ```
 
 We initialise the parameters at the mean of the prior distributions and simulate 1 million iterations from the Metropolis algorithm. The first half are discarded and every 100th iteration is retained in an attempt to reduce auto-correlation in the chain.
 
 ```{r metropolis-samples, eval=run_mcmc}
-initial_parameters <- c(r0 = 2.25, gamma = 1/4.5, rho = 0.01, eta = 0.14, psi = 17)
-ys <- uk %>% pull(deaths)
 iters <-
   jonnylaw::metropolis(
     theta = initial_parameters,
@@ -348,7 +349,7 @@ iters %>%
   filter(iteration > 1e6 / 2) %>%
   filter(iteration %% 100 == 0) %>% 
   mutate(beta = r0 * gamma) %>% 
-  pivot_longer(-c("chain", "iteration"), names_to = "parameter") %>% 
+  pivot_longer(-c("chain", "iteration", "accepted"), names_to = "parameter") %>% 
   ggplot(aes(x = value, colour = parameter, fill = parameter)) +
   geom_histogram(alpha = 0.5, position = "identity") +
   facet_wrap(~parameter, scales = "free") +
@@ -357,7 +358,7 @@ iters %>%
 
 The next plot shows both the prior and posterior distribution. The prior is the solid black line and the posterior samples are plotted in a histogram. Most of the prior distributions are narrow and hence have resulted in little change. The posterior mean of the infectious period, $1/gamma$ is approximately 4 days, down from the prior mean of 4.5. The posterior mean of $\psi$ is, 13.5, 3.5 days shorter than the prior mean. 
 
-```{r}
+```{r echo=FALSE}
 prior_posterior <- function(parameter, prior, limits) {
   iters %>%
     filter(iteration > 1e6 / 2) %>%
@@ -416,7 +417,7 @@ iters %>%
 
 Let's simulate forward 100 days from the hypothesised start date, 2020-01-26 using the posterior distribution.
 
-```{r}
+```{r echo=FALSE}
 days <- 100
 
 iters %>% 

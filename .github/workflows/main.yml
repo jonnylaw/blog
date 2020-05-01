@@ -6,6 +6,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@master
+        with:
+          lfs: true
       - name: Install Stan, Python and R dependencies
         run: |-
          apt-get update \
