@@ -11,6 +11,9 @@ tags: []
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+config <- configr::read.config(here::here("config.toml"))
+run_mcmc <- config$runMcmc == 1
+
 library(tidyr)
 library(dplyr)
 library(readr)
@@ -243,7 +246,7 @@ hmc_df <- function(log_posterior, gradient, step_size, l, initP, m, parameter_na
 
 Then the function is used in `future_map_dfr`:
 
-```{r hmc}
+```{r hmc, eval=run_mcmc}
 future::plan(future::multiprocess)
 start_time <- Sys.time()
 out_hmc <-
@@ -263,6 +266,16 @@ out_hmc <-
   )
 end_time <- Sys.time()
 hmc_time <- end_time - start_time
+```
+
+```{r write-iters-hmc, eval=run_mcmc}
+readr::write_rds(hmc_time, path = here::here("models/hmc-time.Rds"))
+readr::write_rds(out_hmc, path = here::here("models/hmc.Rds"))
+```
+
+```{r read-iters-hmc, eval=!run_mcmc}
+hmc_time <- readr::read_rds(here::here("models/hmc-time.Rds"))
+out_hmc <- readr::read_rds(here::here("models/hmc.Rds"))
 ```
 
 The traceplots of both chains are plotted below.
@@ -291,7 +304,7 @@ out_hmc %>%
 
 This could be compared to a similar method, such as the [Metropolis algorithm](2019/02/11/efficient_mcmc_rcpp). To determine which algorithm is the most efficient for sampling from the posterior distribution of the bivariate Normal model.
 
-```{r}
+```{r, eval=run_mcmc}
 proposal <- function(x) {
   z = rnorm(4, sd = 0.05)
   c(x[1] + z[1], x[2] * exp(z[2]),
@@ -305,7 +318,16 @@ end_time <- Sys.time()
 metropolis_time <- end_time - start_time
 ```
 
-The ESS/s can be computed using:
+```{r write-iters-metropolis, eval=run_mcmc}
+readr::write_rds(metropolis_time, path = here::here("models/metropolis-time.Rds"))
+```
+
+```{r read-iters-metropolis, eval=!run_mcmc}
+metropolis_time <- readr::read_rds(here::here("models/metropolis-time.Rds"))
+out_met <- readr::read_rds(here::here("models/metropolis-r.Rds"))
+```
+
+The ESS/s can be computed for the Metropolis algorithm
 
 ```{r}
 out_met %>% 

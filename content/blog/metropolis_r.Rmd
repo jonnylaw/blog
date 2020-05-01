@@ -11,6 +11,8 @@ tags: []
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+config <- configr::read.config(here::here("config.toml"))
+run_mcmc <- config$runMcmc == 1
 library(tidyr)
 library(dplyr)
 library(readr) 
@@ -132,8 +134,16 @@ proposal <- function(x) {
 
 Finally, all the components are there to sample from the posterior distribution of the parameters. The mean of the sampled posterior distribution should coincide with the parameters used to simulate the data. In the figure below the actual values used to simulate the data are plotted with dashed lines.
 
-```{r}
+```{r metropolis-serial, eval=run_mcmc}
 out = metropolis(theta, log_posterior(xs), proposal, 10000)
+```
+
+```{r write-iters-serial, eval=run_mcmc}
+readr::write_rds(out, path = here::here("models/metropolis-serial-r.Rds"))
+```
+
+```{r read-iters-serial, eval=!run_mcmc}
+out <- readr::read_rds(here::here("models/metropolis-serial-r.Rds"))
 ```
 
 ```{r, echo=FALSE}
@@ -167,13 +177,21 @@ metropolis_df <- function(theta, log_posterior, proposal, m, parameter_names) {
 
 Then `future_map_dfr` is used which performs the function `.f` for each element of `.x`. It then rowbinds into a dataframe. This is explicit in the function name, the suffix `_dfr` meaning a dataframe is the return type and is created by rowbinding the results. The `id` of each function run is provided by the `.id` column and takes on the values of `.x`.
 
-```{r, cache=TRUE}
+```{r metropolis-r, eval=run_mcmc}
 plan(multiprocess)
 mh_samples <- future_map_dfr(
   .x = 1:2,
   .f = metropolis_df(theta, log_posterior(xs), proposal, 10000, actual_values$parameter),
   .id = "chain"
 )
+```
+
+```{r write-iters, eval=run_mcmc}
+readr::write_rds(mh_samples, path = here::here("models/metropolis-r.Rds"))
+```
+
+```{r read-iters, eval=!run_mcmc}
+mh_samples <- readr::read_rds(here::here("models/metropolis-r.Rds"))
 ```
 
 The figure below shows the trace plots and marginal densities from 10,000 draws of the parallel Metropolis hastings algorithm.
@@ -225,8 +243,16 @@ NumericVector proposalCpp(NumericVector p, double delta) {
 
 These functions can then be used in the Metropolis algorithm written using R, as we can see from the below code chunk the C++ function appears as if it was an R function.
 
-```{r}
+```{r metropolis-cpp, eval=run_mcmc}
 out_cpp <- metropolis(theta, function(p) logDensity(xs, p), function(p) proposalCpp(p, 0.05), 10000)
+```
+
+```{r write-iters-cpp, eval=run_mcmc}
+readr::write_rds(out_cpp, path = here::here("models/metropolis-cpp.Rds"))
+```
+
+```{r read-iters-cpp, eval=!run_mcmc}
+out_cpp <- readr::read_rds(here::here("models/metropolis-cpp.Rds"))
 ```
 
 ```{r, echo=FALSE}

@@ -4,6 +4,7 @@ languageCode = "en-us"
 title = "Bayesian Statistics and Functional Programming "
 theme = "hugo-lithium-theme"
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+runMcmc = 0
 
 [permalinks]
     post = "/:year/:month/:day/:slug/"

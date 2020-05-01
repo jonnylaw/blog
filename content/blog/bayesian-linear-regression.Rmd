@@ -9,6 +9,8 @@ tags: []
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+config <- configr::read.config(here::here("config.toml"))
+run_mcmc <- config$runMcmc == 1
 library(tidyr)
 library(dplyr)
 library(readr)
@@ -167,7 +169,7 @@ ys <- tibble(y = weights,
              x = heights)
 ```
 
-```{r}
+```{r gibbs-sample-lm, eval=run_mcmc}
 plan(multiprocess)
 iters <- future_map_dfr(
   .x = 1:2,
@@ -186,6 +188,14 @@ iters <- future_map_dfr(
     ),
   .id = "chain"
 )
+```
+
+```{r, eval=run_mcmc}
+write_rds(iters, path = here::here("models/gibbs-lm.Rds"))
+```
+
+```{r, eval=!run_mcmc}
+iters <- read_rds(here::here("models/gibbs-lm.Rds"))
 ```
 
 ```{r, echo=FALSE}

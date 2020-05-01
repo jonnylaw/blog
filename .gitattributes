@@ -10,3 +10,4 @@ static/models/benchmark_kfas.Rds filter=lfs diff=lfs merge=lfs -text
 static/models/hmc_bivariate.Rds filter=lfs diff=lfs merge=lfs -text
 static/models/poisson.Rds filter=lfs diff=lfs merge=lfs -text
 static/models/rcpp.Rds filter=lfs diff=lfs merge=lfs -text
+*.Rds filter=lfs diff=lfs merge=lfs -text

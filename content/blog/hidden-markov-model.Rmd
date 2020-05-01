@@ -1,7 +1,7 @@
 ---
 title: Functional Programming and Hidden Markov Models
 author: Jonny Law
-date: '2020-04-28'
+date: '2020-05-01'
 slug: multi-state-survival-models-part-2
 categories:
   - Bayesian
@@ -11,6 +11,9 @@ tags: []
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+config <- configr::read.config(here::here("config.toml"))
+run_mcmc <- config$runMcmc == 1
+
 library(ggplot2)
 library(tibble)
 library(dplyr)
@@ -286,7 +289,7 @@ $$\log p(y_{1:T}) = \log \sum_{i=1}^T\sum_{j=1}^K p(x_t=j\mid y_{1:t-1})p(y_t|x_
 
 This can be used in a Metropolis-Hastings algorithm to determine the posterior distribution of the parameters in the transition matrix, $\alpha$ and $\beta$. We can keep a running total of log-likelihood by returning a list from the forward step containing the log-likelihood and the posterior probability of the states given the observation.
 
-```{r eval=TRUE}
+```{r echo=TRUE}
 ll_step <- function(state, y, observation, P) {
   unnorm_state <- observation(y) * t(P) %*% state[[2]]
   list(
@@ -298,7 +301,7 @@ ll_step <- function(state, y, observation, P) {
 
 To return only the log-likelihood we can use `purrr::reduce`. 
 
-```{r}
+```{r marginal-log-likelihood, echo=TRUE}
 log_likelihood <- function(ys, x0, observation, P) {
   alpha <- normalise(observation(ys[1]) * x0)
   init <- list(0, alpha)
@@ -337,7 +340,7 @@ proposal <- function(theta) {
 }
 ```  
 
-```{r}
+```{r, eval=run_mcmc}
 init_theta <- c(a, b)
 names(init_theta) <- c("alpha", "beta")
 
@@ -349,6 +352,14 @@ iters_metropolis <- metropolis(
   chains = 4,
   parallel = T
 )
+```
+
+```{r write-iters-cpp, eval=run_mcmc}
+readr::write_rds(iters_metropolis, path = here::here("models/metropolis-hmm.Rds"))
+```
+
+```{r read-iters-cpp, eval=!run_mcmc}
+iters_metropolis <- readr::read_rds(here::here("models/metropolis-hmm.Rds"))
 ```
 
 We draw 10,000 iterations from the Metropolis algorithm, the parameter diagnostics are plotted below.
