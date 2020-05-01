@@ -107,6 +107,13 @@
       "Repository": "CRAN",
       "Hash": "c6faf038ba4346b1de19ad7c99b8f94a"
     },
+    "RcppTOML": {
+      "Package": "RcppTOML",
+      "Version": "0.1.6",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "950fc9c586c81f7caa63646c745cdd62"
+    },
     "SnowballC": {
       "Package": "SnowballC",
       "Version": "0.7.0",
@@ -274,6 +281,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "98ca919385a634e5d558e6938755e0bf"
+    },
+    "configr": {
+      "Package": "configr",
+      "Version": "0.3.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "ef2bd7278b0cfa2c14362b9cba28c6fc"
     },
     "crayon": {
       "Package": "crayon",
