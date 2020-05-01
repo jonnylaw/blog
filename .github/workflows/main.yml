@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
         with:
           lfs: true
       - name: Install Stan, Python and R dependencies
