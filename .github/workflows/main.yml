@@ -6,7 +6,8 @@ jobs:
     steps:
       - name: Install Stan, Python and R dependencies
         run: |-
-         add-apt-repository ppa:ubuntugis/ppa ppa:git-core/ppa \
+         add-apt-repository ppa:ubuntugis/ppa \
+         add-apt-repository ppa:git-core/ppa \
           && apt-get update \
           && apt-get install -y --no-install-recommends \
           libpython3-dev \
