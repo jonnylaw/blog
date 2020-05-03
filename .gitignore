@@ -41,5 +41,4 @@ blogdown/*
 renv/library
 # Generated website
 docs
-static
 .httr-oauth

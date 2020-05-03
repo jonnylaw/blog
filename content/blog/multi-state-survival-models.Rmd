@@ -21,14 +21,12 @@ library(dplyr)
 library(readr)
 library(ggplot2)
 library(patchwork)
-library(pdftools)
-library(magick)
 theme_set(theme_minimal())
 ```
 
 Multi-state models are used to model disease progression. The model is a continuous time Markov process. The states and time of transitions are fully observed. There are three states a patient can be in, "healthy", "illness" and "deceased". The possible pairs of transitions between these states include healthy -> illness, illness -> healthy, illness -> death and healthy -> death. The model can be expressed as a directed graph.
 
-```{r, echo=FALSE, engine='tikz', out.width='90%', fig.ext=if (knitr:::is_latex_output()) 'pdf' else 'png'}
+```{r multi-state, echo=FALSE, eval=FALSE, engine='tikz', out.width='90%', fig.ext='png'}
 \begin{tikzpicture}[->, node distance=2.5cm]
   \tikzstyle{obs}=[rectangle,draw,auto,minimum size=10mm]
 
@@ -43,6 +41,8 @@ Multi-state models are used to model disease progression. The model is a continu
 
 \end{tikzpicture}
 ```
+
+![state transition diagram](/blog/multi-state-survival-models_files/multi-state-1.png)
 
 The state "Deceased" is an absorbing state, whereas the other two states are transient. This means we can't transition away from the Deceased state. 
 

@@ -21,7 +21,6 @@ jobs:
           libudunits2-dev \
           libgdal-dev \
           libcurl4-openssl-dev \
-          libmagick++-dev \
           libpoppler-cpp-dev \
           git \
           git-lfs \
@@ -46,7 +45,7 @@ jobs:
             ${{ runner.os }}-renv-
       - name: Install R package dependencies
         run: |-
-          Rscript -e "renv::restore(); tinytex::install_tinytex(); install.packages('blogdown')"
+          Rscript -e "renv::restore(); install.packages('blogdown')"
       - name: Render Site
         run: |-
           Rscript -e "options(blogdown.subdir = 'blog'); blogdown::build_site()"

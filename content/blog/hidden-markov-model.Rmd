@@ -13,14 +13,11 @@ tags: []
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 config <- configr::read.config(here::here("config.toml"))
 run_mcmc <- config$runMcmc == 1
-
 library(ggplot2)
 library(tibble)
 library(dplyr)
 library(tidyr)
 library(jonnylaw)
-library(magick)
-library(pdftools)
 theme_set(theme_minimal())
 ```
 
@@ -32,7 +29,7 @@ Where $y_{1:T} = y_1, \dots, y_T$ represents the sequence of observed values and
 
 The model can be visualised using a state-transition diagram where observed nodes are rectangular and latent nodes are circular. The arrows represent any transitions which can be made and also convey conditional independence assumptions in the Model. The state forms a first order Markov process, which means $p(x_t|x_{t-1},\dots,x_1) = p(x_t|x_{t-1})$ and each observation is conditionally independent of all others given the corresponding value of the latent state at that time, $y_t \perp\!\!\!\perp y_{1:t-1},y_{t+1:T}$
 
-```{r, echo=FALSE, engine='tikz', out.width='90%', fig.ext='png'}
+```{r hmm, echo=FALSE, eval=FALSE, engine='tikz', out.width='90%', fig.ext='png'}
 \begin{tikzpicture}[->, node distance=1.5cm]
   \tikzstyle{obs}=[rectangle,draw,auto,minimum size=10mm]
   \tikzstyle{state}=[circle, draw, auto, minimum size=10mm]
@@ -59,6 +56,8 @@ The model can be visualised using a state-transition diagram where observed node
 
 \end{tikzpicture}
 ```
+
+![state transition diagram for hmm](/blog/hidden-markov-model_files/hmm.png)
 
 ## Example: The occasionally dishonest casino
 
