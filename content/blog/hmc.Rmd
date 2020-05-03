@@ -331,6 +331,6 @@ The ESS/s can be computed for the Metropolis algorithm
 
 ```{r}
 out_met %>% 
-  summarise_at(3:6, rstan::ess_bulk) %>% 
+  summarise_at(2:5, rstan::ess_bulk) %>% 
   mutate_all(~ . / as.numeric(metropolis_time))
 ```
