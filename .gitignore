@@ -42,3 +42,4 @@ renv/library
 # Generated website
 docs
 .httr-oauth
+models
