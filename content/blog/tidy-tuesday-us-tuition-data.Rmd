@@ -132,7 +132,6 @@ tuesdata$tuition_income %>%
 To create a chart of diversity such as that on the [priceonomics](https://priceonomics.com/ranking-the-most-and-least-diverse-colleges-in/) blog I took the top 20 colleges according to Forbes [from wikipedia](https://en.wikipedia.org/wiki/Rankings_of_universities_in_the_United_States#Forbes_college_rankings). I copied the table to an R tribble using [data pasta](https://cran.r-project.org/web/packages/datapasta/vignettes/how-to-datapasta.html).
 
 ```{r}
-
 top_unis <- tibble::tribble(
                               ~name, ~ranking,
                      "Harvard University", 1,

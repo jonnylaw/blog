@@ -38,6 +38,7 @@ Multi-state models are used to model disease progression. The model is a continu
   \path[every node/.style={font=\sffamily\small}]
   (1) edge[bend right] node {} (2)
   (2) edge[bend right] node {} (1)
+  (1) edge[bend right] node {} (3)
   (2) edge node {} (3);
 
 \end{tikzpicture}

@@ -13,6 +13,7 @@ tags: []
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 config <- configr::read.config(here::here("config.toml"))
 run_mcmc <- config$runMcmc == 1
+write_mcmc <- config$writeMcmc == 1
 
 library(tidyr)
 library(dplyr)
@@ -312,7 +313,7 @@ iters <-
   )
 ```
 
-```{r, eval=run_mcmc}
+```{r, eval=write_mcmc}
 write_rds(iters, path = here::here("models/sir.Rds"))
 ```
 

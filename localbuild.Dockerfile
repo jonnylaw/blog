@@ -29,6 +29,3 @@ RUN Rscript -e "Sys.setenv(RENV_PATHS_CACHE = '/usr/local/app/renv/library/R-4.0
 
 # Install Ammonite
 RUN sh -c '(echo "#!/usr/bin/env sh" && curl -L https://github.com/lihaoyi/Ammonite/releases/download/2.0.4/2.12-2.0.4) > /usr/local/bin/amm && chmod +x /usr/local/bin/amm'
-
-# Build site
-RUN Rscript -e "options(blogdown.subdir = 'blog'); blogdown::build_site()"
