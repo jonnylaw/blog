@@ -23,19 +23,13 @@ jobs:
           libcurl4-openssl-dev \
           libpoppler-cpp-dev \
           git \
-          git-lfs \
           && apt-get clean \
           && rm -rf /var/lib/apt/lists/
       - name: Checkout Repository
         uses: actions/checkout@v2
-        with:
-          lfs: true
       - name: Install Ammonite 2.12
         run: |-
           sh -c '(echo "#!/usr/bin/env sh" && curl -L https://github.com/lihaoyi/Ammonite/releases/download/2.0.4/2.12-2.0.4) > /usr/local/bin/amm && chmod +x /usr/local/bin/amm'
-      - name: Run Scala notebooks 
-        run: |-
-          ./notebooks/run_scala.sh
       - uses: actions/cache@v1
         if: startsWith(runner.os, 'Linux')
         with:
@@ -46,6 +40,9 @@ jobs:
       - name: Install R package dependencies
         run: |-
           Rscript -e "renv::restore(); install.packages('blogdown')"
+      - name: Run Scala notebooks 
+        run: |-
+          ./notebooks/run_scala.sh
       - name: Render Site
         run: |-
           Rscript -e "options(blogdown.subdir = 'blog'); blogdown::build_site()"

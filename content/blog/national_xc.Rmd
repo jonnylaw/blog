@@ -11,7 +11,11 @@ tags: []
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
-library(tidyr); library(dplyr); library(readr); library(ggplot2); library(jonnylaw);
+library(tidyr)
+library(dplyr) 
+library(readr)
+library(ggplot2)
+library(jonnylaw)
 library(htmltab)
 library(gridExtra)
 theme_set(theme_minimal())

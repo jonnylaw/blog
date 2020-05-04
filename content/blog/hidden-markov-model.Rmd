@@ -13,6 +13,7 @@ tags: []
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 config <- configr::read.config(here::here("config.toml"))
 run_mcmc <- config$runMcmc == 1
+write_mcmc <- config$writeMcmc == 1
 library(ggplot2)
 library(tibble)
 library(dplyr)
@@ -353,7 +354,7 @@ iters_metropolis <- metropolis(
 )
 ```
 
-```{r write-iters-cpp, eval=run_mcmc}
+```{r write-iters-cpp, eval=write_mcmc}
 readr::write_rds(iters_metropolis, path = here::here("models/metropolis-hmm.Rds"))
 ```
 

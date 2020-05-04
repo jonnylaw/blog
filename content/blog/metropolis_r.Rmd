@@ -13,6 +13,7 @@ tags: []
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 config <- configr::read.config(here::here("config.toml"))
 run_mcmc <- config$runMcmc == 1
+write_mcmc <- config$writeMcmc == 1
 library(tidyr)
 library(dplyr)
 library(readr) 
@@ -138,7 +139,7 @@ Finally, all the components are there to sample from the posterior distribution 
 out = metropolis(theta, log_posterior(xs), proposal, 10000)
 ```
 
-```{r write-iters-serial, eval=run_mcmc}
+```{r write-iters-serial, eval=write_mcmc}
 readr::write_rds(out, path = here::here("models/metropolis-serial-r.Rds"))
 ```
 
@@ -186,7 +187,7 @@ mh_samples <- future_map_dfr(
 )
 ```
 
-```{r write-iters, eval=run_mcmc}
+```{r write-iters, eval=write_mcmc}
 readr::write_rds(mh_samples, path = here::here("models/metropolis-r.Rds"))
 ```
 
@@ -247,7 +248,7 @@ These functions can then be used in the Metropolis algorithm written using R, as
 out_cpp <- metropolis(theta, function(p) logDensity(xs, p), function(p) proposalCpp(p, 0.05), 10000)
 ```
 
-```{r write-iters-cpp, eval=run_mcmc}
+```{r write-iters-cpp, eval=write_mcmc}
 readr::write_rds(out_cpp, path = here::here("models/metropolis-cpp.Rds"))
 ```
 
@@ -342,6 +343,3 @@ NumericMatrix metropolisCpp(Function logDensity,
   return mat;
 }
 ```
-
-
-

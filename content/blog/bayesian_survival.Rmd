@@ -9,6 +9,10 @@ tags: []
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+config <- configr::read.config(here::here("config.toml"))
+run_mcmc <- config$runMcmc == 1
+write_mcmc <- config$writeMcmc == 1
+
 library(jonnylaw)
 library(dplyr)
 library(readr)
@@ -17,6 +21,7 @@ library(rstan)
 library(brms)
 library(tidybayes)
 library(lubridate)
+library(survival)
 theme_set(theme_minimal())
 ```
 
@@ -80,7 +85,6 @@ This can be recognised as a Gamma distribution with shape $\alpha-\sum_{i=1}^n\n
 To test this method, we will use the ovarian cancer data from the `survival` package. The ovarian cancer data contains the followup time, `futime` and censoring, `fustat`.
 
 ```{r, echo=FALSE}
-library(survival)
 data("ovarian")
 
 ovarian %>% 
@@ -146,7 +150,7 @@ In general, parametric survival models can be fitted using sampling based method
 
 To express this model using `brms`, we model the followup time directly while considering censoring. The event is considered right-censored if a death has not occurred, where `fustat = 1` and the formula to specify the followup time is right censored is `futime | cens(fustat)`. This is followed by distributed by `~` and the covariates of interest. To compare it to the analytic result above we consider the model with only an intercept and no covariates. Note that this model is not exactly the same since the prior is on specified on the log of the rate, $\lambda$.
 
-```{r brms}
+```{r brms, eval=run_mcmc}
 fit_exponential <-
   brm(
     futime | cens(fustat) ~ 1,
@@ -155,6 +159,14 @@ fit_exponential <-
     cores = 4,
     prior = prior("normal(0.0, 3.0)", "Intercept")
   )
+```
+
+```{r write-iters, eval=write_mcmc}
+readr::write_rds(fit_exponential, here::here("models/brms_survival.Rds"))
+```
+
+```{r read-iters, eval=!run_mcmc}
+fit_exponential <- readr::read_rds(fit_exponential, here::here("models/brms_survival.Rds"))
 ```
 
 ```{r}

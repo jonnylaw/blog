@@ -13,6 +13,7 @@ tags: []
 knitr::opts_chunk$set(echo = TRUE)
 config <- configr::read.config(here::here("config.toml"))
 run_mcmc <- config$runMcmc == 1
+write_mcmc <- config$writeMcmc == 1
 
 library(tidyr)
 library(dplyr)
@@ -268,7 +269,7 @@ end_time <- Sys.time()
 hmc_time <- end_time - start_time
 ```
 
-```{r write-iters-hmc, eval=run_mcmc}
+```{r write-iters-hmc, eval=write_mcmc}
 readr::write_rds(hmc_time, path = here::here("models/hmc-time.Rds"))
 readr::write_rds(out_hmc, path = here::here("models/hmc.Rds"))
 ```
@@ -318,7 +319,7 @@ end_time <- Sys.time()
 metropolis_time <- end_time - start_time
 ```
 
-```{r write-iters-metropolis, eval=run_mcmc}
+```{r write-iters-metropolis, eval=write_mcmc}
 readr::write_rds(metropolis_time, path = here::here("models/metropolis-time.Rds"))
 ```
 
