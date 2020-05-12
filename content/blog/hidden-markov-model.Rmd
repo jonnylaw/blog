@@ -334,6 +334,7 @@ logit <- function(p) {
 }
 
 proposal <- function(theta) {
+  a <- theta[1]; b <- theta[2]
   transformed <- logit(c(a, b))
   prop <- rnorm(2, mean = transformed, sd = 0.1)
   logistic(prop)
@@ -371,9 +372,10 @@ actual_values <- tibble(
 )
 
 iters_metropolis %>% 
-  group_by(chain) %>% 
+  group_by(chain) %>%
   mutate(iteration = row_number()) %>% 
+  filter(iteration > 5e3) %>%
   pivot_longer(3:4, names_to = "parameter", values_to = "value") %>% 
-  plot_diagnostics_sim(actual_values)
+  plot_diagnostics()
 ```
 

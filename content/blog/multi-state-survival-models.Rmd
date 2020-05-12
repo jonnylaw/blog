@@ -335,7 +335,7 @@ p(X_{i=13,t_{0:3}}|Q) &= Pr(X_{t_1} = 2|X_{t_0} = 1)Pr(X_{t>t_1} = 3)Pr(X_{t_2} 
 &=f_{12}(t_1-t_0)S_{13}(t_1-t_0)f_{21}(t_2-t_1)S_{23}(t_2-t_1) \\
 &=q_{12}\exp(-q_{12}(t_1-t_0))\exp(-(t_1-t_0)q_{13})q_{21}\exp(-q_{21}(t_2-t_1))\exp(-(t_2-t_1)q_{23}) \\
 &= q_{12}q_{21}\exp(-q_{12}(t_1-t_0) -(t_1-t_0)q_{13} -q_{21}(t_2-t_1) -(t_2-t_1)q_{23}) \\
-&= q_{12}q_{21}\exp(-q_{12}q_{13}(t_1-t_0) - q_{21}q_{23}(t_2-t_1))
+&= q_{12}q_{21}\exp(-(q_{12} + q_{13})(t_1-t_0) - (q_{21} + q_{23})(t_2-t_1))
 \end{aligned}$$
 
 The final line shows that the likelihood consists of the hazards of the observed transitions $1 \rightarrow 2$ and $2 \rightarrow 1$, multiplied by the exponential of the sum of the off-diagonal elements of the rate matrix multiplied by the total time those states have been observed.
