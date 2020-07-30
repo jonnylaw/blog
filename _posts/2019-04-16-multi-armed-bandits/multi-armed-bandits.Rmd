@@ -3,14 +3,18 @@ title: "Multi-armed Bandits in Scala"
 author: "Jonny Law"
 date: '2019-04-16'
 slug: multi-armed-bandits
-tags: []
+output: distill::distill_article
 categories: 
-  - scala
+  - Scala
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(tidyr); library(dplyr); library(readr); library(ggplot2); library(jonnylaw);
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(jonnylaw)
 theme_set(theme_minimal())
 ```
 
@@ -149,7 +153,14 @@ val oneBandit = epsilonGreedy(0.5, 10, r(qs), 1000)
 
 The distribution of actions at the end of 1,000 steps with epsilon = 0.5 and number of actions 10 is:
 
-<img src="/post/2019-04-16-multi-armed-bandits_files/actions_bar.png" alt="actions distribution" width=500 />
+```{r action_distribution}
+action_distribution <- read_csv(here::here("notebooks/data/action_distribution.csv"), 
+                                col_names = c("action", "count"))
+
+action_distribution %>% 
+  ggplot(aes(x = action, y = count)) +
+  geom_col()
+```
 
 The mean reward at action 8 was highest at approximately 1.95, the epsilon-greedy algorithm prefers to take action 8.
 
@@ -163,19 +174,7 @@ Vector.fill(2000)(DenseVector(bandit(0.1, 10, r(qs), 1000).reward)).
   map(_ / 2000)
 ```
 
-The average reward for each time step can then be plotted, this can be used to evaluate different choices of epsilon.
-
-```{r}
-action_distribution <- read_csv(here::here("notebooks/data/action_distribution.csv"), 
-                                col_names = c("action", "count"))
-
-action_distribution %>% 
-  ggplot(aes(x = action, y = count)) +
-  geom_col()
-```
-
-
-Different values of epsilon can be compared and the average reward can be calculated
+The average reward for each time step can then be plotted, this can be used to evaluate different choices of epsilon. Different values of epsilon can be compared and the average reward can be calculated
 
 ```scala
 val data = List(0.0, 0.1, 0.5).map ( eps => averageReward(2000, 1000, eps))

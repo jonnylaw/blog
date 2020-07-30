@@ -3,19 +3,16 @@ title: Multi State Models
 author: Jonny Law
 date: '2020-04-19'
 slug: multi-state-survival-models
+output: distill::distill_article
 categories:
   - R
   - Bayesian
-tags: []
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,
                       message = FALSE,
                       warning = FALSE)
-config <- configr::read.config(here::here("config.toml"))
-run_mcmc <- config$runMcmc == 1
-write_mcmc <- config$writeMcmc == 1
 
 library(tidyr) 
 library(dplyr)
@@ -27,7 +24,7 @@ theme_set(theme_minimal())
 
 Multi-state models are used to model disease progression. The model is a continuous time Markov process. The states and time of transitions are fully observed. There are three states a patient can be in, "healthy", "illness" and "deceased". The possible pairs of transitions between these states include healthy -> illness, illness -> healthy, illness -> death and healthy -> death. The model can be expressed as a directed graph.
 
-```{r multi-state, echo=FALSE, eval=FALSE, engine='tikz', out.width='90%', fig.ext='png'}
+```{r multi-state, echo=FALSE, engine='tikz', out.width='90%', fig.ext='png'}
 \begin{tikzpicture}[->, node distance=2.5cm]
   \tikzstyle{obs}=[rectangle,draw,auto,minimum size=10mm]
 
@@ -43,8 +40,6 @@ Multi-state models are used to model disease progression. The model is a continu
 
 \end{tikzpicture}
 ```
-
-![state transition diagram](/blog/multi-state-survival-models_files/multi-state-1.png)
 
 The state "Deceased" is an absorbing state, whereas the other two states are transient. This means we can't transition away from the Deceased state. 
 
@@ -435,7 +430,7 @@ log_posterior <- function(lambda) {
 
 We are ready to sample from the posterior distribution of the rate parameters using the Metropolis algorithm. We run four chains in parallel using [furrr](https://davisvaughan.github.io/furrr/) as explained in [my previous post](/blog/efficient_mcmc_using_rcpp/) on efficient MCMC in R.
 
-```{r, echo=TRUE, eval=run_mcmc}
+```{r metropolic-msm, echo=TRUE, cache=TRUE}
 iters <- jonnylaw::metropolis(
   lambda,
   log_posterior,
@@ -444,14 +439,6 @@ iters <- jonnylaw::metropolis(
   chains = 4, 
   parallel = TRUE
 )
-```
-
-```{r write-iters, eval=write_mcmc}
-write_rds(iters, path = here::here("models/ctmc.Rds"))
-```
-
-```{r read-iters, eval=!run_mcmc}
-iters <- read_rds(here::here("models/ctmc.Rds"))
 ```
 
 The posterior diagnostics are plotted below.

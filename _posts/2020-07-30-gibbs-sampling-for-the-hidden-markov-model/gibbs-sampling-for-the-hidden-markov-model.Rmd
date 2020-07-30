@@ -1,0 +1,136 @@
+---
+title: "Gibbs Sampling for the Hidden Markov Model"
+description: |
+  A short description of the post.
+author:
+  - name: Jonny Law
+    url: {}
+date: 07-30-2020
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(jonnylaw)
+```
+
+Calculate $p(z_t = i | z_{t+1} = j, y_{1:T})$
+
+```{r}
+hmm_backward_sample_step <- function(
+    sampled_state,
+    alpha,
+    alpha1,
+    y1,
+    transition_matrix,
+    observation) {
+    observation_dist = observation(y1, sampledState)
+    transition = transitionMatrix[, sampledState]
+
+    probs = ((observation_dist %*% transition) * alpha) / alpha1
+
+    sample(x = seq_len(length(probs)), size = 1, prob = probs)
+  }
+```
+
+Perform backward sampling for the HMM
+
+```{r}
+hmm_backward_sample <- function(ys,
+                                alphas, # matrix
+                                observation,
+                                transition_matrix) {
+  d <- ncol(alphas)
+  n <- length(ys)
+  sampleN = sample(seq_len(d), size = 1, prob = alphas[n,])
+  
+  purrr::accumulate(
+    rev(ys),
+    hmm_backward_step,
+    observation = observation, 
+    transition_matrix = transition_matrix, 
+    .init = sampleN
+  )
+    
+    (alphas.init).lazyZip(alphas.tail).lazyZip(ys.tail).toVector.
+    scanRight(sampleN) {
+      case ((alpha0, alpha1, y1), sample) =>
+        backwardSampleStep(transitionMatrix, observation, alpha0, alpha1, y1, sample)
+    }
+  }
+```
+
+Sample a value of the latent-state of an HMM
+
+```{r}
+hmm_forward_backward_sample <- function(ys,
+                                        x0,
+                                        observation,
+                                        transitionMatrix) = {
+  alphas = hmm_forward(ys, x0, observation, transitionMatrix)
+  hmm_backward_sample(ys, alphas, observation, transitionMatrix)
+}
+```
+
+Sample a value of the transition matrix from a product of Dirichlet distributions
+
+```{r}
+sample_theta <- function(xs: Vector[Int], alpha: DenseVector[Double]): DenseMatrix[Double] = {
+    val nStates = 2
+    val stateTransitions = Ctmc.stateTransitions(nStates, xs)
+    val out: Array[Array[Double]] = breeze.util.JavaArrayOps.dmDToArray2(stateTransitions).
+      map(x => Dirichlet(alpha + DenseVector(x)).draw.data)
+    breeze.util.JavaArrayOps.array2DToDm(out)
+  }
+
+  case class GibbsState(transitionMatrix: DenseMatrix[Double], xs: Vector[Int])
+```
+  /**
+   * Perform a single Gibbs step for a discrete time HMM
+   *
+   * @param alpha
+   * @param ys
+   * @param x0
+   * @param observation
+   * @param state
+   * @return
+   */
+    
+```{r}
+  def gibbsStep[A](
+    alpha: DenseVector[Double],
+    ys: Vector[A],
+    x0: DenseVector[Double],
+    observation: A => DenseVector[Double])
+               (state: GibbsState) = {
+    val transitionMatrix = sampleTheta(state.xs, alpha)
+    val newState = forwardBackwardSample(ys, x0, observation, transitionMatrix)
+    GibbsState(transitionMatrix, newState)
+  }
+```
+
+  /**
+   * Perform Gibbs Sampling for a discrete time HMM with known initial distribution
+   * and observation matrix
+   *
+   * @param alpha prior for the dirichlet distribution
+   * @param ys observations of the HMM
+   * @param x0 initial distribution of the states
+   * @param observation observation distribution
+   */
+    
+```{r}
+  def gibbsHmm[A](
+    alpha: DenseVector[Double],
+    ys: Vector[A],
+    x0: DenseVector[Double],
+    observation: A => DenseVector[Double]): Iterator[GibbsState] = {
+    val nStates = x0.size
+    val transitionMatrix = new DenseMatrix(nStates, nStates, Dirichlet(alpha).sample(nStates).toArray.flatMap(_.data))
+    val xs = forwardBackwardSample(ys, x0, observation, transitionMatrix)
+    Iterator.iterate(GibbsState(transitionMatrix, xs))(gibbsStep(alpha, ys, x0, observation))
+  }
+```
+

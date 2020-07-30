@@ -6,7 +6,6 @@ slug: national-cross-country
 output: distill::distill_article
 categories:
   - R
-  - Running
 ---
 
 ```{r setup, include=FALSE}

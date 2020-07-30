@@ -6,6 +6,7 @@ slug: tidy-tuesday
 output: distill::distill_article
 categories:
   - R
+  - tidy-tuesday
 ---
 
 ```{r setup, include=FALSE}

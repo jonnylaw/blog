@@ -11,9 +11,6 @@ categories:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-config <- configr::read.config(here::here("_site.yml"))
-run_mcmc <- config$runMcmc == 1
-write_mcmc <- config$writeMcmc == 1
 
 library(tidyr)
 library(dplyr)
@@ -28,7 +25,7 @@ Linear regression models are commonly used to explain relationships between pred
 
 $$y_i = \alpha + x_i^T\beta + \varepsilon_i, \quad \varepsilon_i \sim \mathcal{N}(0, \sigma^2).$$
 
-The parameters of the model include the intercept (or overall mean) $\alpha \in \mathbb{R}$, the coefficients of the predictor variables, $\beta \in \mathbb{R}^m$ and the standard deviation of the un-modelled noise, $\sigma \in \mathbb{R}$. 
+The parameters of the model include the intercept (or overall mean) $\alpha \in \mathbb{R}$, the coefficients of the predictor variables, $\beta \in \mathbb{R}^m$ is a $m \times 1$ column vector and the standard deviation of the un-modelled noise, $\sigma \in \mathbb{R}$. 
 
 ## The Model as a Data Generating Process
 
@@ -115,13 +112,13 @@ This allows us to construct a Gibbs Sampler for the linear regression model by a
 sample_tau <- function(ys, alpha, beta, alpha0, beta0) {
   rgamma(1,
     shape = alpha0 + nrow(ys) / 2,
-    rate = beta0 + 0.5 * sum((ys$y - (alpha + t(ys$x) %*% beta))^2)
+    rate = beta0 + 0.5 * sum((ys$y - (alpha + as.matrix(ys$x) %*% beta))^2)
   )
 }
 
 sample_alpha <- function(ys, beta, tau, mu0, tau0) {
   prec <- tau0 + tau * nrow(ys)
-  mean <- (tau0 + tau * sum(ys$y - t(ys$x) %*% beta)) / prec
+  mean <- (tau0 + tau * sum(ys$y - as.matrix(ys$x) %*% beta)) / prec
   rnorm(1, mean = mean, sd = 1 / sqrt(prec))
 }
 
@@ -173,7 +170,7 @@ ys <- tibble(y = weights,
              x = heights)
 ```
 
-```{r gibbs-sample-lm, eval=run_mcmc}
+```{r gibbs-sample-lm, cache=TRUE}
 plan(multiprocess)
 iters <- future_map_dfr(
   .x = 1:2,
@@ -192,14 +189,6 @@ iters <- future_map_dfr(
     ),
   .id = "chain"
 )
-```
-
-```{r, eval=write_mcmc}
-write_rds(iters, path = here::here("models/gibbs-lm.Rds"))
-```
-
-```{r, eval=!run_mcmc}
-iters <- read_rds(here::here("models/gibbs-lm.Rds"))
 ```
 
 ```{r, echo=FALSE}
@@ -255,7 +244,7 @@ gibbs_sample_centered <- function(ys,
 }
 ```
 
-```{r}
+```{r centered-iters, cache=TRUE}
 iters_centered <- future_map_dfr(
   .x = 1:2,
   .f = function(x) gibbs_sample_centered(

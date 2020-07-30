@@ -21,6 +21,27 @@
     "preview_height": 303
   },
   {
+    "path": "posts/2020-04-19-multi-state-survival-models/",
+    "title": "Multi State Models",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2020-04-19",
+    "categories": [
+      "R",
+      "Bayesian"
+    ],
+    "preview": "posts/2020-04-19-multi-state-survival-models/distill-preview.png",
+    "last_modified": "2020-07-30T11:57:36+01:00",
+    "input_file": {},
+    "preview_width": 769,
+    "preview_height": 216
+  },
+  {
     "path": "posts/2020-03-17-tidy-tuesday-the-office/",
     "title": "Tidy Tuesday: The Office",
     "description": {},
@@ -95,10 +116,11 @@
     ],
     "date": "2020-03-03",
     "categories": [
-      "R"
+      "R",
+      "tidy-tuesday"
     ],
     "preview": "posts/2020-03-03-tidy_tuesday_nhl_data/distill-preview.png",
-    "last_modified": "2020-07-30T08:18:13+01:00",
+    "last_modified": "2020-07-30T13:48:11+01:00",
     "input_file": {},
     "preview_width": 1248,
     "preview_height": 768
@@ -156,8 +178,28 @@
       "R",
       "Bayesian"
     ],
-    "preview": "posts/2019-06-14-bayesian-linear-regression/bayesian-linear-regression_files/figure-html5/unnamed-chunk-1-1.png",
-    "last_modified": "2020-07-30T08:18:13+01:00",
+    "preview": "posts/2019-06-14-bayesian-linear-regression/distill-preview.png",
+    "last_modified": "2020-07-30T11:46:56+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2019-04-16-multi-armed-bandits/",
+    "title": "Multi-armed Bandits in Scala",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2019-04-16",
+    "categories": [
+      "Scala"
+    ],
+    "preview": "posts/2019-04-16-multi-armed-bandits/distill-preview.png",
+    "last_modified": "2020-07-30T13:45:12+01:00",
     "input_file": {},
     "preview_width": 1248,
     "preview_height": 768
@@ -177,7 +219,7 @@
       "Scala"
     ],
     "preview": "posts/2019-04-15-scala-and-jupyter-notebook-with-almond/distill-preview.png",
-    "last_modified": "2020-07-30T08:18:13+01:00",
+    "last_modified": "2020-07-30T11:46:44+01:00",
     "input_file": {},
     "preview_width": 1248,
     "preview_height": 768
@@ -198,7 +240,7 @@
       "Bayesian"
     ],
     "preview": "posts/2019-02-25-rejection_sampling/distill-preview.png",
-    "last_modified": "2020-07-30T08:18:13+01:00",
+    "last_modified": "2020-07-30T11:46:40+01:00",
     "input_file": {},
     "preview_width": 1248,
     "preview_height": 768
@@ -218,7 +260,27 @@
       "R"
     ],
     "preview": "posts/2019-02-25-sampling/distill-preview.png",
-    "last_modified": "2020-07-30T08:18:13+01:00",
+    "last_modified": "2020-07-30T11:46:41+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2019-02-22-national_xc/",
+    "title": "A Statistical Model for Finishing Positions at the National Cross Country",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2019-02-22",
+    "categories": [
+      "R"
+    ],
+    "preview": "posts/2019-02-22-national_xc/distill-preview.png",
+    "last_modified": "2020-07-30T13:47:03+01:00",
     "input_file": {},
     "preview_width": 1248,
     "preview_height": 768
@@ -239,7 +301,7 @@
       "Bayesian"
     ],
     "preview": "posts/2019-02-11-metropolis_r/distill-preview.png",
-    "last_modified": "2020-07-30T08:18:13+01:00",
+    "last_modified": "2020-07-30T11:56:45+01:00",
     "input_file": {},
     "preview_width": 1248,
     "preview_height": 768
@@ -259,7 +321,7 @@
       "R"
     ],
     "preview": {},
-    "last_modified": "2020-07-30T08:18:13+01:00",
+    "last_modified": "2020-07-30T11:43:29+01:00",
     "input_file": {}
   },
   {
@@ -278,7 +340,7 @@
       "Bayesian"
     ],
     "preview": "posts/2017-04-23-BreezeMcmc/distill-preview.png",
-    "last_modified": "2020-07-30T08:18:13+01:00",
+    "last_modified": "2020-07-30T11:43:25+01:00",
     "input_file": {},
     "preview_width": 1248,
     "preview_height": 768
@@ -298,8 +360,67 @@
       "Scala"
     ],
     "preview": {},
-    "last_modified": "2020-07-30T08:18:13+01:00",
+    "last_modified": "2020-07-30T11:43:22+01:00",
     "input_file": {}
+  },
+  {
+    "path": "posts/2017-01-04-FailureInFunctionalProgramming/",
+    "title": "Using Monads for Handling Failures and Exceptions",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2017-01-04",
+    "categories": [
+      "Scala"
+    ],
+    "preview": {},
+    "last_modified": "2020-07-30T11:43:21+01:00",
+    "input_file": {}
+  },
+  {
+    "path": "posts/2016-12-13-SeasonalDlm/",
+    "title": "Seasonal DLM",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2016-12-13",
+    "categories": [
+      "Bayesian",
+      "Scala"
+    ],
+    "preview": "posts/2016-12-13-SeasonalDlm/distill-preview.png",
+    "last_modified": "2020-07-30T11:43:20+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2016-12-12-KalmanFilter/",
+    "title": "The Kalman Filter in Scala",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2016-12-12",
+    "categories": [
+      "Scala"
+    ],
+    "preview": "posts/2016-12-12-KalmanFilter/distill-preview.png",
+    "last_modified": "2020-07-30T11:43:18+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
   },
   {
     "path": "posts/2016-12-01-PracticalAkkaStreams/",
@@ -316,7 +437,7 @@
       "Scala"
     ],
     "preview": {},
-    "last_modified": "2020-07-30T08:18:13+01:00",
+    "last_modified": "2020-07-30T11:43:16+01:00",
     "input_file": {}
   }
 ]
