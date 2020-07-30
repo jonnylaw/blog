@@ -1,4 +1,11 @@
-# scala stuff
-target/*
 project/*
-.ensime
+.metals/
+.scalafmt.conf
+target/*
+.DS_Store
+*.csv
+.bloop
+.Rproj.user
+*.jar
+.bloop/*
+settings.json
