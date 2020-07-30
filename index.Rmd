@@ -1,0 +1,34 @@
+---
+title: Blog
+site: distill::distill_website
+listing: 
+  posts:
+    - 2020-07-29-academic-ancestory                     
+    - 2020-05-01-hidden-markov-model                   
+    - 2020-04-19-multi-state-survival-models            
+    - 2020-04-08-tidy-tuesday-tour-de-france           
+    - 2020-03-27-bayesian-inference-for-an-sir-model    
+    - 2020-03-17-tidy-tuesday-the-office               
+    - 2020-03-10-tidy-tuesday-us-tuition-data           
+    - 2020-03-09-github-actions-for-r-projects         
+    - 2020-03-04-harrier_league_data                    
+    - 2020-03-03-tidy_tuesday_nhl_data                 
+    - 2019-11-04-parsing-strava                         
+    - 2019-08-09-bayesian_survival                     
+    - 2019-08-05-ad_r                                   
+    - 2019-07-31-hmc                                   
+    - 2019-06-14-bayesian-linear-regression             
+    - 2019-04-16-multi-armed-bandits                   
+    - 2019-04-15-scala-and-jupyter-notebook-with-almond 
+    - 2019-02-25-sampling                              
+    - 2019-02-25-rejection_sampling                     
+    - 2019-02-22-national_xc                           
+    - 2019-02-11-metropolis_r                           
+    - 2017-10-26-harrier-league-cross-country          
+    - 2017-04-23-BreezeMcmc                             
+    - 2017-02-21-AkkaClient                            
+    - 2017-01-04-FailureInFunctionalProgramming         
+    - 2016-12-13-SeasonalDlm                           
+    - 2016-12-12-KalmanFilter                           
+    - 2016-12-01-PracticalAkkaStreams  
+---

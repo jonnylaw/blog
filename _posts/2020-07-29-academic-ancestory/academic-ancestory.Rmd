@@ -1,0 +1,59 @@
+---
+title: "Academic Ancestory"
+description: |
+  Using R to scrape academic ancestory
+author:
+  - name: Jonny Law
+date: 2020-07-29
+draft: true
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(rvest)
+```
+
+```{r}
+get_advisor <- function(person_id) {
+  url <- paste0("https://www.mathgenealogy.org/id.php?id=", person_id)
+  page <- xml2::read_html(url)
+  person_name <- page %>% 
+    rvest::html_nodes(xpath = "//*[@id=\"paddingWrapper\"]/h2") %>% 
+    stringr::str_split(pattern = "<|>", simplify = TRUE) %>% 
+    .[,3] %>% stringr::str_trim()
+  
+  advisor_link <- page %>% 
+    rvest::html_nodes(xpath = "//*[@id=\"paddingWrapper\"]/p[2]/a")
+  
+  advisor_id <- advisor_link %>% 
+    rvest::html_attr(name = "href") %>% 
+    stringr::str_extract("[0-9]+")
+  
+  advisor_name <- advisor_link %>% 
+    stringr::str_split(pattern = "<|>", simplify = TRUE) %>% 
+    .[,3] %>% 
+    stringr::str_trim()
+  
+  tibble(person_name = person_name,
+         person_id = as.numeric(person_id),
+         advisor_name = advisor_name,
+         advisor_id = as.numeric(advisor_id))
+}
+```
+
+```{r}
+iterate_df <- function(init, n, f) {
+  res <- list()
+  res[[1]] <- init
+  for (i in seq_len(n-1) + 1) {
+    res[[i]] <- f(res[[i-1]])
+  }
+  purrr::reduce(.x = res, .f = dplyr::bind_rows)
+}
+```
+my_ancestors <- iterate_df(get_advisor(256142), 10, function(row) get_advisor(row$advisor_id))
+```
+

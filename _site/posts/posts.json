@@ -1,0 +1,322 @@
+[
+  {
+    "path": "posts/2020-05-01-hidden-markov-model/",
+    "title": "Functional Programming and Hidden Markov Models",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2020-05-01",
+    "categories": [
+      "Bayesian",
+      "R"
+    ],
+    "preview": "posts/2020-05-01-hidden-markov-model/distill-preview.png",
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {},
+    "preview_width": 831,
+    "preview_height": 303
+  },
+  {
+    "path": "posts/2020-03-17-tidy-tuesday-the-office/",
+    "title": "Tidy Tuesday: The Office",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2020-03-17",
+    "categories": [
+      "tidy-tuesday",
+      "R",
+      "Bayesian"
+    ],
+    "preview": "posts/2020-03-17-tidy-tuesday-the-office/distill-preview.png",
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2020-03-10-tidy-tuesday-us-tuition-data/",
+    "title": "Tidy Tuesday: US Tuition Data",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2020-03-10",
+    "categories": [
+      "tidy-tuesday",
+      "R"
+    ],
+    "preview": "posts/2020-03-10-tidy-tuesday-us-tuition-data/distill-preview.png",
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2020-03-04-harrier_league_data/",
+    "title": "Releasing Harrier League Data",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2020-03-04",
+    "categories": [
+      "R"
+    ],
+    "preview": "posts/2020-03-04-harrier_league_data/distill-preview.png",
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2020-03-03-tidy_tuesday_nhl_data/",
+    "title": "Tidy Tuesday: NHL Goalscorers",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2020-03-03",
+    "categories": [
+      "R"
+    ],
+    "preview": "posts/2020-03-03-tidy_tuesday_nhl_data/distill-preview.png",
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2019-11-04-parsing-strava/",
+    "title": "Analysing .fit files in R",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2019-11-04",
+    "categories": [
+      "R"
+    ],
+    "preview": "posts/2019-11-04-parsing-strava/distill-preview.png",
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2019-08-05-ad_r/",
+    "title": "Forward Mode AD in R",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2019-08-05",
+    "categories": [
+      "R"
+    ],
+    "preview": {},
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {}
+  },
+  {
+    "path": "posts/2019-06-14-bayesian-linear-regression/",
+    "title": "Bayesian Linear Regression with Gibbs Sampling in R",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2019-06-14",
+    "categories": [
+      "R",
+      "Bayesian"
+    ],
+    "preview": "posts/2019-06-14-bayesian-linear-regression/bayesian-linear-regression_files/figure-html5/unnamed-chunk-1-1.png",
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2019-04-15-scala-and-jupyter-notebook-with-almond/",
+    "title": "Scala and Jupyter Notebook with Almond",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2019-04-15",
+    "categories": [
+      "Scala"
+    ],
+    "preview": "posts/2019-04-15-scala-and-jupyter-notebook-with-almond/distill-preview.png",
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2019-02-25-rejection_sampling/",
+    "title": "Bayesian Inference using rejection sampling",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2019-02-25",
+    "categories": [
+      "R",
+      "Bayesian"
+    ],
+    "preview": "posts/2019-02-25-rejection_sampling/distill-preview.png",
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2019-02-25-sampling/",
+    "title": "Sampling from a distribution with a known CDF",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2019-02-25",
+    "categories": [
+      "R"
+    ],
+    "preview": "posts/2019-02-25-sampling/distill-preview.png",
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2019-02-11-metropolis_r/",
+    "title": "Efficient Markov chain Monte Carlo in R with Rcpp",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2019-02-11",
+    "categories": [
+      "R",
+      "Bayesian"
+    ],
+    "preview": "posts/2019-02-11-metropolis_r/distill-preview.png",
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2017-10-26-harrier-league-cross-country/",
+    "title": "Harrier League Cross Country",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2017-10-26",
+    "categories": [
+      "R"
+    ],
+    "preview": {},
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {}
+  },
+  {
+    "path": "posts/2017-04-23-BreezeMcmc/",
+    "title": "MCMC with Scala Breeze",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2017-04-23",
+    "categories": [
+      "Scala",
+      "Bayesian"
+    ],
+    "preview": "posts/2017-04-23-BreezeMcmc/distill-preview.png",
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {},
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
+    "path": "posts/2017-02-21-AkkaClient/",
+    "title": "An Akka HTTP Client with JSON Parsing",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2017-02-21",
+    "categories": [
+      "Scala"
+    ],
+    "preview": {},
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {}
+  },
+  {
+    "path": "posts/2016-12-01-PracticalAkkaStreams/",
+    "title": "Practical Introduction to Akka Streaming",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2016-12-01",
+    "categories": [
+      "Scala"
+    ],
+    "preview": {},
+    "last_modified": "2020-07-30T08:18:13+01:00",
+    "input_file": {}
+  }
+]

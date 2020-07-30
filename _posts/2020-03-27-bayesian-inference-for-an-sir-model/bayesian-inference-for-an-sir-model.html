@@ -1,0 +1,148 @@
+---
+title: 'Bayesian Inference for an SIR Model'
+author: Jonny Law
+date: '2020-03-27'
+slug: bayesian-inference-for-an-sir-model
+categories:
+  - R
+  - Bayesian
+tags: []
+---
+
+
+
+<p><a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins University</a> have put together a repository containing confirmed cases of COVID19, deaths and recovered patients. Below we plot the confirmed cases, confirmed recovered and deaths.</p>
+<p><img src="/blog/bayesian-inference-for-an-sir-model_files/figure-html/unnamed-chunk-1-1.png" width="768" /></p>
+<div id="sir-model" class="section level2">
+<h2>SIR Model</h2>
+<p>The system of ordinary differential equations (ODE) for the Susceptible Infected Recovered (SIR) model is given by</p>
+<p><span class="math display">\[\begin{align}
+&amp; \frac{dS}{dt} = - \frac{\beta I S}{N}, \\
+&amp; \frac{dI}{dt} = \frac{\beta I S}{N}- \gamma I, \\
+&amp; \frac{dR}{dt} = \gamma I,\\
+&amp; N = S + I + R.
+\end{align}\]</span></p>
+<p>Where <span class="math inline">\(S\)</span> is the number of susceptible, <span class="math inline">\(I\)</span> the total infected and <span class="math inline">\(R\)</span> the total recovered. <span class="math inline">\(\gamma\)</span> is the recovery rate (<span class="math inline">\(1/\gamma\)</span> is the infectious period), <span class="math inline">\(\beta\)</span> is the infection rate (<span class="math inline">\(1/\beta\)</span> is the time between contacts). These parameters are unobserved.</p>
+<p>We can Use <code>deSolve</code> to solve the ODE system startin with an initial state of 66.4 million people susceptible and one infected. This produces a simulation conditional on the parameters chosen. The parameters can change depending on each countries reaction to the virus. For instance the infection rate can be lowered by quarantine or social distancing, thus reducing the contact rate <span class="math inline">\(\beta\)</span>.</p>
+<pre class="r"><code>parameters &lt;- c(beta = 0.5, gamma = 1/4.5)
+initial_state &lt;- c(S = 66.4e6, I = 1, R = 0) 
+
+sir &lt;- function(t, state, parameters) {
+  with(as.list(c(state, parameters)), {
+    N &lt;- sum(S, I, R)
+    dS = -beta * S * I / N
+    dI = beta * S * I / N - gamma * I
+    dR = gamma * I
+    
+    list(c(dS, dI, dR))
+  })  
+}
+
+times &lt;- seq_len(100)
+out &lt;- ode(y = initial_state, times = times, func = sir, parms = parameters)</code></pre>
+<p><img src="/blog/bayesian-inference-for-an-sir-model_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Consider the model in <a href="https://www.dropbox.com/s/oxmu2rwsnhi9j9c/Draft-COVID-19-Model%20%2813%29.pdf">this pre-print from Lourenco et al 2020</a>, which has since been criticised in <a href="https://www.bmj.com/content/bmj/368/bmj.m1216.full.pdf">this response</a>. We observe the cumulative deaths</p>
+<p><span class="math display">\[\Lambda_t = \rho\eta R_{t-\psi},\]</span></p>
+<p>where <span class="math inline">\(\rho\)</span> is the proportion of the population at risk of severe disease, <span class="math inline">\(\eta\)</span> is the probability of dying with the severe disease. <span class="math inline">\(R_{t-\psi}\)</span> is the removed population with a delay between the time of infection represented by <span class="math inline">\(\psi\)</span>. The parameters are given prior distributions in the paper, we can simulate multiple trajectories of the cumulative deaths by first simulating from the prior distribution then solving the SIR system. The prior distributions as given in the paper are</p>
+<p><span class="math display">\[\begin{aligned}
+  \frac{1}{\gamma} &amp;\sim \mathcal{N}(4.5, 1^2), \\
+  \psi &amp;\sim \mathcal{n}(17, 2^2), \\
+  R_0 &amp;\sim \mathcal{n}(2.25, 0.2^2), \\
+  \eta &amp;\sim \mathcal{n}(0.14, 0.007^2), \\
+  \rho &amp;\sim \text{Gamma}(5, 5/0.01).
+\end{aligned}\]</span></p>
+<p>There is also a parameter for the time of introduction relative to the time of the first reported case, <span class="math inline">\(\tau\)</span>. It has a strange prior distribution, being uniform from <span class="math inline">\(-\infty\)</span> to <span class="math inline">\(\infty\)</span>. Obviously this parameter can not be positive, since a confirmed case indicates that the time of introduction is in the past.</p>
+<p><img src="/blog/bayesian-inference-for-an-sir-model_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>We can simulate more times from the prior and calculate the empirical intervals instead of plotting raw trajectories. The initial state is <span class="math inline">\(S = 66.44 \times 10^6\)</span>, <span class="math inline">\(I = 1\)</span> and <span class="math inline">\(R = 0\)</span>. The initial time is taken to be one week before the first confirmed case in the UK.</p>
+<p><img src="/blog/bayesian-inference-for-an-sir-model_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="inference-method" class="section level2">
+<h2>Inference method</h2>
+<p>The inference method is explained clearly in <a href="https://elifesciences.org/articles/29820">Lourenço et al (2017)</a>, albeit with a different model. The Metropolis algorithm with a symmetric random walk proposal distribution is used, the likelihood is the product of independent Poisson distributions</p>
+<p><span class="math display">\[\mathcal{L}(y_{1:T}|\Lambda_{1:T}, \theta^\star) = \prod_{t=1}^T\left(\textrm{Poisson}(y_t;\Lambda_t)\right)\]</span></p>
+<p>The steps to perform inference for the static parameters are summarised below</p>
+<ol style="list-style-type: decimal">
+<li>Propose new (log) parameters from a symmetric Normal distribution <span class="math inline">\(\log(\theta^\star) \sim \mathcal{N}(\log\theta^\star\mid\log\theta, \sigma I_d)\)</span></li>
+<li>Solve the ODE using the <code>deSolve</code> package using the proposed parameters</li>
+<li>Calculate the un-normalised log-posterior <span class="math inline">\(\log p(\Lambda_{1:T}, \theta^\star\mid y_{1:T}) = \log p(\theta) +\sum_{t=1}^T\log\left(\textrm{Poisson}(y_t\mid\Lambda_t)\right)\)</span></li>
+<li>Accept the new parameters with probability <span class="math inline">\(\alpha\)</span> where</li>
+</ol>
+<p><span class="math display">\[\alpha = \min\left(1, \frac{p(\Lambda_{1:T}, \theta^\star\mid y_{1:T})}{p(\Lambda_{1:T}, \theta\mid y_{1:T})}\right).\]</span></p>
+<p>First we specify the likelihood in R.</p>
+<pre class="r"><code>log_likelihood_sir &lt;- function(parameters, ys, initial_state) {
+  initial_state &lt;- c(S = 60e6, I = 1, R = 0) # 
+  
+  # Transition function
+  sir &lt;- function(t, state, parameters) {
+    beta &lt;- parameters[1] * parameters[2]
+    gamma &lt;- parameters[2]
+    
+    with(as.list(state), {
+      N &lt;- sum(S, I, R)
+      dS = -beta * S * I / N
+      dI = beta * S * I / N - gamma * I
+      dR = gamma * I
+      
+      list(c(dS, dI, dR))
+    })  
+  }
+  
+  sir_sim &lt;-
+    deSolve::ode(
+      y = initial_state,
+      times = seq_along(ys),
+      func = sir,
+      parms = parameters
+    )
+  
+  cumulative_deaths &lt;- function(t, R, parameters) {
+    R[max(1, t - parameters[5])] * parameters[3] * parameters[4]
+  }
+  
+  lambdas &lt;- purrr::map_dbl(sir_sim[, 1], ~ cumulative_deaths(t = .x, sir_sim[, 4], parameters))
+  
+  ll &lt;- sum(dpois(x = ys, lambda = lambdas, log = TRUE))
+  
+  if_else(is.nan(ll) || is.na(ll), -Inf, ll)
+}</code></pre>
+<p>Then we specify the prior distributions.</p>
+<pre class="r"><code>log_prior &lt;- function(parameters) {
+  r0 = parameters[1]; gamma = parameters[2]; rho = parameters[3]
+  eta = parameters[4]; psi = parameters[5]
+  
+  dnorm(1/gamma, mean = 4.5, sd = 1, log = TRUE) +
+    dnorm(psi, mean = 17, sd = 2, log = TRUE) +
+    dnorm(r0, mean = 2.25, sd = 0.2, log = TRUE) +
+    dnorm(eta, mean = 0.14, sd = 0.007, log = TRUE) +
+    dgamma(rho, shape = 5, rate = 5/0.01, log = TRUE)
+}
+
+proposal &lt;- function(p) {
+  p * exp(rnorm(5, sd = c(0.02, 0.02, 0.02, 0.02, 0.05)))
+}
+
+initial_parameters &lt;- c(r0 = 2.25, gamma = 1/4.5, rho = 0.01, eta = 0.14, psi = 17)
+ys &lt;- uk %&gt;% pull(deaths)</code></pre>
+<p>We initialise the parameters at the mean of the prior distributions and simulate 1 million iterations from the Metropolis algorithm. The first half are discarded and every 100th iteration is retained in an attempt to reduce auto-correlation in the chain.</p>
+<pre class="r"><code>iters &lt;-
+  jonnylaw::metropolis(
+    theta = initial_parameters,
+    function(p) log_likelihood_sir(ys = ys, parameters = p) + log_prior(p),
+    proposal = proposal,
+    1e6, 
+    chains = 2, 
+    parallel = TRUE
+  )</code></pre>
+<pre class="r"><code>write_rds(iters, path = here::here(&quot;models/sir.Rds&quot;))</code></pre>
+<pre class="r"><code>iters &lt;- read_rds(here::here(&quot;models/sir.Rds&quot;))</code></pre>
+<p>I have cached the results of the chunk running the Metropolis algorithm. The results can be loaded using <code>lazyLoad</code> - this is useful for long-running Rmarkdown chunks.</p>
+<pre class="r"><code>lazyLoad(here::here(&quot;content/blog/bayesian-inference-for-an-sir-model_cache/html/metropolis-samples_4388ff8bda2e17c9d25302cfbbb94be8&quot;))</code></pre>
+<p><img src="/blog/bayesian-inference-for-an-sir-model_files/figure-html/traceplots-1.png" width="672" /></p>
+<p><img src="/blog/bayesian-inference-for-an-sir-model_files/figure-html/densities-1.png" width="672" /></p>
+<p>The next plot shows both the prior and posterior distribution. The prior is the solid black line and the posterior samples are plotted in a histogram. Most of the prior distributions are narrow and hence have resulted in little change. The posterior mean of the infectious period, <span class="math inline">\(1/gamma\)</span> is approximately 4 days, down from the prior mean of 4.5. The posterior mean of <span class="math inline">\(\psi\)</span> is, 13.5, 3.5 days shorter than the prior mean.</p>
+<p><img src="/blog/bayesian-inference-for-an-sir-model_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>Now plot the posterior cumulative death curve.</p>
+<p><img src="/blog/bayesian-inference-for-an-sir-model_files/figure-html/plot-posterior-1.png" width="672" /></p>
+<p>Let’s simulate forward 100 days from the hypothesised start date, 2020-01-26 using the posterior distribution.</p>
+<p><img src="/blog/bayesian-inference-for-an-sir-model_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>

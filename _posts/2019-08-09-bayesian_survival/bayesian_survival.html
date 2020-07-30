@@ -1,0 +1,68 @@
+---
+title: "Bayesian Survival Analysis: Exponential Model"
+author: "Jonny Law"
+date: "2019-08-09"
+slug: bayesian-survival-analysis
+categories: [bayesian, R]
+tags: []
+---
+
+
+
+<div id="poisson-distribution" class="section level1">
+<h1>Poisson Distribution</h1>
+<p>Consider an arbitrary interval where the expected number of events in the interval is denoted as <span class="math inline">\(\lambda\)</span>. The number of events in this interval is Poisson distributed with rate <span class="math inline">\(\lambda\)</span>. To see this, proceed to subdivide the interval into <span class="math inline">\(n\)</span> smaller intervals <span class="math inline">\(t_1, \dots, t_n\)</span> in which the probability of an event occurring in each small interval is <span class="math inline">\(\lambda / n\)</span> and can be represented as an independent Bernoulli trial. The number of events in the entire interval is distributed according to a Binomial distribution with number of trials <span class="math inline">\(n\)</span> and probability of success <span class="math inline">\(\lambda / n\)</span>. If the intervals are infinitesimally small, in the limit as <span class="math inline">\(n \rightarrow \infty\)</span>, then number of trials increases and the Binomial distribution tends to the Poisson distribution:</p>
+<p><span class="math display">\[\begin{align*}
+f(k) &amp;= \lim_{n\rightarrow\infty} {n \choose k}\left(\frac{\lambda}{n}\right)^k\left(1-\left(\frac{\lambda}{n}\right)\right)^{n-k}, \\
+&amp;= \lim_{n\rightarrow\infty} \frac{n!}{(n-k)!k!}\left(\frac{\lambda}{n}\right)^k\left(1-\left(\frac{\lambda}{n}\right)\right)^{n}\left(1-\left(\frac{\lambda}{n}\right)\right)^{-k}, \\
+&amp;= \lim_{n\rightarrow\infty}\frac{n(n-1)\dots(n-k+1)(n-k)!}{(n-k)!n^k}\frac{\lambda^ke^{-\lambda}}{k!} \cdot 1, \\
+&amp;= 1 \cdot \frac{\lambda^ke^{-\lambda}}{k!}.
+\end{align*}\]</span></p>
+<p>This is the probability mass function of the Poisson distribution and corresponds to the probability of observing exactly <span class="math inline">\(k\)</span> events in an interval with expected number of events <span class="math inline">\(\lambda\)</span>. The Poisson probability mass function can be plotted for various values of <span class="math inline">\(\lambda\)</span>:</p>
+</div>
+<div id="exponential-survival-model" class="section level1">
+<h1>Exponential Survival Model</h1>
+<p>The inter-arrival times of a Poisson process are distributed according to an exponential distribution with density <span class="math inline">\(f(t) = \lambda e^{-\lambda t}\)</span>. The CDF of the exponential distribution is <span class="math inline">\(F(t) = \int_0^\infty f(s) ds = 1 - e^{-\lambda t}.\)</span> The cumulative distribution function (CDF) is defined as <span class="math inline">\(\textrm{Pr}(T \leq t) = F(t)\)</span>, where <span class="math inline">\(T\)</span> is a random variable representing the failure time and <span class="math inline">\(t\)</span> is time period, hence the CDF defines the probability of the event occurring before time <span class="math inline">\(t\)</span>. The survival function is the complement of the CDF and is defined as <span class="math inline">\(S(t) = 1 - \textrm{Pr}(T \leq t) = \textrm{Pr}(T &gt; t)\)</span>, the probability of the event happening after the elapsed time <span class="math inline">\(t\)</span> given that the event hasn’t happened before <span class="math inline">\(t\)</span>. The survival function for the exponential distribution is <span class="math inline">\(S(t) = \exp(-\lambda t)\)</span> and the hazard function is <span class="math inline">\(h(t) = \lambda\)</span>. The hazard is defined as the probability of an event happening in a small interval <span class="math inline">\((t_0, t_0 + \delta t]\)</span> given that the event has not yet happened:</p>
+<p><span class="math display">\[\begin{align*}
+h(t) &amp;= \lim_{\delta t \rightarrow 0} \frac{\textrm{Pr}(t &lt; T \leq t + \delta t|T &gt; t)}{\delta t}, \\
+&amp;= \lim_{\delta t \rightarrow 0}\frac{\textrm{Pr}(t &lt; T \leq t + \delta t)}{\delta t S(t)}, \\
+&amp;= \frac{f(t)}{S(t)}, \\
+&amp;= -\frac{\textrm{d}}{\textrm{d}t}\ln(S(t)), \\
+&amp;= -\frac{\textrm{d}}{\textrm{d}t}(-\lambda t), \\
+&amp;= \lambda.
+\end{align*}\]</span></p>
+<p>Observations consist of the triple <span class="math inline">\(\{y, x, \nu\}\)</span> where <span class="math inline">\(y \in \mathbb{R}^n\)</span> is a vector of followup times, <span class="math inline">\(x \in \mathbb{R}^{n\times p}\)</span> is a matrix of covariates where the <span class="math inline">\(i^{th}\)</span> row is associated with the <span class="math inline">\(i^{th}\)</span> entry of the followup time vector <span class="math inline">\(y\)</span>, finally <span class="math inline">\(\nu\)</span> is a <span class="math inline">\(n\)</span> dimensional vector where each entry is 1 if the event is a death and 0 if the event is censored at the followup time.</p>
+<p>To determine the rate parameter of the exponential survival, <span class="math inline">\(\lambda\)</span> and learn about the survival function then we first need to specify the likelihood. The likelihood for a parametric survival model can be written as:</p>
+<p><span class="math display">\[p(y|x, \theta) = \prod_{i=1}^n f(y_i|x, \theta)^{\nu_i}S(y_i|x, \theta)^{1-\nu_i}.\]</span></p>
+<p>This means for a censored individual, when <span class="math inline">\(\nu = 0\)</span>, then only the survival function has a contribution to the likelihood since the event happens sometime after the followup time <span class="math inline">\(y\)</span>. For the exponential model the likelihood can be written as:</p>
+<p><span class="math display">\[p(y|x, \theta) = \prod_{i=1}^n  (\lambda e^{-\lambda y_i})^{\nu_i}(e^{-\lambda y_i})^{1-\nu_i}\]</span></p>
+<p>For the following derivation assume that the model has no covariates and hence <span class="math inline">\(\lambda\)</span> is a parameter of interest. If the prior for the hazard is <span class="math inline">\(\lambda \sim \textrm{Gamma}(\alpha, \beta)\)</span> then the posterior for lambda is:</p>
+<p><span class="math display">\[\begin{align}
+p(\lambda|y, x) &amp;= \frac{\beta^\alpha}{\Gamma(\alpha)}\lambda^{\alpha-1}e^{-\beta \lambda}\prod_{i=1}^n  (\lambda e^{-\lambda y_i})^{\nu_i}(e^{-\lambda y_i})^{1-\nu_i}, \\
+&amp;\propto \lambda^{(\alpha-1+\sum_{i=1}^n\nu_i)}e^{-\lambda(\beta + \sum_{i=1}^ny_i)}.
+\end{align}\]</span></p>
+<p>This can be recognised as a Gamma distribution with shape <span class="math inline">\(\alpha-\sum_{i=1}^n\nu_i\)</span> and scale <span class="math inline">\(\beta + \sum_{i=1}^ny_i\)</span>.</p>
+<p>To test this method, we will use the ovarian cancer data from the <code>survival</code> package. The ovarian cancer data contains the followup time, <code>futime</code> and censoring, <code>fustat</code>.</p>
+<p>The posterior distribution of the hazard for the ovarian cancer data is plotted below, where the parameters of the Gamma prior distribution are <span class="math inline">\(\alpha = 3\)</span>, <span class="math inline">\(\beta = 2\)</span>.</p>
+<p>The posterior predictive distribution can be calculated as:</p>
+<p><span class="math display">\[f(t|y) = \int f(t|\theta)p(\theta|y) d\theta\]</span></p>
+<p>And the predictive survival:</p>
+<p><span class="math display">\[S(t|y) = \int S(t|\theta)p(\theta|y) d\theta\]</span>
+Now the survival curve can be plotted by simulating the rate, <span class="math inline">\(\lambda\)</span> from the posterior distribution and calculating the survival <span class="math inline">\(e^{-\lambda t}\)</span> for discrete values of <span class="math inline">\(t\)</span>.</p>
+<div id="fitting-the-exponential-model-using-brms" class="section level2">
+<h2>Fitting the exponential model using BRMS</h2>
+<p>In general, parametric survival models can be fitted using sampling based methods such as MCMC. The package <a href="https://github.com/paul-buerkner/brms">brms</a> can be used as a straightforward interface to <a href="https://mc-stan.org">stan</a>.</p>
+<p>To express this model using <code>brms</code>, we model the followup time directly while considering censoring. The event is considered right-censored if a death has not occurred, where <code>fustat = 1</code> and the formula to specify the followup time is right censored is <code>futime | cens(fustat)</code>. This is followed by distributed by <code>~</code> and the covariates of interest. To compare it to the analytic result above we consider the model with only an intercept and no covariates. Note that this model is not exactly the same since the prior is on specified on the log of the rate, <span class="math inline">\(\lambda\)</span>.</p>
+<pre class="r"><code>fit_exponential &lt;-
+  brm(
+    futime | cens(fustat) ~ 1,
+    data = ovarian,
+    family = brmsfamily(&quot;exponential&quot;),
+    cores = 4,
+    prior = prior(&quot;normal(0.0, 3.0)&quot;, &quot;Intercept&quot;)
+  )</code></pre>
+<pre class="r"><code>readr::write_rds(fit_exponential, here::here(&quot;models/brms_survival.Rds&quot;))</code></pre>
+<pre class="r"><code>summary(fit_exponential)</code></pre>
+<p>The figure on the left below compares the analytic survival function for the exponential model on the left, to the sampling based survival function using 100 draws from the posterior distribution. In addition, the thick black line on the right-hand plot represents the median survival calculated from 4,000 draws from the posterior distribution</p>
+</div>
+</div>

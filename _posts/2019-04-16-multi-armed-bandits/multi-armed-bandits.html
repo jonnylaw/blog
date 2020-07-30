@@ -1,0 +1,153 @@
+---
+title: "Multi-armed Bandits in Scala"
+author: "Jonny Law"
+date: '2019-04-16'
+slug: multi-armed-bandits
+tags: []
+categories: 
+  - scala
+---
+
+
+
+<div id="setting-up-the-environment" class="section level2">
+<h2>Setting up the Environment</h2>
+<p>This post uses <a href="https://almond.sh/">Almond</a> in order to run Scala code in a Jupyter notebook. See <a href="/2019/04/15/scala-and-jupyter-notebook-with-almond/">my previous post</a> to learn how to setup Jupyter, Ammonite and Almond. That post examined using the Scala libraries EvilPlot (including inline plotting in the Jupyter notebook) and Rainier for Bayesian inference in a simple linear model.</p>
+<p>The imports required for this post are:</p>
+<pre class="scala"><code>import coursier.MavenRepository
+
+interp.repositories() ++= Seq(MavenRepository(
+  &quot;http://dl.bintray.com/cibotech/public&quot;
+))
+
+import $ivy.`com.stripe::rainier-core:0.2.2`
+import $ivy.`com.stripe::rainier-plot:0.2.2`
+import $ivy.`org.scalanlp::breeze:0.13.2`
+
+import breeze.stats.distributions._
+import breeze.linalg._
+import almond.interpreter.api._</code></pre>
+<p>The full working notebook can be found <a href="https://github.com/jonnylaw/blog/tree/master/notebooks/multi_armed_bandit.ipynb">here</a>.</p>
+</div>
+<div id="a-multi-armed-bandit" class="section level1">
+<h1>A Multi-armed Bandit</h1>
+<p>A multi-armed bandit is an analogy taken from the one-armed bandit slot machines where a lever is pulled and the player has an unknown probability of a prize. A multi-armed bandit is a generalisation, whereby the player is faced with multiple one-armed bandits each of which could have different rewards. The problem is to determine the best bandit to play. One way to determine this is to randomly pull levers to get information on the payout for each bandit. Assuming the probability of payout is constant in time, then after a period of exploration the player will be able to know which bandits pay the most.</p>
+</div>
+<div id="epsilon-greedy-method" class="section level1">
+<h1>Epsilon Greedy Method</h1>
+<p>One strategy to maximise the expected long-term reward from a bandit is to choose the bandit with the largest long-term reward a fraction of the time and the rest of the time choose a bandit uniformly at random in order to continually explore the space of actions. At each time step, the reward for a given action can be calculated and the long-term reward can be calculated as the function:</p>
+<p><span class="math display">\[Q_{t+1}(A) = Q_t(A) + \frac{R_t(A) - Q_t(A)}{N_t(A)}\]</span>
+where <span class="math inline">\(A\)</span> is the current action, <span class="math inline">\(Q_t(A)\)</span> is the long-term reward at time <span class="math inline">\(t\)</span> for action <span class="math inline">\(A\)</span>, <span class="math inline">\(R_t(A)\)</span> is the instantaneous reward for action <span class="math inline">\(A\)</span> at time <span class="math inline">\(t\)</span> and <span class="math inline">\(N_t(A)\)</span> is the total number of times action <span class="math inline">\(A\)</span> has been performed by time step <span class="math inline">\(t\)</span>. Before writing the algorithm for the epsilon greedy algorithm, first we define a few helper functions.</p>
+<p>The first is to sample a value uniformly a random from a selection of values.</p>
+<pre class="scala"><code>def sample(selection: Vector[Int]): Rand[Int] = {
+    for {
+        i &lt;- Multinomial(DenseVector.ones[Double](selection.size))
+    } yield selection(i)
+}</code></pre>
+<p>If there are multiple actions with the same long-term reward then the next action should be selected randomly from all the actions which maximise the long term reward.</p>
+<pre class="scala"><code>def maxActionWithTies(longTermReward: Vector[Double]): Rand[Int] = {
+    val maxReward = longTermReward.max
+    val rewards = longTermReward.zipWithIndex.
+          filter { case (r, a) =&gt; r == maxReward }.map(_._2)
+    if (rewards.size &gt; 1) {
+        sample(rewards)        
+    } else {
+        Rand.always(rewards.head)
+    }
+}</code></pre>
+<p>Then a single step of the epsilon greedy algorithm can be written</p>
+<pre class="scala"><code>case class BanditState(
+    reward: Array[Double],
+    longTermReward: Vector[Double],
+    actions: Map[Int, Int]
+)
+def banditStep(
+    epsilon: Double,
+    reward: Int =&gt; Rand[Double],
+    selectAction: (Map[Int, Int], Vector[Double]) =&gt; Rand[Int])(s: BanditState): Rand[BanditState] = {
+    for {
+        nextAction &lt;- selectAction(s.actions, s.longTermReward)
+        newReward &lt;- reward(nextAction)
+        prevCount = s.actions.get(nextAction).get
+        nextCount  = prevCount + 1
+        newLongTermReward = s.longTermReward(nextAction) + (newReward - s.longTermReward(nextAction)) / nextCount
+    } yield BanditState(s.reward :+ newReward, 
+                s.longTermReward.updated(nextAction, newLongTermReward),
+                s.actions.updated(nextAction, nextCount))
+}</code></pre>
+<p>Firstly, we define a <code>BanditState</code> which contains all of the rewards <span class="math inline">\(R_t(A)\)</span> for each time step, a list of length equal to the number of actions containing the long-term reward for each action. <code>actions</code> represents <span class="math inline">\(N_t(A)\)</span> using a map from the index of the action to the count of actions. The algorithm proceeds by sampling a uniform random number, if this number is less than the chosen value of epsilon, then a random action is sampled from a Multinomial distribution with equal probabilities, otherwise the algorithm selects the action which currently has the highest long-term reward. The values are updated according to the formula above.</p>
+<p>To run this algorithm for a pre-determined number of steps, realise that it is recursive and completely determined by the count and long-term reward at the previous time step. Hence it can be implemented as a Markov chain.</p>
+<pre class="scala"><code>def buildActions(actions: Int): Map[Int, Int] = {
+    (0 until actions).map(a =&gt; a -&gt; 0).toMap
+}
+
+def epsilonGreedy(
+    epsilon: Double, 
+    actions: Int, 
+    reward: Int =&gt; Rand[Double],
+    n: Int): BanditState = {
+    
+    val initState = BanditState(Array(0.0), Vector.fill(10)(0.0), buildActions(actions))
+    MarkovChain(initState)(banditStep(epsilon, reward, selectGreedy(epsilon))).steps.drop(n-1).next
+}</code></pre>
+<p>We can assume that the rewards for each of the ten actions is Normally distributed and define a suitable reward function</p>
+<pre class="scala"><code>val qs = Gaussian(0, 1).sample(10)
+
+// The reward is selected from a N(q(A_t), 1)
+def r(qa: Seq[Double])(action: Int): Rand[Double] = 
+    Gaussian(qa(action), 1)
+    
+//  qs: IndexedSeq[Double] = Vector(
+//    -1.1319170735731177,
+//    0.5392647196381599,
+//    0.7127636875526561,
+//    0.8765526115252499,
+//    -0.9555744042626685,
+//    -0.2723645491439034,
+//    0.10029206857194808,
+//    0.3758538986470721,
+//    1.9412629812694995,
+//    1.0620845496569054
+//)</code></pre>
+<p>Then the algorithm can be run for a single multi-armed bandit</p>
+<pre class="scala"><code>val oneBandit = epsilonGreedy(0.5, 10, r(qs), 1000)</code></pre>
+<p>The distribution of actions at the end of 1,000 steps with epsilon = 0.5 and number of actions 10 is:</p>
+<p><img src="/post/2019-04-16-multi-armed-bandits_files/actions_bar.png" alt="actions distribution" width=500 /></p>
+<p>The mean reward at action 8 was highest at approximately 1.95, the epsilon-greedy algorithm prefers to take action 8.</p>
+</div>
+<div id="multiple-multi-armed-bandits" class="section level1">
+<h1>Multiple Multi-armed Bandits</h1>
+<p>Now to see the behaviour of a typical multi-armed bandit with a constant reward function, calculate the average reward for n = 2,000 10-arm bandits each with 1,000 steps.</p>
+<pre class="scala"><code>Vector.fill(2000)(DenseVector(bandit(0.1, 10, r(qs), 1000).reward)).
+  reduce(_ + _).
+  map(_ / 2000)</code></pre>
+<p>The average reward for each time step can then be plotted, this can be used to evaluate different choices of epsilon.</p>
+<pre class="r"><code>action_distribution &lt;- read_csv(here::here(&quot;notebooks/data/action_distribution.csv&quot;), 
+                                col_names = c(&quot;action&quot;, &quot;count&quot;))</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   action = col_double(),
+##   count = col_double()
+## )</code></pre>
+<pre class="r"><code>action_distribution %&gt;% 
+  ggplot(aes(x = action, y = count)) +
+  geom_col()</code></pre>
+<p><img src="/blog/multi-armed-bandits_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>Different values of epsilon can be compared and the average reward can be calculated</p>
+<pre class="scala"><code>val data = List(0.0, 0.1, 0.5).map ( eps =&gt; averageReward(2000, 1000, eps))</code></pre>
+<pre class="r"><code>average_reward &lt;- read_csv(here::here(&quot;notebooks/data/average_reward.csv&quot;))</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   epsilon = col_double(),
+##   step = col_double(),
+##   reward = col_double()
+## )</code></pre>
+<pre class="r"><code>average_reward %&gt;% 
+  ggplot(aes(x = step, y = reward, colour = as.factor(epsilon))) +
+  geom_line() +
+  geom_label(data = filter(average_reward, step == 1000), 
+            aes(label = epsilon, x = 950, y = reward), hjust = .5) +
+  theme(legend.position = &quot;none&quot;) +
+  labs(title = &quot;Average reward by step for various values of epsilon&quot;)</code></pre>
+<p><img src="/blog/multi-armed-bandits_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>

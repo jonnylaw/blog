@@ -1,0 +1,13 @@
+name: "distill_blog"
+title: "Bayesian Statistics and Functional Programming"
+description: |
+  Bayesian Statistics and Functional Programming
+base_url: https://jonnylaw.rocks/
+output_dir: "_site"
+navbar:
+  right:
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+output: distill::distill_article

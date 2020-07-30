@@ -1,0 +1,131 @@
+---
+title: 'Tidy Tuesday: Tour de France'
+author: Jonny Law
+date: '2020-04-08'
+slug: tidy-tuesday-tour-de-france
+categories:
+  - R
+tags: []
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyr) 
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(leaflet)
+library(stringr)
+theme_set(theme_minimal())
+```
+
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2020-04-07')
+```
+
+The Tour de France is the biggest annual sporting event in the world featuring 21 days of bicycle racing and two rest days around France (sometimes starting other countries, including Yorkshire in 2014). There have been 106 editions up to the 2019 race with the first event held 116 years ago in July 1903. During that time the race has evolved. Initially the races were entirely self-supported, meaning you had to carry your own spare tyres and fix any mechanical issues. Additionally, many of the mountain passes had gravel roads instead of the pristine tarmac of modern day. In the 1913 race, Eugène Christophe was hit by a race vehicle on his descent from the Tourmalet, a 2,115m mountain pass in the French Pyrenees. This caused Christophe's front fork to break which he would be forced to repair himself. He walked 10km to the nearest village and used a forge to render a new fork and thus repair his bicycle. However, Christophe [paid a boy to operate the bellows](http://www.veloarchive.com/races/tour/1913.php) on the forge meaning he received a ten minute penalty! The image below is Christophe during the 1913 tour, credit [Bike Race Info](http://bikeraceinfo.com/tdf/tdf1913.html).
+
+![Eugene Christophe](/blog/tidy-tuesday-tour-de-france_files/1913-christophe1.jpg)
+
+The modern Tour de France is not so tough, now team cars and neutral service vehicles follow the riders throughout the stage to change wheels, fix mechanicals and hand out food and drinks. Additionally, riders work in teams. Before 1987 the team size was 10 riders and a total of 22 teams for 220 riders. The UCI reduced the team size for grand tours to nine in 1987 and kept that size until 2017. The team size in the grand tours (Tour de France, Vuelta a España and Giro d'Italia) was reduced to eight beginning with the 2018 season. It was thought by some, that teams (particularly Team Sky, now Team Ineos) were dominating the narrative of the race by riding hard on the front, thus neutralising attacks. From [cycling news](https://www.cyclingnews.com/news/uci-approves-reduced-team-sizes-for-2018/) "The Grand Tour organisers have been pushing for a reduction in team sizes in order to open up the races and prevent one team from controlling the race." 
+
+The Tour de France has several competitions running simultaneously. There is one race for the overall title which is called the general classification and is awarded to the rider who completes the full course with the lowest cumulative time. The rider in the lead of the general classification (GC) at the end of the previous days racing is awarded the yellow jersey (introduced in the 1919 edition of the Tour). Each stage is a race in its own right, with stages on offer for different kinds of riders. Flat stages allow recovery for the GC riders and are typically won by sprinters from bunch sprints. Time trial stages can often be won by time trial specialists providing they come early enough in the program (such as a prologue stage before stage 1) such that they are not too tired to perform. The moutain stages of the Pyrenees and Alps are the testing grounds of the GC riders. 
+
+There are two other jerseys, the green jersey awarded to the rider who has the most accumulated the most points from stage wins and intermediate sprints. This can reward riders for trying to break away from the pelaton and work hard in a small group battling the wind. The polka-dot jersey is awarded to the best climber, with points being awarded for the first few over key climbs in the race. The final jersey is the white jersey for best young rider, awarded to the rider with the lowest cumulative time under the age of 26. Other prizes include the team classification, which awards a yellow number to the leading team calculated by adding the times of the three best riders of each team per stage. The image below shows the 2018 Tour de France Jersey winners, Pierre Latour in White, Geraint Thomas in Yellow, Julian Alaphilippe in Polka-dot and Peter Sagan in Green.
+
+![2018 tour de France Jersey winners](/blog/tidy-tuesday-tour-de-france_files/tour-de-france-jersey-winners-2019_1kmrquz26n90e1nkfth5ge9bew.jpg)
+
+## Cumulative wins by nationality
+
+This weeks data consists of TdF winners, stage results and information about each stage. First we will look at the TdF overall winners by nationality.
+
+```{r}
+winners <- tuesdata$tdf_winners
+
+winners %>% 
+  select(start_date, edition, nationality) %>% 
+  mutate(year = lubridate::year(start_date), true = TRUE) %>% 
+  mutate(nationality = stringr::str_trim(nationality)) %>% 
+  pivot_wider(names_from = nationality, values_from = true) %>% 
+  mutate_at(vars(France:Colombia), ~ if_else(is.na(.x), FALSE, .x)) %>% 
+  mutate_at(vars(France:Colombia), cumsum) %>% 
+  pivot_longer(names_to = "country", values_to = "cumulative_wins", France:Colombia) %>% 
+  ggplot(aes(x = start_date, y = cumulative_wins, group = country, colour = country)) +
+  geom_line() +
+  gghighlight::gghighlight(country %in% c("France", "Belgium", "Great Britain")) +
+  labs(x = "Edition", y = "Wins", title = "Tour de France wins by Country")
+```
+
+France have won the most Tours, unsurprisingly. However France haven't had a winner since Bernard Hinault in 1985, 35 years ago! On the other hand Britain didn't have a winner until Bradley Wiggins in 2012 and have since won the yellow jersey a further five times with Chris Froome winner four times and Geraint Thomas winning last for GB in 2018.
+
+Total number of wins. 
+
+```{r}
+winners %>% 
+  select(start_date, edition, winner_name) %>% 
+  mutate(year = lubridate::year(start_date), true = TRUE) %>% 
+  mutate(nationality = stringr::str_trim(winner_name)) %>% 
+  pivot_wider(names_from = winner_name, values_from = true) %>% 
+  mutate_at(vars(`Maurice Garin`:`Egan Bernal`), ~ if_else(is.na(.x), FALSE, .x)) %>% 
+  mutate_at(vars(`Maurice Garin`:`Egan Bernal`), cumsum) %>% 
+  pivot_longer(names_to = "winner", values_to = "cumulative_wins", `Maurice Garin`:`Egan Bernal`) %>% 
+  ggplot(aes(x = start_date, y = cumulative_wins, group = winner, colour = winner)) +
+  geom_line() +
+  gghighlight::gghighlight(winner %in% c("Jacques Anquetil", "Bernard Hinault", "Eddy Merckx", "Miguel Induráin", "Lance Armstrong")) + 
+  labs(title = "Total wins", y = "Wins")
+```
+
+## Specialists
+
+## Which was the most difficult edition
+
+How can we characterise the most difficult Tour de France. Here are a few variables which affect the difficulty or could be a proxy for the difficulty of the full tour
+
+* Distance covered
+* Number of stage types (flat, mountain, TT)
+* Total time
+* Average Speed
+* Proportion of finishers
+* Weather
+* Paved roads
+
+Some of these will be difficult to quantify - for instance is weather data available for the France in 1903? Can we determine when the mountain passes in the Pyrenees and the Alps were paved? Let's look at some of these which are present in the data.
+
+First consider the total distance of each Tour.
+
+```{r}
+stages <- tuesdata$tdf_stages
+
+stages %>% 
+  mutate(year = lubridate::year(Date)) %>% 
+  count(year, wt = Distance, name = "total_distance") %>% 
+  ggplot(aes(y = total_distance, x = year, colour = )) + 
+  geom_col() +
+  gghighlight::gghighlight(total_distance > 5000) +
+  coord_flip()
+```
+
+If we look at the composition of the stages we see that the 1903 had only six stages! Let's calculate the average distance by stage type.
+
+```{r}
+stage_types <- stages %>% 
+  rowwise() %>% 
+  mutate(year = lubridate::year(Date),
+         type = case_when(
+           str_detect(Type, regex("time", ignore_case = T)) ~ "time trial",
+           str_detect(Type, regex("mountain", ignore_case = T)) ~ "mountain",
+           str_detect(Type, regex("hilly", ignore_case = T)) ~ "hilly",
+           T ~ "flat")) %>% 
+  group_by(year, type) %>% 
+  summarise(total_distance = sum(Distance), average_distance = mean(Distance))
+
+stage_types %>%
+  ungroup() %>%
+  tidyr::complete(year, type) %>% 
+  mutate_if(is.numeric, ~ replace_na(., 0)) %>% 
+  ggplot(aes(x = year, y = total_distance, fill = type)) +
+  geom_col() +
+  coord_flip() +
+  scale_x_reverse()
+```
+

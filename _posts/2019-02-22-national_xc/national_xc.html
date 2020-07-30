@@ -1,0 +1,123 @@
+---
+title: "A Statistical Model for Finishing Positions at the National Cross Country"
+author: Jonny Law
+date: '2019-02-22'
+slug: national-cross-country
+categories:
+  - R
+  - Running
+tags: []
+---
+
+
+
+<div id="area-results" class="section level1">
+<h1>Area Results</h1>
+<p>Download the results from Power of ten for northern, midlands, southern and national.</p>
+</div>
+<div id="a-linear-model" class="section level1">
+<h1>A linear model</h1>
+<p>The goal is to fit a model, where the outcome is the position at the national and the input is the position at the northern XC. This then allows us to determine the quality of the field at each XC and determine what position you are likely to finish in the National this season given a result in the area championships. A simple linear model has each observation (runner) considered independent with normally distributed errors.</p>
+<p><span class="math display">\[Y_i = \beta^T x_i + \varepsilon_i, \quad \mathcal{N}(0, \sigma^2).\]</span></p>
+<p>Three separate models are fit, one for each area championship under consideration. To construct the dataset for each of the models we join the results together from the area and nationals in 2018 by name and exclude those who didn’t participate in both. We fit the model using least squares and see that the coefficient associated with the finishing position in the northerns is 2.23 and the intercept is 95. This means that given your finishing position in the Northern XC, just add 95 and multiple by 2.23 to get an approximate finishing position in the 2018 National XC.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">95.0</td>
+<td align="right">25.3</td>
+<td align="right">3.8</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">position_northern</td>
+<td align="right">2.2</td>
+<td align="right">0.1</td>
+<td align="right">17.0</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Next we plot a Normal Q-Q plot to check the residuals are Normally distributed. If the residuals (the errors, <span class="math inline">\(Y_i - \varepsilon_i, i = 1,\dots,N\)</span>) are Normally distributed the conclusions drawn from the model are valid. The Q-Q plots look reasonable (except maybe the midlands (centre)) with only a few outliers identified by R.</p>
+<div class="figure"><span id="fig:unnamed-chunk-4"></span>
+<img src="/blog/national_xc_files/figure-html/unnamed-chunk-4-1.png" alt="Normal Q-Q plots (Left) Northern. (Centre) Midlands. (Right) Southerns." width="672" />
+<p class="caption">
+Figure 1: Normal Q-Q plots (Left) Northern. (Centre) Midlands. (Right) Southerns.
+</p>
+</div>
+<p>Next we can plot the actual values and the “line of best fit”. This is the regression line given by the data, we can see this generally captures the relationship quite well.</p>
+<p><img src="/blog/national_xc_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Looking at the line of best fit, the data appears to be linear, however exceptional performances in both competitions are not accurately modelled.</p>
+<p>The coefficients for the midlands and the southerns simple linear regression are as follows:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">190.8</td>
+<td align="right">45.5</td>
+<td align="right">4.2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">position_midlands</td>
+<td align="right">3.6</td>
+<td align="right">0.4</td>
+<td align="right">8.9</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">89.8</td>
+<td align="right">17.2</td>
+<td align="right">5.2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">position_southern</td>
+<td align="right">1.9</td>
+<td align="right">0.1</td>
+<td align="right">26.2</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="predict-2019-national-placing-using-the-linear-model" class="section level1">
+<h1>Predict 2019 National placing using the linear model</h1>
+<p>Now we’d like to use this data in order to predict a performance in 2019. I ran in the Northern XC, finished 289th. The linear model predicts a mean finishing position of 742, given by the equation:</p>
+<p><span class="math display">\[\textrm{finish_nationals} = 95 + 2.239 * 289\]</span></p>
+<pre><code>##        1 
+## 742.0754</code></pre>
+<p>My actual finishing position was 904.</p>
+</div>
