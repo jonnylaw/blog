@@ -17,6 +17,7 @@ library(rvest)
 ```
 
 ```{r}
+# TODO: This breaks when a person has two advisors
 get_advisor <- function(person_id) {
   url <- paste0("https://www.mathgenealogy.org/id.php?id=", person_id)
   page <- xml2::read_html(url)
@@ -53,7 +54,25 @@ iterate_df <- function(init, n, f) {
   }
   purrr::reduce(.x = res, .f = dplyr::bind_rows)
 }
+
+my_ancestors <- iterate_df(get_advisor(256142), 13, function(row) get_advisor(row$advisor_id))
 ```
-my_ancestors <- iterate_df(get_advisor(256142), 10, function(row) get_advisor(row$advisor_id))
+
+```{r}
+from_lagrange <- iterate_df(get_advisor(17864), 3, function(row) get_advisor(row$advisor_id))
 ```
+
+
+## Plot as graph
+
+## Get most interesting papers
+
+
+
+```{r}
+library(scholar)
+
+get_publications(id = "Z-kAK98AAAAJ")
+```
+
 

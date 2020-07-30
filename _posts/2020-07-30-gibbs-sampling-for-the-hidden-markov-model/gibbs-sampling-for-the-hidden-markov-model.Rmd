@@ -4,11 +4,15 @@ description: |
   A short description of the post.
 author:
   - name: Jonny Law
-    url: {}
+    url: {https://twitter.com/lawsy}
 date: 07-30-2020
+draft: TRUE
 output:
   distill::distill_article:
     self_contained: false
+categories:
+  - Scala
+  - Bayesian
 ---
 
 ```{r setup, include=FALSE}
@@ -16,68 +20,152 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(jonnylaw)
 ```
 
-Calculate $p(z_t = i | z_{t+1} = j, y_{1:T})$
+In this post we will consider the backward smoothing algorithm for a hidden Markov model (HMM). While exploring the derivation and implementation we will consider how to avoid the use of mutable state and implement the algorithm in a purely functional way. This post follows from the previous post discussing [hidden Markov models] and functional programming, the inference scheme developed in that post was a Metropolis-Hastings algorithm where the marginal likelihood calculated using the HMM forward algorithm.
 
-```{r}
-hmm_backward_sample_step <- function(
-    sampled_state,
-    alpha,
-    alpha1,
-    y1,
-    transition_matrix,
-    observation) {
-    observation_dist = observation(y1, sampledState)
-    transition = transitionMatrix[, sampledState]
+In this post I am going to use the functional programming language Scala to illustrate the ideas required to implement the backward smoothing algorithm for the HMM. As an extension, we will consider another parameter inference algorithm, a Gibbs sampling algorithm targeting the posterior distribution of the transition matrix.
 
-    probs = ((observation_dist %*% transition) * alpha) / alpha1
+The 
 
-    sample(x = seq_len(length(probs)), size = 1, prob = probs)
+First we sample $p(z_t = i | z_{t+1} = j, y_{1:T})$
+
+```scala
+def stateTransitions(
+  nStates: Int,
+  states: Vector[Int]): DenseMatrix[Double] = {
+  val zeros = DenseMatrix.zeros[Double](nStates, nStates)
+  states.init.zip(states.tail).foldLeft(zeros){
+    case (acc, (from, to)) => acc.update(from, to, acc(from, to) + 1)
+    acc
   }
-```
-
-Perform backward sampling for the HMM
-
-```{r}
-hmm_backward_sample <- function(ys,
-                                alphas, # matrix
-                                observation,
-                                transition_matrix) {
-  d <- ncol(alphas)
-  n <- length(ys)
-  sampleN = sample(seq_len(d), size = 1, prob = alphas[n,])
-  
-  purrr::accumulate(
-    rev(ys),
-    hmm_backward_step,
-    observation = observation, 
-    transition_matrix = transition_matrix, 
-    .init = sampleN
-  )
-    
-    (alphas.init).lazyZip(alphas.tail).lazyZip(ys.tail).toVector.
-    scanRight(sampleN) {
-      case ((alpha0, alpha1, y1), sample) =>
-        backwardSampleStep(transitionMatrix, observation, alpha0, alpha1, y1, sample)
-    }
-  }
-```
-
-Sample a value of the latent-state of an HMM
-
-```{r}
-hmm_forward_backward_sample <- function(ys,
-                                        x0,
-                                        observation,
-                                        transitionMatrix) = {
-  alphas = hmm_forward(ys, x0, observation, transitionMatrix)
-  hmm_backward_sample(ys, alphas, observation, transitionMatrix)
 }
 ```
 
-Sample a value of the transition matrix from a product of Dirichlet distributions
+```scala
+ /**
+   * A single step of the backward pass
+   *
+   * @param observation
+   * @param transitionMatrix
+   * @param y
+   * @param beta
+   */
+  def backwardStep[A](
+    observation: A => DenseVector[Double],
+    transitionMatrix: DenseMatrix[Double])(
+    y: A,
+    beta: DenseVector[Double]) = {
+    normalise(transitionMatrix * (observation(y) *:* beta))
+  }
 
-```{r}
-sample_theta <- function(xs: Vector[Int], alpha: DenseVector[Double]): DenseMatrix[Double] = {
+  /**
+   * Backward pass of the forward-backward algorithm
+   *
+   * @param ys
+   * @param transitionMatrix
+   * @param observation
+   * @return
+   */
+  def backward[A](
+    ys: Vector[A],
+    transitionMatrix: DenseMatrix[Double],
+    observation: A => DenseVector[Double]): Vector[DenseVector[Double]] = {
+    val nStates = transitionMatrix.cols
+    val init = DenseVector.ones[Double](nStates)
+    ys.scanRight(init)(backwardStep(observation, transitionMatrix))
+  }
+
+  /**
+   * Calculate the smoothed states from the forward and backward smoothing algorithms
+   */
+  def smoothed(
+    alphas: Vector[DenseVector[Double]],
+    betas: Vector[DenseVector[Double]]): Vector[DenseVector[Double]] = {
+    alphas.zip(betas).map { case (a, b) => normalise(a *:* b) }
+  }
+  
+  /**
+   * Perform Forward-Backward smoothing
+   *
+   * @param ys
+   * @param x0
+   * @param observation
+   * @param transitionMatrix
+   * @return
+   */
+  def fowardBackward[A](
+    ys: Vector[A],
+    x0: DenseVector[Double],
+    observation: A => DenseVector[Double],
+    transitionMatrix: DenseMatrix[Double]): Vector[DenseVector[Double]] = {
+    val alphas = forward(ys, x0, observation, transitionMatrix)
+    val betas = backward(ys, transitionMatrix, observation)
+    smoothed(alphas, betas)
+  }
+```
+
+## Gibbs Sampler
+
+```scala
+  /**
+   * Calculate p(z_t = i | z_{t+1} = j, y_{1:T})
+   *
+   * @param transitionMatrix
+   * @param observation
+   * @param alpha
+   * @param alpha1
+   */
+  def backwardSampleStep[A](
+    transitionMatrix: DenseMatrix[Double],
+    observation: A => DenseVector[Double],
+    alpha: DenseVector[Double],
+    alpha1: DenseVector[Double],
+    y1: A,
+    sampledState: Int): Int = {
+    val observationDist: Double = observation(y1)(sampledState)
+    val transition: DenseVector[Double] = transitionMatrix(::, sampledState)
+
+    val probs = ((observationDist * transition) *:* alpha) /:/ alpha1
+
+    Multinomial(probs).draw
+  }
+
+  /**
+   * Perform backward sampling for the HMM
+   *
+   * @param ys
+   * @param alphas
+   * @param observation
+   * @param transitionMatrix
+   * @return
+   */
+  def backwardSample[A](
+    ys: Vector[A],
+    alphas: Vector[DenseVector[Double]],
+    observation: A => DenseVector[Double],
+    transitionMatrix: DenseMatrix[Double]): Vector[Int] = {
+    val sampleN: Int = Multinomial(alphas.last).draw
+
+    (alphas.init).lazyZip(alphas.tail).lazyZip(ys.tail).toVector.
+      scanRight(sampleN) { case ((alpha0, alpha1, y1), sample) =>
+        backwardSampleStep(transitionMatrix, observation, alpha0, alpha1, y1, sample) }
+  }
+
+  /**
+   * Sample a value of the latent-state of an HMM
+   */
+  def forwardBackwardSample[A](
+    ys: Vector[A],
+    x0: DenseVector[Double],
+    observation: A => DenseVector[Double],
+    transitionMatrix: DenseMatrix[Double]): Vector[Int] = {
+    val alphas = forward(ys, x0, observation, transitionMatrix)
+    backwardSample(ys, alphas, observation, transitionMatrix)
+  }
+
+  /**
+   * Sample a value of the transition matrix from a product of Dirichlet distributions
+   */
+  def sampleTheta(xs: Vector[Int], alpha: DenseVector[Double]): DenseMatrix[Double] = {
     val nStates = 2
     val stateTransitions = Ctmc.stateTransitions(nStates, xs)
     val out: Array[Array[Double]] = breeze.util.JavaArrayOps.dmDToArray2(stateTransitions).
@@ -87,50 +175,65 @@ sample_theta <- function(xs: Vector[Int], alpha: DenseVector[Double]): DenseMatr
 
   case class GibbsState(transitionMatrix: DenseMatrix[Double], xs: Vector[Int])
 ```
-  /**
-   * Perform a single Gibbs step for a discrete time HMM
-   *
-   * @param alpha
-   * @param ys
-   * @param x0
-   * @param observation
-   * @param state
-   * @return
-   */
-    
+
+## Dishonest Casino
+
 ```{r}
-  def gibbsStep[A](
-    alpha: DenseVector[Double],
-    ys: Vector[A],
-    x0: DenseVector[Double],
-    observation: A => DenseVector[Double])
-               (state: GibbsState) = {
-    val transitionMatrix = sampleTheta(state.xs, alpha)
-    val newState = forwardBackwardSample(ys, x0, observation, transitionMatrix)
-    GibbsState(transitionMatrix, newState)
-  }
+gibbs <-
+  read_csv(
+    "~/git/ctmc/models/dishonest_casino_gibbs.csv",
+    col_names = c("a",
+                  "one_minus_a",
+                  "one_minus_b",
+                  "b")
+  )
 ```
 
-  /**
-   * Perform Gibbs Sampling for a discrete time HMM with known initial distribution
-   * and observation matrix
-   *
-   * @param alpha prior for the dirichlet distribution
-   * @param ys observations of the HMM
-   * @param x0 initial distribution of the states
-   * @param observation observation distribution
-   */
-    
+
 ```{r}
-  def gibbsHmm[A](
-    alpha: DenseVector[Double],
-    ys: Vector[A],
-    x0: DenseVector[Double],
-    observation: A => DenseVector[Double]): Iterator[GibbsState] = {
-    val nStates = x0.size
-    val transitionMatrix = new DenseMatrix(nStates, nStates, Dirichlet(alpha).sample(nStates).toArray.flatMap(_.data))
-    val xs = forwardBackwardSample(ys, x0, observation, transitionMatrix)
-    Iterator.iterate(GibbsState(transitionMatrix, xs))(gibbsStep(alpha, ys, x0, observation))
-  }
+gibbs %>% 
+  select(a, b) %>% 
+  mutate(iteration = row_number()) %>% 
+  pivot_longer(c("a", "b"), names_to = "parameter", values_to = "value") %>% 
+  jonnylaw::plot_diagnostics_sim(actual_values = 
+                                   tibble(parameter = c("a", "b"), actual_value = c(0.3, 0.1)))
 ```
+
+## Simple HMM
+
+The transition matrix used to simulate the sequence of states and observations is
+
+$$P = \begin{pmatrix}
+0.5 & 0.5 \\
+0.4 & 0.6
+\end{pmatrix}$$
+
+The emission matrix used to simulate the sequence of states and observations is
+
+$$B = \begin{pmatrix}
+0.2 & 0.8 \\
+0.9 & 0.1
+\end{pmatrix}.$$
+
+```{r}
+simple_hmm <- read_csv("~/git/ctmc/data/simple_hmm.csv")
+
+simple_hmm %>% 
+  filter(time < 100) %>% 
+  pivot_longer(-time, values_to = "value", names_to = "key") %>% 
+  ggplot(aes(x = time, y = value)) +
+  geom_step() +
+  facet_wrap(~key, ncol = 1)
+```
+
+```{r simple_hmm}
+gibbs <- read_csv("~/git/ctmc/models/simple_hmm_gibbs.csv")
+
+gibbs %>% 
+  group_by(chain) %>% 
+  mutate(iteration = row_number()) %>% 
+  pivot_longer(c("p1", "p2", "p3", "p4"), names_to = "parameter", values_to = "value") %>% 
+  jonnylaw::plot_diagnostics()
+```
+
 

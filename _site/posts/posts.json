@@ -164,6 +164,27 @@
     "input_file": {}
   },
   {
+    "path": "posts/2019-07-31-hmc/",
+    "title": "Hamiltonian Monte Carlo in R",
+    "description": {},
+    "author": [
+      {
+        "name": "Jonny Law",
+        "url": {}
+      }
+    ],
+    "date": "2019-07-31",
+    "categories": [
+      "R",
+      "Bayesian"
+    ],
+    "preview": "posts/2019-07-31-hmc/distill-preview.png",
+    "last_modified": "2020-07-30T16:48:08+01:00",
+    "input_file": "hmc.utf8.md",
+    "preview_width": 1248,
+    "preview_height": 768
+  },
+  {
     "path": "posts/2019-06-14-bayesian-linear-regression/",
     "title": "Bayesian Linear Regression with Gibbs Sampling in R",
     "description": {},

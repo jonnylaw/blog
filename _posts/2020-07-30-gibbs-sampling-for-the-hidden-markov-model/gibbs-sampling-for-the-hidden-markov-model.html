@@ -19,369 +19,39 @@
  <!--/radix_placeholder_import_source-->
 
   <!--radix_placeholder_meta_tags-->
-  <title>Bayesian Statistics and Functional Programming: About Me</title>
+  <title>Gibbs Sampling for the Hidden Markov Model</title>
   
-  <meta property="description" itemprop="description" content="About the author."/>
+  <meta property="description" itemprop="description" content="A short description of the post."/>
   
   
+  <!--  https://schema.org/Article -->
+  <meta property="article:published" itemprop="datePublished" content="2020-07-30"/>
+  <meta property="article:created" itemprop="dateCreated" content="2020-07-30"/>
+  <meta name="article:author" content="Jonny Law"/>
   
   <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
-  <meta property="og:title" content="Bayesian Statistics and Functional Programming: About Me"/>
+  <meta property="og:title" content="Gibbs Sampling for the Hidden Markov Model"/>
   <meta property="og:type" content="article"/>
-  <meta property="og:description" content="About the author."/>
+  <meta property="og:description" content="A short description of the post."/>
   <meta property="og:locale" content="en_US"/>
-  <meta property="og:site_name" content="Bayesian Statistics and Functional Programming"/>
   
   <!--  https://dev.twitter.com/cards/types/summary -->
   <meta property="twitter:card" content="summary"/>
-  <meta property="twitter:title" content="Bayesian Statistics and Functional Programming: About Me"/>
-  <meta property="twitter:description" content="About the author."/>
+  <meta property="twitter:title" content="Gibbs Sampling for the Hidden Markov Model"/>
+  <meta property="twitter:description" content="A short description of the post."/>
   
   <!--/radix_placeholder_meta_tags-->
   <!--radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description"]}},"value":[{"type":"character","attributes":{},"value":["About Me"]},{"type":"character","attributes":{},"value":["About the author."]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","date","draft","output","categories"]}},"value":[{"type":"character","attributes":{},"value":["Gibbs Sampling for the Hidden Markov Model"]},{"type":"character","attributes":{},"value":["A short description of the post.\n"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url"]}},"value":[{"type":"character","attributes":{},"value":["Jonny Law"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["https://twitter.com/lawsy"]}},"value":[{"type":"NULL"}]}]}]},{"type":"character","attributes":{},"value":["07-30-2020"]},{"type":"logical","attributes":{},"value":[true]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained"]}},"value":[{"type":"logical","attributes":{},"value":[false]}]}]},{"type":"character","attributes":{},"value":["Scala","Bayesian"]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
-  <!--radix_placeholder_navigation_in_header-->
   
-  <script type="application/javascript">
-  
-    window.headroom_prevent_pin = false;
-  
-    window.document.addEventListener("DOMContentLoaded", function (event) {
-  
-      // initialize headroom for banner
-      var header = $('header').get(0);
-      var headerHeight = header.offsetHeight;
-      var headroom = new Headroom(header, {
-        onPin : function() {
-          if (window.headroom_prevent_pin) {
-            window.headroom_prevent_pin = false;
-            headroom.unpin();
-          }
-        }
-      });
-      headroom.init();
-      if(window.location.hash)
-        headroom.unpin();
-      $(header).addClass('headroom--transition');
-  
-      // offset scroll location for banner on hash change
-      // (see: https://github.com/WickyNilliams/headroom.js/issues/38)
-      window.addEventListener("hashchange", function(event) {
-        window.scrollTo(0, window.pageYOffset - (headerHeight + 25));
-      });
-  
-      // responsive menu
-      $('.distill-site-header').each(function(i, val) {
-        var topnav = $(this);
-        var toggle = topnav.find('.nav-toggle');
-        toggle.on('click', function() {
-          topnav.toggleClass('responsive');
-        });
-      });
-  
-      // nav dropdowns
-      $('.nav-dropbtn').click(function(e) {
-        $(this).next('.nav-dropdown-content').toggleClass('nav-dropdown-active');
-        $(this).parent().siblings('.nav-dropdown')
-           .children('.nav-dropdown-content').removeClass('nav-dropdown-active');
-      });
-      $("body").click(function(e){
-        $('.nav-dropdown-content').removeClass('nav-dropdown-active');
-      });
-      $(".nav-dropdown").click(function(e){
-        e.stopPropagation();
-      });
-    });
+  <script type="text/json" id="radix-resource-manifest">
+  {"type":"NULL"}
   </script>
-  
-  <style type="text/css">
-  
-  /* Theme (user-documented overrideables for nav appearance) */
-  
-  .distill-site-nav {
-    color: rgba(255, 255, 255, 0.8);
-    background-color: #455a64;
-    font-size: 15px;
-    font-weight: 300;
-  }
-  
-  .distill-site-nav a {
-    color: inherit;
-    text-decoration: none;
-  }
-  
-  .distill-site-nav a:hover {
-    color: white;
-  }
-  
-  @media print {
-    .distill-site-nav {
-      display: none;
-    }
-  }
-  
-  .distill-site-header {
-  
-  }
-  
-  .distill-site-footer {
-  
-  }
-  
-  
-  /* Site Header */
-  
-  .distill-site-header {
-    width: 100%;
-    box-sizing: border-box;
-    z-index: 3;
-  }
-  
-  .distill-site-header .nav-left {
-    display: inline-block;
-    margin-left: 8px;
-  }
-  
-  @media screen and (max-width: 768px) {
-    .distill-site-header .nav-left {
-      margin-left: 0;
-    }
-  }
-  
-  
-  .distill-site-header .nav-right {
-    float: right;
-    margin-right: 8px;
-  }
-  
-  .distill-site-header a,
-  .distill-site-header .title {
-    display: inline-block;
-    text-align: center;
-    padding: 14px 10px 14px 10px;
-  }
-  
-  .distill-site-header .title {
-    font-size: 18px;
-  }
-  
-  .distill-site-header .logo {
-    padding: 0;
-  }
-  
-  .distill-site-header .logo img {
-    display: none;
-    max-height: 20px;
-    width: auto;
-    margin-bottom: -4px;
-  }
-  
-  .distill-site-header .nav-image img {
-    max-height: 18px;
-    width: auto;
-    display: inline-block;
-    margin-bottom: -3px;
-  }
-  
-  
-  
-  @media screen and (min-width: 1000px) {
-    .distill-site-header .logo img {
-      display: inline-block;
-    }
-    .distill-site-header .nav-left {
-      margin-left: 20px;
-    }
-    .distill-site-header .nav-right {
-      margin-right: 20px;
-    }
-    .distill-site-header .title {
-      padding-left: 12px;
-    }
-  }
-  
-  
-  .distill-site-header .nav-toggle {
-    display: none;
-  }
-  
-  .nav-dropdown {
-    display: inline-block;
-    position: relative;
-  }
-  
-  .nav-dropdown .nav-dropbtn {
-    border: none;
-    outline: none;
-    color: rgba(255, 255, 255, 0.8);
-    padding: 16px 10px;
-    background-color: transparent;
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-    margin: 0;
-    margin-top: 1px;
-    z-index: 2;
-  }
-  
-  .nav-dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: white;
-    min-width: 200px;
-    border: 1px solid rgba(0,0,0,0.15);
-    border-radius: 4px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
-    z-index: 1;
-    margin-top: 2px;
-    white-space: nowrap;
-    padding-top: 4px;
-    padding-bottom: 4px;
-  }
-  
-  .nav-dropdown-content hr {
-    margin-top: 4px;
-    margin-bottom: 4px;
-    border: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  }
-  
-  .nav-dropdown-active {
-    display: block;
-  }
-  
-  .nav-dropdown-content a, .nav-dropdown-content .nav-dropdown-header {
-    color: black;
-    padding: 6px 24px;
-    text-decoration: none;
-    display: block;
-    text-align: left;
-  }
-  
-  .nav-dropdown-content .nav-dropdown-header {
-    display: block;
-    padding: 5px 24px;
-    padding-bottom: 0;
-    text-transform: uppercase;
-    font-size: 14px;
-    color: #999999;
-    white-space: nowrap;
-  }
-  
-  .nav-dropdown:hover .nav-dropbtn {
-    color: white;
-  }
-  
-  .nav-dropdown-content a:hover {
-    background-color: #ddd;
-    color: black;
-  }
-  
-  .nav-right .nav-dropdown-content {
-    margin-left: -45%;
-    right: 0;
-  }
-  
-  @media screen and (max-width: 768px) {
-    .distill-site-header a, .distill-site-header .nav-dropdown  {display: none;}
-    .distill-site-header a.nav-toggle {
-      float: right;
-      display: block;
-    }
-    .distill-site-header .title {
-      margin-left: 0;
-    }
-    .distill-site-header .nav-right {
-      margin-right: 0;
-    }
-    .distill-site-header {
-      overflow: hidden;
-    }
-    .nav-right .nav-dropdown-content {
-      margin-left: 0;
-    }
-  }
-  
-  
-  @media screen and (max-width: 768px) {
-    .distill-site-header.responsive {position: relative;}
-    .distill-site-header.responsive a.nav-toggle {
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
-    .distill-site-header.responsive a,
-    .distill-site-header.responsive .nav-dropdown {
-      display: block;
-      text-align: left;
-    }
-    .distill-site-header.responsive .nav-left,
-    .distill-site-header.responsive .nav-right {
-      width: 100%;
-    }
-    .distill-site-header.responsive .nav-dropdown {float: none;}
-    .distill-site-header.responsive .nav-dropdown-content {position: relative;}
-    .distill-site-header.responsive .nav-dropdown .nav-dropbtn {
-      display: block;
-      width: 100%;
-      text-align: left;
-    }
-  }
-  
-  /* Site Footer */
-  
-  .distill-site-footer {
-    width: 100%;
-    overflow: hidden;
-    box-sizing: border-box;
-    z-index: 3;
-    margin-top: 30px;
-    padding-top: 30px;
-    padding-bottom: 30px;
-    text-align: center;
-  }
-  
-  /* Headroom */
-  
-  d-title {
-    padding-top: 6rem;
-  }
-  
-  @media print {
-    d-title {
-      padding-top: 4rem;
-    }
-  }
-  
-  .headroom {
-    z-index: 1000;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-  }
-  
-  .headroom--transition {
-    transition: all .4s ease-in-out;
-  }
-  
-  .headroom--unpinned {
-    top: -100px;
-  }
-  
-  .headroom--pinned {
-    top: 0;
-  }
-  
-  </style>
-  
-  <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
-  <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
-  <script src="site_libs/headroom-0.9.4/headroom.min.js"></script>
+  <!--radix_placeholder_navigation_in_header-->
   <!--/radix_placeholder_navigation_in_header-->
   <!--radix_placeholder_distill-->
   
@@ -1267,10 +937,10 @@
   </script>
   
   <!--/radix_placeholder_distill-->
-  <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
-  <script src="site_libs/bowser-1.9.3/bowser.min.js"></script>
-  <script src="site_libs/webcomponents-2.0.0/webcomponents.js"></script>
-  <script src="site_libs/distill-2.2.21/template.v2.js"></script>
+  <script src="gibbs-sampling-for-the-hidden-markov-model_files/jquery-1.11.3/jquery.min.js"></script>
+  <script src="gibbs-sampling-for-the-hidden-markov-model_files/bowser-1.9.3/bowser.min.js"></script>
+  <script src="gibbs-sampling-for-the-hidden-markov-model_files/webcomponents-2.0.0/webcomponents.js"></script>
+  <script src="gibbs-sampling-for-the-hidden-markov-model_files/distill-2.2.21/template.v2.js"></script>
   <!--radix_placeholder_site_in_header-->
   <!--/radix_placeholder_site_in_header-->
 
@@ -1282,53 +952,83 @@
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"About Me","description":"About the author.","authors":[]}
+{"title":"Gibbs Sampling for the Hidden Markov Model","description":"A short description of the post.","authors":[{"author":"Jonny Law","authorURL":{"https://twitter.com/lawsy":{}},"affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-07-30T00:00:00.000+01:00","citationText":"Law, 2020"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
 <!--radix_placeholder_navigation_before_body-->
-<header class="header header--fixed" role="banner">
-<nav class="distill-site-nav distill-site-header">
-<div class="nav-left">
-<a href="index.html" class="title">Bayesian Statistics and Functional Programming</a>
-</div>
-<div class="nav-right">
-<a href="index.html">Home</a>
-<a href="about.html">About</a>
-<a href="https://twitter.com/lawsy">Twitter</a>
-<a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
-</div>
-</nav>
-</header>
 <!--/radix_placeholder_navigation_before_body-->
 <!--radix_placeholder_site_before_body-->
 <!--/radix_placeholder_site_before_body-->
 
 <div class="d-title">
-<h1>About Me</h1>
-<p><p>About the author.</p></p>
+<h1>Gibbs Sampling for the Hidden Markov Model</h1>
+<p><p>A short description of the post.</p></p>
 </div>
 
+<div class="d-byline">
+  Jonny Law true 
+  
+<br/>07-30-2020
+</div>
 
 <div class="d-article">
-<p>Jonny Law is a data scientist at the <a href="https://www.ncl.ac.uk/nicd/">National Innovation Centre for Data</a>, working with local and national companies to allow them to make the most of their data. Previously he was a Statistics PhD student on the <a href="http://www.bigdata-cdt.ac.uk/">Cloud Computing for Big Data CDT</a>. His primary research interest is in using functional programming for Bayesian Inference using <a href="http://www.scala-lang.org/">Scala</a>.</p>
-<h2 id="skills">Skills</h2>
-<ul>
-<li>R</li>
-<li>Scala</li>
-<li>Python</li>
-<li>SQL</li>
-<li>Bayesian Statistics</li>
-<li>Time series analysis</li>
-<li>Machine Learning</li>
-</ul>
-<h2 id="projects">Projects</h2>
-<p><strong>Bayesian State Space Model</strong></p>
-<p><a href="https://jonnylaw.github.io/bayesian_dlms/">git.io/dlm</a> <em>A Scala library for Dynamic Linear Models, with filtering and parameter inference algorithms</em></p>
-<p><strong>Gaussian Processes</strong></p>
-<p><a href="https://jonnylaw.github.io/gaussian-processes/">git.io/gaussianprocesses</a> <em>A Scala library for Gaussian Processes</em></p>
-<p><strong>Composable POMP Models</strong></p>
-<p><a href="https://git.io/statespace">git.io/statespace</a> <em>A Scala library for online Bayesian filtering of univariate state space models, sometimes called POMP (Partially Observed Markov Process Models).</em></p>
+<p>In this post we will consider the backward smoothing algorithm for a hidden Markov model (HMM). While exploring the derivation and implementation we will consider how to avoid the use of mutable state and implement the algorithm in a purely functional way. This post follows from the previous post discussing [hidden Markov models] and functional programming, the inference scheme developed in that post was a Metropolis-Hastings algorithm where the marginal likelihood calculated using the HMM forward algorithm.</p>
+<p>In this post I am going to use the functional programming language Scala to illustrate the ideas required to implement the backward smoothing algorithm for the HMM. As an extension, we will consider another parameter inference algorithm, a Gibbs sampling algorithm targeting the posterior distribution of the transition matrix.</p>
+<p>The</p>
+<p>First we sample <span class="math inline">\(p(z_t = i | z_{t+1} = j, y_{1:T})\)</span></p>
+<pre class="scala"><code>
+def stateTransitions(
+  nStates: Int,
+  states: Vector[Int]): DenseMatrix[Double] = {
+  val zeros = DenseMatrix.zeros[Double](nStates, nStates)
+  states.init.zip(states.tail).foldLeft(zeros){
+    case (acc, (from, to)) =&gt; acc.update(from, to, acc(from, to) + 1)
+    acc
+  }
+}</code></pre>
+<pre class="scala"><code>
+ /**
+   * A single step of the backward pass
+   *
+   * @param observation
+   * @param transitionMatrix
+   * @param y
+   * @param beta
+   */
+  def backwardStep[A](
+    observation: A =&gt; DenseVector[Double],
+    transitionMatrix: DenseMatrix[Double])(
+    y: A,
+    beta: DenseVector[Double]) = {
+    normalise(transitionMatrix * (observation(y) *:* beta))
+  }
+
+  /**
+   * Backward pass of the forward-backward algorithm
+   *
+   * @param ys
+   * @param transitionMatrix
+   * @param observation
+   * @return
+   */
+  def backward[A](
+    ys: Vector[A],
+    transitionMatrix: DenseMatrix[Double],
+    observation: A =&gt; DenseVector[Double]): Vector[DenseVector[Double]] = {
+    val nStates = transitionMatrix.cols
+    val init = DenseVector.ones[Double](nStates)
+    ys.scanRight(init)(backwardStep(observation, transitionMatrix))
+  }
+
+  /**
+   * Calculate the smoothed states from the forward and backward smoothing algorithms
+   */
+  def smoothed(
+    alphas: Vector[DenseVector[Double]],
+    betas: Vector[DenseVector[Double]]): Vector[DenseVector[Double]] = {
+    alphas.zip(betas).map { case (a, b) =&gt; normalise(a *:* b) }
+  }</code></pre>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
@@ -1336,6 +1036,15 @@
 <div class="d-appendix">
 </div>
 
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 
 <!--radix_placeholder_site_after_body-->
 <!--/radix_placeholder_site_after_body-->
