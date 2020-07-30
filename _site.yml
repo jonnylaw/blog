@@ -10,6 +10,8 @@ navbar:
       href: index.html
     - text: "About"
       href: about.html
+    - text: "Twitter"
+      href: https://twitter.com/lawsy
 output: distill::distill_article
 exclude: 
   - scala_projects
