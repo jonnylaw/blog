@@ -55,7 +55,12 @@ ggplot(data = data.frame(x = 0), mapping = aes(x = x)) +
   stat_function(fun = posterior, aes(colour = "Posterior")) +
   xlab("p_h") +
   ylab("Density") +
-  theme(text = element_text(size = 20), legend.title = element_blank(), legend.position = c(0.2, 0.9), legend.text = element_text(size = rel(1.3)))
+  theme(
+    text = element_text(size = 20),
+    legend.title = element_blank(),
+    legend.position = c(0.2, 0.9),
+    legend.text = element_text(size = rel(1.3))
+  )
 ```
 
 # Rejection Sampler
@@ -82,7 +87,7 @@ problems, but finding the upper bound $M$ can be challenging. The rejection algo
 rejection_sample <- function(prop, propPdf, log_density) {
   u <- runif(1)
   y <- prop(1)
-
+  
   if (log(u) < log_density(y) - propPdf(y)) {
     y
   } else {
@@ -98,13 +103,13 @@ log_density <- function(alpha, beta, Y, n) {
 
 samples <- 1000
 lden <- log_density(alpha, beta, Y, n)
-rejection_samples <- replicate(samples, rejection_sample(runif, function(x) dunif(x, log = T), lden))
+rejection_samples <-
+  replicate(samples, rejection_sample(runif, function(x)
+    dunif(x, log = T), lden))
 
 ggplot(tibble(rejection_samples)) +
   geom_histogram(aes(x = rejection_samples, y = ..density..), alpha = 0.4) +
-  stat_function(
-    fun =  posterior, aes(colour = "Analytic posterior")
-  ) +
+  stat_function(fun =  posterior, aes(colour = "Analytic posterior")) +
   theme(legend.position = "none") +
   xlab("p_h")
 ```
