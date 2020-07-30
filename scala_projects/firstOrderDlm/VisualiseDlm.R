@@ -1,7 +1,5 @@
-## Check and install packages
-packages <- c("dplyr","tidyr","ggplot2","gridExtra", "magrittr")
-newPackages <- packages[!(packages %in% as.character(installed.packages()[,"Package"]))]
-if(length(newPackages)) install.packages(newPackages)
+## Check packages
+packages <- c("dplyr", "tidyr", "ggplot2", "gridExtra", "magrittr")
 lapply(packages,require,character.only=T)
 
 ## set ggplot theme

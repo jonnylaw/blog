@@ -11,3 +11,7 @@ navbar:
     - text: "About"
       href: about.html
 output: distill::distill_article
+exclude: 
+  - scala_projects
+  - notebooks
+  - data
