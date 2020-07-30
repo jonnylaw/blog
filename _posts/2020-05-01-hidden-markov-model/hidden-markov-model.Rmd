@@ -341,7 +341,7 @@ proposal <- function(theta) {
 }
 ```  
 
-```{r, eval=run_mcmc}
+```{r hmm-mcmc, cache=TRUE}
 init_theta <- c(a, b)
 names(init_theta) <- c("alpha", "beta")
 
@@ -353,14 +353,6 @@ iters_metropolis <- metropolis(
   chains = 4,
   parallel = T
 )
-```
-
-```{r write-iters-cpp, eval=write_mcmc}
-readr::write_rds(iters_metropolis, path = here::here("models/metropolis-hmm.Rds"))
-```
-
-```{r read-iters-cpp, eval=!run_mcmc}
-iters_metropolis <- readr::read_rds(here::here("models/metropolis-hmm.Rds"))
 ```
 
 We draw 10,000 iterations from the Metropolis algorithm, the parameter diagnostics are plotted below.
