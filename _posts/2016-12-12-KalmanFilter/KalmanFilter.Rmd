@@ -172,4 +172,4 @@ filtered %>%
   facet_wrap(~stationId, scales = "free")
 ```
 
-The full code is available in a notebook file and an [ammonite](https://ammonite.io/) script in the [GitHub Repo](https://github.com/jonnylaw/blog/notebooks) associated with this blog.
+The full code is available in a notebook file and an [ammonite](https://ammonite.io/) script in the [GitHub Repo](https://github.com/jonnylaw/blog/tree/master/notebooks) associated with this blog.
