@@ -4,6 +4,9 @@ description: |
   This post explores how to create a simple neural network to learn a linear function and a non-linear function using both standard R and the Torch library for R.
 author: "Jonny Law"
 date: "2021-02-02"
+output: 
+  distill::distill_article:
+    self_contained: false
 categories:
   - R
   - Deep Learning
