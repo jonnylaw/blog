@@ -6,6 +6,9 @@ author:
   - name: Jonny Law
     url: {}
 date: 02-02-2021
+categories:
+  - R
+  - Deep Learning
 output:
   distill::distill_article:
     self_contained: false

@@ -5,6 +5,7 @@ date: '2016-12-12'
 output: distill::distill_article
 categories: 
   - Scala
+  - Bayesian
 ---
 
 ```{r setup, include=FALSE}
