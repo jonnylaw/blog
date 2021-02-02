@@ -3,7 +3,7 @@ title: Blog
 site: distill::distill_website
 listing: 
   posts:
-    - 2020-07-29-academic-ancestory                     
+    - 2021-02-02-neural-networks-in-r
     - 2020-05-01-hidden-markov-model                   
     - 2020-04-19-multi-state-survival-models            
     - 2020-04-08-tidy-tuesday-tour-de-france           
