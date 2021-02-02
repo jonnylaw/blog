@@ -43,3 +43,5 @@ renv/library
 docs
 .httr-oauth
 models
+.metals
+.vscode
