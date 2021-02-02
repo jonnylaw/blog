@@ -10,7 +10,7 @@ categories:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(torch)
 theme_set(theme_minimal())
@@ -144,7 +144,8 @@ training_loop <- function(x, y, init_w, epochs, learning_rate) {
 
 ```{r loss-curve, echo=FALSE}
 out <- training_loop(x = scale(observed$x), y = scale(observed$y), c(1, 1), 500, 1e-4)
-qplot(x = seq_along(out$losses), y = out$losses, geom = "line")
+qplot(x = seq_along(out$losses), y = out$losses, geom = "line") +
+  labs(x = "Epoch", y = "Loss")
 ```
 
 Since this model is so small, consisting of only two weights. We can plot the actual function learned by the model using `geom_abline`.
@@ -152,7 +153,8 @@ Since this model is so small, consisting of only two weights. We can plot the ac
 ```{r learned-function, echo=FALSE}
 ggplot(observed, aes(scale(x), scale(y))) +
   geom_point() +
-  geom_abline(intercept = out$weights[501, 1], slope = out$weights[501,2])
+  geom_abline(intercept = out$weights[501, 1], slope = out$weights[501,2]) + 
+  labs(x = "x", y = "y")
 ```
 
 We can try to use this model on a simple non-linear regression problem, of course we probably won't do very well here!  We define the regression problem as
