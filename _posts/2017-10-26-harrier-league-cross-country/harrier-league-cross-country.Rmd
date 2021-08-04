@@ -4,7 +4,9 @@ author:
   - name: Jonny Law
 date: '2017-10-26'
 slug: harrier-league-cross-country
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    self_contained: false
 categories:
   - R
 ---

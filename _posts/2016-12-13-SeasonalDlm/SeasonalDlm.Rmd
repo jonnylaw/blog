@@ -2,7 +2,9 @@
 title: Seasonal DLM
 author: Jonny Law
 date: "2016-12-13"
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    self_contained: false
 categories:
   - Bayesian
   - Scala

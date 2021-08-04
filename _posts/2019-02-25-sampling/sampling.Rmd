@@ -3,7 +3,9 @@ title: "Sampling from a distribution with a known CDF"
 author: "Jonny Law"
 date: '2019-02-25'
 slug: inverse-sampling
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    self_contained: false
 categories:
   - R
 ---

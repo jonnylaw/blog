@@ -2,7 +2,9 @@
 title: 'Tidy Tuesday: The Office'
 author: Jonny Law
 date: '2020-03-17'
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    self_contained: false
 slug: tidy-tuesday-the-office
 categories: 
   - tidy-tuesday

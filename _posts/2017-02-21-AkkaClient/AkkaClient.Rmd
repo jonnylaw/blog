@@ -3,7 +3,9 @@ title: "An Akka HTTP Client with JSON Parsing"
 author: "Jonny Law"
 date: "2017-02-21"
 slug: "akkaclient"
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    self_contained: false
 categories: 
   - Scala
 ---

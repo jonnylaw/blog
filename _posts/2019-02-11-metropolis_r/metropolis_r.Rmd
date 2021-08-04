@@ -3,7 +3,9 @@ title: "Efficient Markov chain Monte Carlo in R with Rcpp"
 author: "Jonny Law"
 date: '2019-02-11'
 slug: efficient_mcmc_using_rcpp
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    self_contained: false
 categories:
   - R
   - Bayesian

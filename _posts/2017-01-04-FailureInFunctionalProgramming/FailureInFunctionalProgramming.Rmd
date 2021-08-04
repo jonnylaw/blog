@@ -2,7 +2,9 @@
 title: "Using Monads for Handling Failures and Exceptions"
 author: "Jonny Law"
 date: "2017-01-04"
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    self_contained: false
 categories: 
   - Scala
 ---

@@ -3,7 +3,9 @@ title: "A Statistical Model for Finishing Positions at the National Cross Countr
 author: Jonny Law
 date: '2019-02-22'
 slug: national-cross-country
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    self_contained: false
 categories:
   - R
 ---

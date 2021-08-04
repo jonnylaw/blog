@@ -3,7 +3,9 @@ title: Multi State Models
 author: Jonny Law
 date: '2020-04-19'
 slug: multi-state-survival-models
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    self_contained: false
 categories:
   - R
   - Bayesian

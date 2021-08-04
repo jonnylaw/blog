@@ -3,7 +3,9 @@ title: Scala and Jupyter Notebook with Almond
 author: Jonny Law
 date: '2019-04-15'
 slug: scala-and-jupyter-notebook-with-almond
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    self_contained: false
 categories:
   - Scala
 ---
