@@ -3,6 +3,7 @@ title: Blog
 site: distill::distill_website 
 listing: 
   posts:
+    - 2021-08-04-entity-embeddings
     - 2021-02-02-neural-networks-in-r 
     - 2020-05-01-hidden-markov-model                   
     - 2020-04-19-multi-state-survival-models            

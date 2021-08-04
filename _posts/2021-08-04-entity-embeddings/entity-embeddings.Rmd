@@ -5,10 +5,13 @@ description: |
 author:
   - name: Jonny Law
     url: {}
-date: 2021-08-04
+date: "2021-08-04"
 output:
   distill::distill_article:
     self_contained: false
+categories:
+  - Python
+  - Deep Learning
 ---
 
 
