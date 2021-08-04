@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Deploy to GitHub Pages
-      uses: maxheld83/ghpages@v0.3.0
-      env:
-        BUILD_DIR: "_site"
-        GH_PAT: ${{ secrets.GH_PAT }}
+      uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
