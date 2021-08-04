@@ -65,7 +65,7 @@ To find the best fit for this model to the observed data, we need to manipulate 
 
 ## Optimisation
 
-To find the maximum of a function in calculus, we first calculate the derivative and determine the point at which the slope is equal to zero. This can find both maximums and minimums, so we can additionally calculate the second derivative and if it's negative then we have a maximum. This is fine for linear optimisation, however when it comes to non-linear optimisation we have to be more creative. We can use gradient descent to take steps in the opposite direction of the gradient to find the minimum of a non-linear function
+To find the maximum of a function in calculus, we first calculate the derivative and determine the point at which the slope is equal to zero. This can find both maximums and minimums (or saddle points), so we can additionally calculate the second derivative and if it's negative then we have a maximum. This is fine for linear optimisation, however when it comes to non-linear optimisation we have to be more creative. We can use gradient descent to take steps in the opposite direction of the gradient to find the minimum of a non-linear function
 
 ```{r}
 gradient_step <- function(learning_rate, params, grad_params) 

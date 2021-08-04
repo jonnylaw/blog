@@ -1,12 +1,9 @@
 ---
 title: "Gibbs Sampling for the Hidden Markov Model"
 description: |
-  A short description of the post.
-author:
-  - name: Jonny Law
-    url: {https://twitter.com/lawsy}
+"Determining the parameters of a simple HMM using functional programming in R."
+author: "Jonny Law"
 date: 07-30-2020
-draft: TRUE
 output:
   distill::distill_article:
     self_contained: false
@@ -19,6 +16,7 @@ categories:
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(jonnylaw)
 library(tidyverse)
+theme_set(theme_minimal())
 ```
 
 In this post we will consider the backward smoothing algorithm for a hidden Markov model (HMM). While exploring the derivation and implementation we will consider how to avoid the use of mutable state and implement the algorithm in a purely functional way. This post follows from the previous post discussing [hidden Markov models] and functional programming, the inference scheme developed in that post was a Metropolis-Hastings algorithm where the marginal likelihood calculated using the HMM forward algorithm.
@@ -134,13 +132,13 @@ Calculate $p(z_t = i | z_{t+1} = j, y_{1:T})$
 ```{r}
 hmm_backward_sample_step <- function(
    sampled_state,
+   y1,
    alpha,
    alpha1,
-   y1,
    transition_matrix,
    observation) {
-   observation_dist <- observation(y1, sampledState)
-   transition <- transitionMatrix[, sampledState]
+   observation_dist <- observation(y1)
+   transition <- transition_matrix[, sampled_state]
 
    probs <- ((observation_dist %*% transition) * alpha) / alpha1
 
@@ -151,83 +149,104 @@ hmm_backward_sample_step <- function(
 Perform backward sampling for the HMM
 
 ```{r}
+accumulate3 <- function(x, y, z, f, ..., init, direction = "forward") {
+  res <- list()
+  res[[1]] <- init
+  for (i in seq_len(length(x) - 1) + 1) {
+     res[[i]] <- f(res[[i-1]], x[[i]], y[[i]], z[[i]], ...)
+  }
+  res
+}
+```
+
+```{r}
 hmm_backward_sample <- function(ys,
                                alphas, # matrix
-                               observation,
-                               transition_matrix) {
+                               transition_matrix,
+                               observation) {
  d <- ncol(alphas)
  n <- length(ys)
  sample_last <- sample(seq_len(d), size = 1, prob = alphas[n,])
  
  accumulate3(
    rev(ys),
-   alphas[[-n]],
-   alphas[[-1]],
-   hmm_backward_step,
-   observation = observation, 
+   y = alphas[-n,],
+   z = alphas[-1,],
+   hmm_backward_sample_step,
    transition_matrix = transition_matrix, 
-   .init = sample_last
+   observation = observation, 
+   init = sample_last
  )
 }
 ```
 
 Functional Backward sampling
 
-```{r}
-accumulate_3 <- function(x, y, z, f, ..., init, direction = "forward") {
-  res <- list()
-  res[[1]] <- init
-  for (i in seq_len(length(x) - 1) + 1) {
-     res[[i]] <- f(res[[i-1]], x[[i]], y[[i]], z[[i]])
-  }
-  res
-}
-```
-
-
 Sample a value of the latent-state of an HMM
 
 ```{r}
 hmm_forward_backward_sample <- function(ys,
-                                       x0,
-                                       observation,
-                                       transitionMatrix) = {
- alphas = hmm_forward(ys, x0, observation, transitionMatrix)
- hmm_backward_sample(ys, alphas, observation, transitionMatrix)
+                                        x0,
+                                        observation,
+                                        transition_matrix) {
+  alphas <- hmm_forward(ys, x0, transition_matrix, observation)
+  alphas <- matrix(unlist(alphas), ncol = length(x0), nrow = length(ys), byrow=TRUE)
+  hmm_backward_sample(ys, alphas, transition_matrix, observation)
 }
 ```
 
 Sample a value of the transition matrix from a product of Dirichlet distributions
 
 ```{r}
-sample_theta <- function(xs: Vector[Int], alpha: DenseVector[Double]): DenseMatrix[Double] = {
-   val nStates = 2
-   val stateTransitions = Ctmc.stateTransitions(nStates, xs)
-   val out: Array[Array[Double]] = breeze.util.JavaArrayOps.dmDToArray2(stateTransitions).
-     map(x => Dirichlet(alpha + DenseVector(x)).draw.data)
-   breeze.util.JavaArrayOps.array2DToDm(out)
- }
+sample_transition <- function(alpha, n_states) {
+  out <- matrix(NA_real_, ncol = n_states, nrow = n_states)
+  for (i in seq_len(n_states)) {
+    out[i, ] <- MCMCpack::rdirichlet(1, alpha)
+  }
+  out
+}
 
- case class GibbsState(transitionMatrix: DenseMatrix[Double], xs: Vector[Int])
+sample_theta <- function(xs, alpha, n_states) {
+  state_transitions_mat <- state_transitions(n_states, xs)
+  out <- matrix(NA_real_, ncol = n_states, nrow = n_states)
+  for (i in seq_len(n_states)) {
+    out[i, ] <- MCMCpack::rdirichlet(1, alpha + state_transitions_mat[i, ])
+  }
+  out
+}
 ```
 
 ```{r}
- def gibbs_step(
-   alpha,
-   ys,
-   x0,
-   observation) {
-   transitionMatrix <- sample_theta(state.xs, alpha)
-   new_state <- forward_backward_sample(ys, x0, observation, transitionMatrix)
-   GibbsState(transitionMatrix, newState)
- }
+gibbs_step <- function(alpha,
+                       ys,
+                       x0,
+                       observation,
+                       xs) {
+  transition_matrix <- sample_theta(xs, alpha, length(x0))
+  new_state <- hmm_forward_backward_sample(ys, x0, observation, transition_matrix)
+  list(m = transition_matrix, state = new_state)
+}
 ```
 
 Functional sampling
 
-```{r}
-iterate_dbl <- function(init, f, ..., n)
+```{r, eval=FALSE}
+iterate_dbl <- function(init, f, ..., n) {
+  i <- 2
+  out <- numeric(n)
+  out[1] <- init
+  while (i <= n) {
+    out[i] <- f(out[i-1])
+    i <- i + 1
+  }
+  out
+}
 ```
+
+```{r}
+iterate_dbl(0, function(x) x + 1, n=10)
+```
+
 
 
 ```{r}
@@ -235,84 +254,25 @@ iterate_dbl <- function(init, f, ..., n)
    alpha,
    ys,
    x0,
-   observation) = {
-   val nStates = length(x0)
-   val transitionMatrix = new DenseMatrix(nStates, nStates, Dirichlet(alpha).sample(nStates).toArray.flatMap(_.data))
-   val xs = forwardBackwardSample(ys, x0, observation, transitionMatrix)
-   Iterator.iterate(GibbsState(transitionMatrix, xs))(gibbsStep(alpha, ys, x0, observation))
+   observation, 
+   iters = 10) {
+   n_states <- length(x0)
+   transition_matrix <- sample_transition(alpha, length(x0))
+   xs <- hmm_forward_backward_sample(ys, x0, observation, transition_matrix)
+   out <- list()
+   for (i in seq_len(iters)) {
+     out[[i]] <- gibbs_step(alpha, ys, x0, observation, xs)
+     xs <- out[[i]]$state
+   }
+   out
  }
 ```
 
-## Dishonest Casino
-
 ```{r}
-build_transition_matrix <- function(theta) {
-  a <- theta[1]; b <- theta[2]
-  matrix(c(a, 1 - a, 1 - b, b), byrow = T, nrow = 2)
-}
+out <- gibbs_hmm(1.0, ys = simple_hmm$y, x0 = c(0.5, 0.5), observation = function(y) B[,y])
 
-observation <- function(y) {
-  c(ifelse(y == 6, 1 / 5, 1 / 10), 1 / 6)
-}
-
-normalise <- function(a) {
-  a / sum(a)
-}
-
-sim_observation <- function(x) {
-  ifelse(
-      x == 1, 
-      sample(6, size = 1), 
-      sample(6, size = 1, prob = normalise(c(rep(1, times = 5),  5)))
-    )
-}
-
-transition <- function(x, P) {
-  sample(2, size = 1, prob = P[x, ])
-}
-
-sim_markov <- function(n, P) {
-  x <- numeric(n)
-  y <- numeric(n)
-  x[1] <- 1
-  y[1] <- sim_observation(x[1])
-  for (i in seq_len(n - 1)) {
-    x[i + 1] <- transition(x[i], P)
-    y[i + 1] <- sim_observation(x[i + 1])
-  }
-  tibble(time = seq_len(n), x, y)
-}
-
-a <- 0.3
-b <- 0.1
-P <- build_transition_matrix(c(a, b))
-sims <- sim_markov(300, P)
+map(out, "m")
 ```
 
-State transitions
-
-```{r}
-state_transitions(n_states = 2, states = sims$x)
-```
-
-
-
-
-```{r}
-simple_hmm <- read_csv("~/git/ctmc/data/simple_hmm.csv")
-
-simple_hmm %>% 
-  
-```
-
-```{r simple_hmm}
-gibbs <- read_csv("~/git/ctmc/models/simple_hmm_gibbs.csv")
-
-gibbs %>% 
-  group_by(chain) %>% 
-  mutate(iteration = row_number()) %>% 
-  pivot_longer(c("p1", "p2", "p3", "p4"), names_to = "parameter", values_to = "value") %>% 
-  jonnylaw::plot_diagnostics()
-```
 
 

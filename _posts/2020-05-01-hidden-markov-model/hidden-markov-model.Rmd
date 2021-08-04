@@ -3,7 +3,9 @@ title: Functional Programming and Hidden Markov Models
 author: Jonny Law
 date: '2020-05-01'
 slug: multi-state-survival-models-part-2
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    self_contained: false
 categories:
   - Bayesian
   - R
