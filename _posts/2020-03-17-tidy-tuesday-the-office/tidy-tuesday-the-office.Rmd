@@ -150,7 +150,7 @@ add_fitted_draws(newdata = model_data, model = fit) %>%
   ungroup() %>%
   mutate(writer = forcats::fct_reorder(writer, fitted_rating)) %>%
   ggplot(aes(y = writer, x = fitted_rating)) +
-  geom_interval() +
+  geom_interval(aes(xmin = .lower, xmax = .upper)) +
   geom_point(aes(x = imdb_rating), data = writers_by_episode) +
   scale_color_brewer() +
   labs(

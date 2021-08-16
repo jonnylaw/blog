@@ -3,6 +3,7 @@ title: Blog
 site: distill::distill_website 
 listing: 
   posts:
+    - 2021-08-16-mc-dropout-uncertainty
     - 2021-08-04-entity-embeddings
     - 2021-02-02-neural-networks-in-r 
     - 2020-05-01-hidden-markov-model                   

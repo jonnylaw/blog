@@ -112,7 +112,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["distill-preview.png","tidy-tuesday-the-office_files/figure-html5/unnamed-chunk-3-1.png","tidy-tuesday-the-office_files/figure-html5/unnamed-chunk-5-1.png","tidy-tuesday-the-office_files/figure-html5/unnamed-chunk-6-1.png","tidy-tuesday-the-office_files/figure-html5/unnamed-chunk-9-1.png"]}
+  {"type":"character","attributes":{},"value":["distill-preview.png","tidy-tuesday-the-office_files/anchor-4.2.2/anchor.min.js","tidy-tuesday-the-office_files/bowser-1.9.3/bowser.min.js","tidy-tuesday-the-office_files/distill-2.2.21/template.v2.js","tidy-tuesday-the-office_files/figure-html5/unnamed-chunk-3-1.png","tidy-tuesday-the-office_files/figure-html5/unnamed-chunk-5-1.png","tidy-tuesday-the-office_files/figure-html5/unnamed-chunk-6-1.png","tidy-tuesday-the-office_files/figure-html5/unnamed-chunk-9-1.png","tidy-tuesday-the-office_files/header-attrs-2.6/header-attrs.js","tidy-tuesday-the-office_files/header-attrs-2.8/header-attrs.js","tidy-tuesday-the-office_files/jquery-1.11.3/jquery.min.js","tidy-tuesday-the-office_files/popper-2.6.0/popper.min.js","tidy-tuesday-the-office_files/tippy-6.2.7/tippy-bundle.umd.min.js","tidy-tuesday-the-office_files/tippy-6.2.7/tippy-light-border.css","tidy-tuesday-the-office_files/tippy-6.2.7/tippy.css","tidy-tuesday-the-office_files/tippy-6.2.7/tippy.umd.min.js","tidy-tuesday-the-office_files/webcomponents-2.0.0/webcomponents.js"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
   <!--/radix_placeholder_navigation_in_header-->
@@ -1430,7 +1430,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </script>
 
   <!--/radix_placeholder_distill-->
-  <script src="tidy-tuesday-the-office_files/header-attrs-2.6/header-attrs.js"></script>
+  <script src="tidy-tuesday-the-office_files/header-attrs-2.8/header-attrs.js"></script>
   <script src="tidy-tuesday-the-office_files/jquery-1.11.3/jquery.min.js"></script>
   <script src="tidy-tuesday-the-office_files/popper-2.6.0/popper.min.js"></script>
   <link href="tidy-tuesday-the-office_files/tippy-6.2.7/tippy.css" rel="stylesheet" />
@@ -1496,17 +1496,17 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>We can use <code>glimpse</code> from the tibble package to see the column types and some example data from the head of the table.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://tibble.tidyverse.org/reference/glimpse.html'>glimpse</a></span><span class='op'>(</span><span class='va'>episode_ratings</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://pillar.r-lib.org/reference/glimpse.html'>glimpse</a></span><span class='op'>(</span><span class='va'>episode_ratings</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>Rows: 188
 Columns: 6
-$ season      &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,…
-$ episode     &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10…
-$ title       &lt;chr&gt; &quot;Pilot&quot;, &quot;Diversity Day&quot;, &quot;Health Care&quot;, &quot;The A…
-$ imdb_rating &lt;dbl&gt; 7.6, 8.3, 7.9, 8.1, 8.4, 7.8, 8.7, 8.2, 8.4, 8.…
-$ total_votes &lt;dbl&gt; 3706, 3566, 2983, 2886, 3179, 2852, 3213, 2736,…
-$ air_date    &lt;date&gt; 2005-03-24, 2005-03-29, 2005-04-05, 2005-04-12…</code></pre>
+$ season      &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, …
+$ episode     &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,…
+$ title       &lt;chr&gt; &quot;Pilot&quot;, &quot;Diversity Day&quot;, &quot;Health Care&quot;, &quot;The Al…
+$ imdb_rating &lt;dbl&gt; 7.6, 8.3, 7.9, 8.1, 8.4, 7.8, 8.7, 8.2, 8.4, 8.4…
+$ total_votes &lt;dbl&gt; 3706, 3566, 2983, 2886, 3179, 2852, 3213, 2736, …
+$ air_date    &lt;date&gt; 2005-03-24, 2005-03-29, 2005-04-05, 2005-04-12,…</code></pre>
 </div>
 <p>Firstly, I will plot the distribution of ratings by season. We can see that the ratings dropped after season 8 when Steve Carell left the show.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1618,13 +1618,13 @@ p(\phi) &amp;= \textrm{Gamma}(0.01, 0.01).
 <p>Next we plot the posterior fitted values using the <a href="https://mjskay.github.io/tidybayes/">tidybayes package</a> and overlay the actual episode ratings using points. Those with fewer writing credits have a larger posterior credible interval.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html'>add_fitted_draws</a></span><span class='op'>(</span>newdata <span class='op'>=</span> <span class='va'>model_data</span>, model <span class='op'>=</span> <span class='va'>fit</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='http://mjskay.github.io/tidybayes/reference/tidybayes-deprecated.html'>add_fitted_draws</a></span><span class='op'>(</span>newdata <span class='op'>=</span> <span class='va'>model_data</span>, model <span class='op'>=</span> <span class='va'>fit</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>fitted_rating <span class='op'>=</span> <span class='va'>.value</span> <span class='op'>*</span> <span class='fl'>10</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'><a href='http://mjskay.github.io/ggdist/reference/point_interval.html'>median_qi</a></span><span class='op'>(</span><span class='va'>fitted_rating</span>, .width <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>.95</span>, <span class='fl'>.8</span>, <span class='fl'>.5</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>ungroup</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>writer <span class='op'>=</span> <span class='fu'>forcats</span><span class='fu'>::</span><span class='fu'><a href='https://forcats.tidyverse.org/reference/fct_reorder.html'>fct_reorder</a></span><span class='op'>(</span><span class='va'>writer</span>, <span class='va'>fitted_rating</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='va'>writer</span>, x <span class='op'>=</span> <span class='va'>fitted_rating</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
-  <span class='fu'><a href='http://mjskay.github.io/ggdist/reference/geom_interval.html'>geom_interval</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'><a href='http://mjskay.github.io/ggdist/reference/geom_interval.html'>geom_interval</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>xmin <span class='op'>=</span> <span class='va'>.lower</span>, xmax <span class='op'>=</span> <span class='va'>.upper</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>imdb_rating</span><span class='op'>)</span>, data <span class='op'>=</span> <span class='va'>writers_by_episode</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/scale_brewer.html'>scale_color_brewer</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>
@@ -1647,9 +1647,9 @@ p(\phi) &amp;= \textrm{Gamma}(0.01, 0.01).
 <p>Now use the <a href="https://rtweet.info/">rtweet</a> library to post the plots directly to Twitter without leaving R. You must connect to the Twitter API using OAuth as described in <a href="https://rtweet.info/articles/auth.html">this vignette</a>, I set the Twitter application keys in my <code>.Renviron</code> file which is never committed to public version control (this can be easily edited using <code>usethis::edit_r_environ()</code>).</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://CRAN.R-project.org/package=rtweet'>rtweet</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>rtweet</span><span class='op'>)</span>
 
-<span class='va'>token</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/rtweet/man/create_token.html'>create_token</a></span><span class='op'>(</span>
+<span class='va'>token</span> <span class='op'>&lt;-</span> <span class='fu'>create_token</span><span class='op'>(</span>
   app <span class='op'>=</span> <span class='st'>"rstats"</span>,
   consumer_key <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span><span class='op'>(</span><span class='st'>"TWITTER_API_KEY"</span><span class='op'>)</span>, 
   consumer_secret <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span><span class='op'>(</span><span class='st'>"TWITTER_API_SECRET_KEY"</span><span class='op'>)</span>,
@@ -1661,7 +1661,7 @@ p(\phi) &amp;= \textrm{Gamma}(0.01, 0.01).
 <p>The function <code>post_tweet</code> can be used to post a new tweet.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/pkg/rtweet/man/post_tweet.html'>post_tweet</a></span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>post_tweet</span><span class='op'>(</span>
   status <span class='op'>=</span> <span class='st'>"This week's #TidyTuesday data is from the US Office TV series. I've fit a simple Bayesian hierarchical model using Stan and BRMS to determine which writers produce the highest rated episodes. Full code: https://jonnylaw.rocks/blog/tidy-tuesday-the-office/ #rstats"</span>,
   media <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"brms_ratings_by_writer.png"</span>, <span class='st'>"ratings_by_writer.png"</span><span class='op'>)</span>,
   token <span class='op'>=</span> <span class='va'>token</span>
