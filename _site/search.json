@@ -6,14 +6,14 @@
       "description": "About the author.",
       "author": [],
       "contents": "\nJonny Law is a data scientist at the National Innovation Centre for Data, working with local and national companies to allow them to make the most of their data. Previously he was a Statistics PhD student on the Cloud Computing for Big Data CDT. His primary research interest is in using functional programming for Bayesian Inference using Scala.\nSkills\nR\nScala\nPython\nSQL\nBayesian Statistics\nTime series analysis\nMachine Learning\nProjects\nBayesian State Space Model\ngit.io/dlm A Scala library for Dynamic Linear Models, with filtering and parameter inference algorithms\nGaussian Processes\ngit.io/gaussianprocesses A Scala library for Gaussian Processes\nComposable POMP Models\ngit.io/statespace A Scala library for online Bayesian filtering of univariate state space models, sometimes called POMP (Partially Observed Markov Process Models).\n\n\n\n",
-      "last_modified": "2021-08-16T16:08:56+01:00"
+      "last_modified": "2021-09-27T13:33:04+01:00"
     },
     {
       "path": "index.html",
       "title": "Blog",
       "author": [],
       "contents": "\n\n\n\n",
-      "last_modified": "2021-08-16T16:09:01+01:00"
+      "last_modified": "2021-09-27T13:33:05+01:00"
     }
   ],
   "collections": ["posts/posts.json"]

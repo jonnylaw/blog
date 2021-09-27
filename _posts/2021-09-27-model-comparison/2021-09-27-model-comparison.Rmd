@@ -1,0 +1,184 @@
+---
+title: "Model Comparison with Hierarchical Models"
+description: |
+  Comparing the performance of multiple machine learning models using Bayesian Hierarchical models.
+author:
+  - name: Jonny Law
+date: 2021-09-27
+bibliography: bibliography.bib
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidymodels)
+library(patchwork)
+theme_set(theme_minimal())
+```
+
+One common problem in machine learning is comparing models. Some choose to calculate a single metric (accuracy, ROC AUC etc.) and compare the value across several models, however fitting multiple models to the same train-test split can result in overfitting. To combat this, we can perform k-fold cross validation. Additionally, we can then use a statistical model to determine if the difference in performance between the models fit on the same k-folds is real or random variation in the sampled test sets. This post uses a method common to meta-analysis, when combining and understanding results from multiple related trials with possibly different datasets. This method has been used for comparing ML models and a detailed treatment for ML model comparison can be found in @benavoli2017time.
+
+To evaluate the methods, we will first simulate some data. Let's consider a multiple linear regression with polynomial relationships.
+
+$$
+\begin{aligned}
+y_i \sim \mathcal{N}(x_1 \beta_1 + x_2^2\beta_2 + x_3^3\beta_3, \sigma^2)
+\end{aligned}
+$$
+
+```{r simulate-data}
+n <- 1000
+# Sample coefficients from standard normal
+beta <- rnorm(3)
+# Sample variance from exponential
+sigma <- rexp(1)
+X <- matrix(rnorm(3 * n), nrow = n, byrow = TRUE)
+y <- rnorm(n = n, mean = cbind(X[,1], X[,2]^2, X[,3]^3) %*% beta, sd = sigma)
+```
+
+```{r plot-simulation, echo=FALSE, fig.cap="Plot of the simulated data"}
+df <- X %>% 
+  as_tibble() %>% 
+  set_names(paste0("X", 1:3)) %>% 
+  add_column(y = y)
+
+df %>% 
+  pivot_longer(starts_with("X")) %>% 
+  ggplot(aes(value, y)) +
+  geom_point() +
+  facet_wrap(vars(name))
+```
+We have a dataset of size $n = `r n`$, we split the dataset into $k = 5$ folds by sampling 5 non-overlapping test sets. We use the `vfold_cv` function from [`rsample`](https://rsample.tidymodels.org).
+
+```{r, k-fold-split}
+splits <- vfold_cv(df, v = 5)
+```
+
+Next, we propose a few candidate models. We can specify the model which is used to generate the data and a random forest which should do a good job to unpick the relationship.
+
+```{r specify models}
+model1 <- linear_reg() %>% 
+  set_engine("lm")
+
+rf <- rand_forest()
+```
+
+We can now specify a workflow set, this includes a recipe for each model. 
+
+```{r}
+wfs <- workflowsets::workflow_set(
+  preproc = list(
+    "linear" = y ~ .,
+    "true" = y ~ X1 + poly(X2, 2) + poly(X3, 3),
+    "linear" = y ~ .
+  ),
+  models = list(
+    linear_reg = linear_reg() %>% set_engine("lm"),
+    linear_reg = linear_reg() %>% set_engine("lm"),
+    rf = rand_forest(mode = "regression") %>% set_engine("ranger")
+  ),
+  cross = FALSE
+)
+```
+
+```{r}
+wf_results <- workflow_map(wfs, resamples = splits, fn = "fit_resamples", verbose = TRUE)
+```
+
+Figure \@ref(fig:plot-results) (left) shows the root mean squared error (RMSE) between each models prediction and the corresponding actual value in the test set. The results appear as a box-plot since the 
+
+$$\text{RMSE} = \sqrt{\sum_{i=1}^N (y_i - f(x_i))^2}$$
+
+Where $N$ is the number of data points in the test dataset (it's $N = 200$ in our example), $y_i$ is value of the $i^{th}$ test example and $f(x_i)$ is the prediction for the $i^{th}$ datapoint. 
+
+Figure \@ref(fig:plot-results) (right) shows the R-squared value, the proportion of explained variance. The R squared value is calculated by
+
+$$R^2 = 1 - \frac{SS_\text{res}}{SS_{\text{tot}}}$$
+
+Where,
+
+$$SS_{\text{res}}=\sum_{i=1}^N (y_i - f(x_i))^2,\\
+SS_\text{tot} = \sum_{i=1}^N(y_i - \bar{y})^2.$$
+
+```{r plot-results, echo=FALSE, fig.cap="Boxplot showing the results from the 5-fold cross validation for each of the three models (Left) RMSE, (Right) R-squared"}
+results_df <- wf_results %>% 
+  unnest() %>% 
+  unnest(.metrics) %>% 
+  select(wflow_id, fold = id, .metric, .estimate) %>% 
+  pivot_wider(names_from = .metric, values_from = .estimate)
+
+results_df %>% 
+  pivot_longer(c("rmse", "rsq"), names_to = "metric") %>% 
+  ggplot(aes(x = wflow_id, y = value)) +
+  geom_boxplot() +
+  facet_wrap(vars(metric), scales = "free_y")
+```
+
+## Hierarchical Model
+
+We must ensure the $k$-folds we sample are identical across models. We can then use a statistical model to determine if the differences between models are real or simply random variation in the sampled test sets. To perform the comparison we consider the RMSE for each of the $k=5$ folds. $y_{ij}$, $i = 1, \dots, k$, $j = 1, \dots N_\text{models}$ is the calculated root mean squared error for the $i^{th}$ fold, with the $j^{th}$ model. We use a log transformation on the RMSE, which is a positive real number, $\mathbb{R}_{\geq 0}$, which transforms the metric to be unconstrained on the real line $\operatorname{log}: \mathbb{R}_{\geq 0} \rightarrow \mathbb{R}$. The outcome is then suitable to model using a Normal distribution.
+
+$$
+\begin{aligned}
+y_{ij} &= \mathcal{N}(\mu_{ij}, \sigma^2), \\
+\mu_{ij} &= (\beta_0 + b_i) + \beta_1 x_{i1} + \beta_2 x_{i2}, \\
+b_i &\sim t(1), \\
+\beta_j &\sim \mathcal{N}(0, 10), \\
+\sigma &\sim \operatorname{Exponential}(1).
+\end{aligned}
+$$
+
+This is a random intercept model, where $b_i$ is drawn from a t-distribution with 1 degree of freedom. This means the coefficients, $\beta_j$ will be the same across folds in each model and the difference between folds is modeled by the random intercept. For our purposes, we are not interested in the difference between folds, just the difference between the models represented by the $\beta_j$ coefficients. The variation between the metrics for each fold will inform us how certain our posterior predictions are. Figure \@ref(fig:performance-folds) shows the RMSE and R-squared for each of the five folds.
+
+```{r performance-folds, fig.cap="Performance metrics for each fold in the 5-fold cross validation. We can see that due to sampling variation, there is a difference between the measured performance for each fold.", echo=FALSE}
+results_df %>%
+  pivot_longer(c("rmse", "rsq")) %>%
+  ggplot(aes(x = fold, y = value, colour = wflow_id, group = wflow_id)) +
+    geom_line() +
+    facet_wrap(vars(name), scales = "free_y") 
+```
+
+```{r model-comparison, results='hide'}
+# To compare between models, we have as the id column the fold under consideration.
+# each column then corresponds to a model with the same metric.
+fit <- results_df %>%
+  select(id = fold, model = wflow_id, rmse) %>%
+  pivot_wider(names_from = model, values_from = rmse) %>%
+  tidyposterior::perf_mod(
+    formula = statistic ~ model + (1 | id), 
+        transform=tidyposterior::ln_trans,
+    prior_intercept = rstanarm::student_t(df = 1)
+  )
+```
+
+```{r map-diff, echo=FALSE}
+map_difference <- tidyposterior::contrast_models(fit,
+                list_1 = "true_linear_reg",
+                list_2 = "linear_linear_reg",
+                seed = 1103)
+```
+
+
+Figure \@ref(fig:posterior-performance) (left) shows the posterior distribution of the RMSE for the two linear regression models applied to the simulated dataset. Figure \@ref(fig:posterior-performance) (right) shows the posterior difference between the estimated RMSE for the linear regression model specified with the known data generating process, compared to the linear regression model without polynomial terms. There is 95% probability that the RMSE of the model which uses the known data generating process is `r abs(round(quantile(map_difference$difference, probs = c(0.05)), digits=2))` smaller than linear regression model specified without polynomial terms.
+
+```{r posterior-performance, fig.cap="Posterior predictive distributions for the performance of the the regression models. (Left) RMSE for each model. (Right) Difference in the RMSE for the two linear regression models.", echo=FALSE}
+p1 <- fit %>%
+  broom::tidy(seed = 7) %>%
+  mutate(model = forcats::fct_inorder(model)) %>%
+  ggplot(aes(x = posterior)) +
+  geom_histogram(bins = 50, col = "white", fill = "blue", alpha = 0.4) +
+  facet_wrap(~ model, ncol = 1) +
+  labs(x = paste("Posterior for RMSE"))
+
+p2 <- map_difference %>%
+  as_tibble() %>%
+  ggplot(aes(x = difference)) +
+  geom_vline(xintercept = 0, lty = 2) +
+  geom_histogram(bins = 50, col = "white", fill = "red", alpha = 0.4) +
+  labs(x = paste("Posterior for mean difference in RMSE"))
+
+p1 | p2
+```

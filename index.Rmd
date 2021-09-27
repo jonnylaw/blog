@@ -3,12 +3,13 @@ title: Blog
 site: distill::distill_website 
 listing: 
   posts:
+    - 2021-09-27-model-comparison
     - 2021-08-16-mc-dropout-uncertainty
     - 2021-08-04-entity-embeddings
     - 2021-02-02-neural-networks-in-r 
     - 2020-05-01-hidden-markov-model                   
     - 2020-04-19-multi-state-survival-models            
-    - 2020-04-08-tidy-tuesday-tour-de-france           
+    - 2020-04-08-tidy-tuesday-tour-de-france
     - 2020-03-27-bayesian-inference-for-an-sir-model    
     - 2020-03-17-tidy-tuesday-the-office               
     - 2020-03-10-tidy-tuesday-us-tuition-data           
