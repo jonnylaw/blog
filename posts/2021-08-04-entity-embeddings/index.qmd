@@ -1,0 +1,212 @@
+---
+title: "Entity Embeddings"
+description: |
+  Creating entity embeddings for categorical predictors using Python.
+date: "2021-08-04"
+categories:
+  - Python
+  - Deep Learning
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+reticulate::use_virtualenv("/Users/jonnylaw/.virtualenvs/entity_embeddings-Xxyc6zLp/", required = TRUE)
+library(reticulate)
+```
+
+The tidymodels framework in R has a function for [constructing Entity Embeddings](https://embed.tidymodels.org/articles/Applications/Tensorflow.html) from categorical features. The library is know as [embed](https://embed.tidymodels.org/) and the heavy lifting (neural network fitting) is performed using Keras. What if we want something similar in Python and sklearn. First, we will aim to understand what an embedding is and how it can be created (and re-used). Embeddings are familiar to those who have used the Word2Vec model for natural language processing (NLP). Word2Vec is a shallow neural network trained on a corpus of (unlabelled) documents. The task of the network is to predict a context word close to the original word. The resulting shallow network has an "embedding matrix" which has the same number of rows as the number of words in the corpus vocabulary and a user-chosen embedding dimension as the number of columns. Each row represents the position of a word in the embedding space and its location is very close to its meaning. Additionally, we can perform arithmetic with the embeddings and get reasonable answers. 
+
+We can use this same technique to embed high-dimensional categorical variables when we have lots of data. This can be seen in a 2017 publication from ASOS, an online fashion retailer ([Customer Lifetime Value Prediction Using Embeddings, Chamberlain et. al., KDD 2017](https://dl.acm.org/doi/pdf/10.1145/3097983.3098123)).
+
+## PyTorch Model
+
+First we must create a new Neural Network architecture, in PyTorch this means that we extend `torch.nn.Module` class which requires the implementation of a `forward` method. The `forward` method creates a prediction from the input, the method consists of applications of matrix multiplications and activations. In this case, we have an `Embedding` module for each categorical feature (of dimension `(n_categories, hidden_dim)`), created using `nn.ModuleList`. The embedding module enables us to "look up" the corresponding row of the embedding matrix for that categorical variable and return the embedding for that category. For the continuous features, we have a linear layer of dimension `(num_cont, hidden_dim)` which can then be combined using `torch.cat`, the ReLU activation function is used and the output is calculated using another linear layer of dimension `(2 hidden_dim, num_output_classes)`. There is no activation on the network, since it is typically more efficient to use a loss function which also includes the calculation of the activation function, `BCEWithLogitsLoss` vs `BCELoss`.
+
+PyTorch implements the backprop algorithm which will create a `backward` function, this backward function is the derivative of the network with respect to the input. This derivative is used in the optimisation algorithms to learn the values of the parameters which minimise the loss function.
+
+We will start with some imports required to use PyTorch.
+
+```{python}
+import torch.nn as nn
+import torch
+```
+
+
+```{python}
+class EmbeddingClassification(nn.Module):
+    """Embed a single categorical predictor
+    
+    Keyword Arguments:
+    
+    num_output_classes: int
+    num_cat_classes: list[int]
+    num_cont: int
+    embedding_dim: int
+    hidden_dim: int
+    """
+    def __init__(self, num_output_classes, num_cat_classes, num_cont, 
+    embedding_dim=64, hidden_dim=64):
+        super().__init__()
+        # Create an embedding for each categorical input
+        self.embeddings = nn.ModuleList([nn.Embedding(nc, embedding_dim) for nc in num_cat_classes])
+        self.fc1 = nn.Linear(in_features=len(num_cat_classes) * embedding_dim, out_features=hidden_dim)
+        self.fc2 = nn.Linear(in_features=num_cont, out_features=hidden_dim)
+        self.relu = nn.ReLU()
+        self.out = nn.Linear(2 * hidden_dim, num_output_classes)
+        
+    def forward(self, x_cat, x_con):
+        # Embed each of the categorical variables
+        x_embed = [emb(x_cat[:, i]) for i, emb in enumerate(self.embeddings)]
+        x_embed = torch.cat(x_embed, dim=1)
+        x_embed = self.fc1(x_embed)
+        x_con = self.fc2(x_con)
+        x = torch.cat([x_con, x_embed.squeeze()], dim=1)
+        x = self.relu(x)
+        return self.out(x)    
+```
+
+## Titanic Dataset
+
+I will show how the embeddings work in practice using the titanic dataset. This is not the ideal dataset to use with embeddings since each categorical variable has a small number of categories, however it is well understood and useful for pedagogical purposes.
+
+```{python}
+import pandas as pd
+from collections import Counter
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import KNNImputer
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder
+
+SEED=7
+```
+
+First we must pre-process the data,
+
+* Parse the `Name` column to extract the title as an additional categorical variable
+* Select the columns to include
+* Interpolate the numeric columns using a `KNNImputer`
+* Split the data into a training/test split
+
+```{python}
+df = pd.read_csv('titanic.csv')
+
+# Derive title column
+df['Title'] = df['Name'].str.extract('([A-Za-z]+\.)', expand = False)
+
+# Count the occurences of Title by category
+def get_category_count(x, categorical_columns):
+    return [Counter(x[c]) for c in categorical_columns]
+  
+# Filter low occurences (less than or equal to 3?)
+cat_counts = get_category_count(df, ["Title"])
+rare_titles = [k for k, v in cat_counts[0].items() if v < 3]
+df['Title'].replace(to_replace=rare_titles, value='other', inplace=True)
+
+include = ['Sex', 'Age', 'Fare', 'Title']
+x = df[include]
+y = df['Survived']
+
+# Define the numeric and categorical columns
+num_cols = ['Fare', 'Age']
+cat_cols = ['Sex', 'Title']
+
+# Split the data into training and test
+x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=SEED)
+
+# Interpolate the numeric columns using KNN and scale using the StandardScaler
+num_standard = Pipeline(steps=[
+    ('imputer', KNNImputer(n_neighbors=5)),
+    ('scaler', StandardScaler())
+])
+```
+
+We then need to encode the categorical variables by assigning a number to each of the possiblities. This allows us to use an embedding layer in the PyTorch neural network (NN). NNs only work with numerical input.
+
+```{python}
+preprocessor = ColumnTransformer(
+transformers=[
+    ("num_std", num_standard, num_cols),
+    ("ordinal_encode", OrdinalEncoder(), cat_cols),
+    ]
+)
+
+preprocessed = preprocessor.fit_transform(x_train, y=None)
+preprocessed_df = pd.DataFrame(preprocessed, columns=num_cols + cat_cols)
+```
+
+```{python}
+def get_categorical_dimensions(x, categorical_columns):
+  count_of_classes = get_category_count(x, categorical_columns)
+  return [len(count) for count in count_of_classes]
+
+
+def entity_encoding_classification(x, categorical_columns, num_classes):
+  """
+  Convenience function for the EmbeddingClassification model which     
+  
+  Keyword Arguments:
+  x: pandas df
+  y: target column
+  categorical_columns: list[int] a list of the indices of the categorical columns
+  num_classes: int the number of output classes of the target column
+  """
+  x_con = x.drop(categorical_columns, axis=1)
+  categorical_dimension = get_categorical_dimensions(x, categorical_columns)
+  return EmbeddingClassification(num_classes, categorical_dimension, len(x_con.columns))
+```
+
+Now we can create the Pytorch model using the function we just defined.
+
+```{python}
+model = entity_encoding_classification(x_train, cat_cols, 1)
+```
+
+We will not write out own training loop, instead we will use the [Skorch](https://skorch.readthedocs.io) library. The Skorch library allows us to use the sklearn API with our own PyTorch models. Skorch provides classes, such as `NeuralNetBinaryClassifier`, with default loss functions (binary cross entropy in this case), train/validation split logic, console logging of loss, validation loss etc. These can be customised, and [additional call-backs](https://skorch.readthedocs.io/en/stable/user/callbacks.html) can be added such as model checkpointing, early stopping, custom scoring metrics and all metrics from sklearn. Other types of model (regression, semi-supervised, reinforcement learning etc.) can be fit using the more generic class `NeuralNet`.
+
+```{python}
+from skorch import NeuralNetBinaryClassifier
+
+net = NeuralNetBinaryClassifier(
+    module = model,
+    iterator_train__shuffle=True, 
+    max_epochs=100,
+    verbose=False
+)
+```
+
+To pass multiple arguments to the forward method of the Skorch model we must specify a [SliceDict](https://skorch.readthedocs.io/en/stable/user/helper.html#slicedict) such that Skorch can access the data and pass it to the module properly.
+
+```{python}
+from skorch.helper import SliceDict
+
+Xs = SliceDict(
+    x_cat=preprocessed_df[cat_cols].to_numpy(dtype="long"), 
+    x_con=torch.tensor(preprocessed_df[num_cols].to_numpy(), dtype=torch.float)
+)
+```
+
+We can now use the sklearn `fit` method with our PyTorch model. This trains the weights of the neural network using back-propagation.
+
+```{python}
+net.fit(Xs, y=torch.tensor(y_train, dtype=torch.float))
+```
+
+Finally, we pre-process the test data by re-using the pipelines from the training data and we can calculate the test accuracy.
+
+```{python}
+from sklearn.metrics import classification_report
+
+x_test_pre = preprocessor.transform(x_test)
+preprocessed_test = pd.DataFrame(x_test_pre, columns=num_cols + cat_cols)
+
+Xs_test = SliceDict(
+    x_cat=preprocessed_test[cat_cols].to_numpy(dtype="long"), 
+    x_con=torch.tensor(preprocessed_test[num_cols].to_numpy(), dtype=torch.float)
+)
+
+net.score(Xs_test, y_test)
+```
+
+This post shows how to implement entity embeddings using Python, and how to incorporate custom PyTorch models into an sklearn pipeline.

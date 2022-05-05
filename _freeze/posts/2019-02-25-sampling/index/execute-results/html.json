@@ -1,0 +1,16 @@
+{
+  "hash": "0e01faf52397884bf905e4736f2114a0",
+  "result": {
+    "markdown": "---\ntitle: \"Sampling from a distribution with a known CDF\"\nauthor: \"Jonny Law\"\ndate: '2019-02-25'\nslug: inverse-sampling\ncategories:\n  - R\n---\n\n\n\n\nA distribution with an inverse cumulative distribution function (CDF) can be\nsampled from using just samples from $U[0, 1]$. The inverse CDF (sometimes\ncalled the quantile function) is the value of $x$ such that $F_X(x) = Pr(X \\leq x) = p$. Consider a that a transformation $g: [0, 1] \\rightarrow \\mathbb{R}$,\nexists which takes a value sampled from the standard\nuniform distribution $u \\sim U[0, 1]$ and returns a value distributed according\nto the target distribution. Then the inverse CDF can be written as:\n\n\n$$Pr(g(U) \\leq x) = Pr(U \\leq g^{-1}(x)) = g^{-1}(x)$$\n\nSince the CDF of the uniform distribution over the interval $[0, 1]$ is:\n\n$$\\begin{align*}\n\n  F_U(u) =\n  \\begin{cases}\n    0 & u < 0 \\\\\n    u & u \\in [0, 1) \\\\\n    1 & u \\geq 1\n  \\end{cases}\n\\end{align*}$$\n\nThen $F_x^{-1}(X) = g(x)$ as required. The algorithm below summarises the inverse sampling procedure.\n\n1. Sample $u \\sim U[0, 1]$\n2. Evaluate $x = F^{-1}(u)$\n3. Return $x$\n \nMost statistical packages will expose the quantile function for common\ndistributions making it practical to use inverse sampling.\nThe figure below shows a histogram of 1,000 simulated values from a\n$\\textrm{Gamma}(3, 4)$ distribution using the inverse CDF method, the analytical\ndensity is plotted in red.\n\nThe figure below shows samples from $\\textrm{Gamma}(3, 4)$ using the inverse CDF method plotted with the analytical PDF.\n\n\n::: {.cell}\n\n```{.r .cell-code}\ninverse_cdf_sample <- function(inv_cdf) {\n  u <- runif(1)\n  inv_cdf(u)\n}\n\ninv_cdf <- function(x) qgamma(p = x, shape = 3, rate = 4)\ngamma_samples <- replicate(1000, inverse_cdf_sample(inv_cdf))\n\nggplot(tibble(gamma_samples)) +\n  geom_histogram(aes(x = gamma_samples, y = ..density..), alpha = 0.4) +\n  stat_function(\n    fun = function(x) dgamma(x, shape = 3, rate = 4),\n    aes(colour = \"Gamma Density\")\n  ) +\n  theme(\n    text = element_text(size = 12), legend.title = element_blank(),\n    legend.text = element_text(size = rel(1.0)), legend.position = c(0.8, 0.8)\n  ) +\n  ylab(\"density\") +\n  xlab(\"value\")\n```\n\n::: {.cell-output .cell-output-stderr}\n```\n`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.\n```\n:::\n\n::: {.cell-output-display}\n![](index_files/figure-html/inverse-sampling-gamma-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": null
+  }
+}

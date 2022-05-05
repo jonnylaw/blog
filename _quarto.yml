@@ -1,0 +1,18 @@
+project:
+  type: website
+
+website:
+  title: "Bayesian Inference and Functional Programming"
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/
+      - icon: twitter
+        href: https://twitter.com
+format:
+  html:
+    theme: litera
+    css: styles.css
+
+site-url: https://jonnylaw.rocks

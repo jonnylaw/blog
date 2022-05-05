@@ -1,0 +1,67 @@
+---
+title: "Releasing Harrier League Data"
+date: "2020-03-04"
+slug: harrier_league_open_data
+categories:
+  - R
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(ggridges)
+library(jonnylaw)
+library(ggplot2)
+library(dplyr)
+library(readr)
+```
+
+The North East Harrier League is a series of cross country running races in the North East of England taking place over the winter from September to March. Results are available online from 2012-13 season to the present season 2019-20. The results are available online in HTML format. I have downloaded and cleaned the data and it can be used for analysis or exploration. The data for senior men and women is available in a tabular format in my blog package - see the file which contains the parsing functions [here](https://github.com/jonnylaw/jonnylaw/blob/master/R/harrier_league.R) to get an insight into what it takes to parse this kind of data. 
+
+I used the following R packages to download, parse the HTML and clean the resulting data
+
+- [rvest](https://rvest.tidyverse.org/) is a web scraping library for R. The functions `read_html`, `html_table` were used to download the raw html and extract tables created using `<table>` tags. `html_node` can be used to find a specific tag, for instance the date of a fixture was often in a main header denoted by either `<h1>` or `<h2>`.
+- [dplyr](https://dplyr.tidyverse.org/) provides a suite of functions which can be used to manipulate columns of a dataframe in a declarative, functional way.
+- [stringr](https://stringr.tidyverse.org/) was used to parse strings in the raw data and the HTML. Information such as division is included in the same table cell as the name. This can be extracted using `str_extract(name, pattern = "[1-3]")` the regex matches either 1, 2 or 3 and extracts the matching number.
+
+The data can be accessed by installing my R package which contains a selection of R code relating to this blog.
+
+```{r echo=TRUE}
+# install.packages("remotes")
+# remotes::install_github("jonnylaw/jonnylaw")
+data("harrier_league_results")
+```
+
+## Determining the most difficult course
+
+As a quick example of what can be done with the data I will consider the running time by course. The data can be split by male and female. However the men and women don't compete over the same distance with the women completing two laps and the men completing three. Therefore we can plot the average time for a single lap of the course (obviously this doesn't account for changing pace throughout the race). It appears that the hardest (or longest) course is Aykley Heads with the highest median race time.
+
+```{r}
+harrier_league_results <- harrier_league_results %>%
+  mutate(
+    course_formatted = forcats::fct_reorder(
+      .f = course_formatted,
+      .x = time_seconds,
+      .fun = median,
+      na.rm = TRUE
+    )
+  ) %>%
+  mutate(average_lap_time = if_else(sex == "M", time_seconds / 3, time_seconds / 2))
+
+harrier_league_results %>% 
+  ggplot(aes(
+    x = average_lap_time,
+    y = course_formatted,
+    height = ..density..,
+    fill = sex,
+    point_colour = sex
+  )) +
+  geom_density_ridges(
+    state = "density",
+    scale = .95,
+    rel_min_height = .01
+  ) +
+  scale_fill_manual(values = c("#D55E0050", "#0072B250")) +
+  theme_ridges(center = TRUE) +
+  scale_y_discrete(labels = tools::toTitleCase) +
+  labs(x = "Average Lap Time (seconds)", y = "Course")
+```

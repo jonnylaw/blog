@@ -1,0 +1,291 @@
+---
+title: "Gibbs Sampling for the Hidden Markov Model"
+description: |
+  "Determining the parameters of a simple HMM using functional programming in R."
+date: 2020-07-30
+categories:
+  - R
+  - Bayesian
+draft: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(jonnylaw)
+library(tidyverse)
+theme_set(theme_minimal())
+```
+
+In this post we will consider the backward smoothing algorithm for a hidden Markov model (HMM). While exploring the derivation and implementation we will consider how to avoid the use of mutable state and implement the algorithm in a purely functional way. This post follows from the previous post discussing [hidden Markov models] and functional programming, the inference scheme developed in that post was a Metropolis-Hastings algorithm where the marginal likelihood calculated using the HMM forward algorithm.
+
+We will consider another parameter inference algorithm, a Gibbs sampling algorithm targeting the posterior distribution of the transition matrix.
+
+## Simple HMM
+
+The transition matrix used to simulate the sequence of states and observations is
+
+$$P = \begin{pmatrix}
+0.5 & 0.5 \\
+0.4 & 0.6
+\end{pmatrix}$$
+
+The emission matrix used to simulate the sequence of states and observations is
+
+$$B = \begin{pmatrix}
+0.2 & 0.8 \\
+0.9 & 0.1
+\end{pmatrix}.$$
+
+```{r}
+P <- matrix(c(0.5, 0.5, 0.4, 0.6), byrow = T, ncol = 2)
+B <- matrix(c(0.2, 0.8, 0.9, 0.1), byrow = T, ncol = 2)
+simple_hmm <-
+  hmm_simulate(300, c(1, 0), P, function(state)
+    sample(1:2, size = 1, prob = B[state, ]))
+
+simple_hmm %>% 
+  filter(time < 100) %>% 
+  pivot_longer(-time, values_to = "value", names_to = "key") %>% 
+  ggplot(aes(x = time, y = value)) +
+  geom_step() +
+  facet_wrap(~key, ncol = 1)
+```
+
+First we calculate the number of state transitions. We can use the function `reduce2`, which starts with two initial values and accepts a reduction function of the form `(accumulator, from, to) -> new_accumulator`. We have the sequence of observations of the discrete hmm, we simply initialise a matrix of zeros with the same dimension as the number of states as the accumulator and add one to the entry in the matrix each time we see a given transition. 
+
+```{r}
+state_transitions <- function(
+  n_states,
+  states) {
+  n <- length(states)
+  zeros <- matrix(0, nrow = n_states, ncol = n_states)
+  
+  purrr::reduce2(states[-n], states[-1], function(acc, from, to) {
+    acc[from, to] <- acc[from, to] + 1
+    acc
+  }, .init = zeros)
+}
+```
+
+```{r}
+state_transitions(2, simple_hmm$y)
+```
+
+```{r filtered-state}
+fwd <- hmm_forward(simple_hmm$y, x0 = c(0, 1), transition_matrix = P, observation = function(y) B[,y])
+tibble(
+  time = seq_len(length(fwd)),
+  filtered_state = purrr::map_dbl(fwd, which.max),
+  p_state1 = purrr::map_dbl(fwd, ~ .[1])
+) %>% 
+  inner_join(simple_hmm, by = "time") %>% 
+  pivot_longer(c("x", "y", "p_state1", "filtered_state"), names_to = "key", values_to = "value") %>% 
+  ggplot(aes(x = time, y = value)) +
+  geom_step() +
+  facet_wrap(~key, ncol = 1, scales = "free_y")
+```
+
+```{r define-backward}
+hmm_backward_step <- function(beta, y, transition_matrix, observation) {
+  normalise(transition_matrix %*% (observation(y) * beta))
+}
+
+hmm_backward <- function(ys, transition_matrix, observation) {
+  purrr::accumulate(
+    rev(ys),
+    hmm_backward_step,
+    observation = observation, 
+    transition_matrix = transition_matrix,
+    .init = c(1, 1)
+  ) %>% rev()
+}
+
+hmm_forward_backward <- function(ys, x0, transition_matrix, observation) {
+  n <- length(ys)
+  f <- hmm_forward(ys, x0, transition_matrix, observation)
+  b <- hmm_backward(ys, transition_matrix, observation)
+  purrr::map2(f, b[-(n+1)], ~ jonnylaw:::normalise(.x * .y))
+}
+```
+
+```{r smoothed-state}
+backward <- hmm_backward(ys = simple_hmm$y, transition_matrix = P, observation = function(y) B[,y])
+
+p1 <- tibble(
+  time = seq_len(length(fwd)),
+  smoothed_p_state1 = purrr::map_dbl(backward, ~ .[1])[-301],
+  filtered_p_state1 = purrr::map_dbl(fwd, ~ .[1])
+) %>% 
+  inner_join(simple_hmm, by = "time") %>% 
+  pivot_longer(c("smoothed_p_state1", "filtered_p_state1"), names_to = "key", values_to = "value") %>% 
+  ggplot(aes(x = time, y = value)) +
+  geom_step() +
+  facet_wrap(~key, ncol = 1)
+
+p2 <- tibble(
+  time = seq_len(length(fwd)),
+  smoothed_p_state1 = purrr::map_dbl(backward, ~ .[1])[-301],
+  filtered_p_state1 = purrr::map_dbl(fwd, ~ .[1])
+) %>% 
+  inner_join(simple_hmm, by = "time") %>% 
+  pivot_longer(c("x", "y"), names_to = "key", values_to = "value") %>% 
+  ggplot(aes(x = time, y = value)) +
+  geom_step() +
+  facet_wrap(~key, ncol = 1)
+
+gridExtra::grid.arrange(p1, p2)
+```
+
+## Gibbs Sampler
+
+Calculate $p(z_t = i | z_{t+1} = j, y_{1:T})$
+
+```{r}
+hmm_backward_sample_step <- function(
+   sampled_state,
+   y1,
+   alpha,
+   alpha1,
+   transition_matrix,
+   observation) {
+   observation_dist <- observation(y1)
+   transition <- transition_matrix[sampled_state, ]
+
+   probs <- ((observation_dist %*% transition) * alpha) / alpha1
+
+   sample(x = seq_len(length(probs)), size = 1, prob = probs)
+ }
+```
+
+Functional Backward sampling, we must `reduce` while collecting the intermediate results in a list. 
+
+```{r}
+accumulate3 <- function(x, y, z, f, ..., init, direction = "forward") {
+  res <- list()
+  res[[1]] <- init
+  for (i in seq_len(length(x)) + 1) {
+     res[[i]] <- f(res[[i-1]], x[[i-1]], y[[i-1]], z[[i-1]], ...)
+  }
+  res
+}
+```
+
+```{r}
+accumulate3(x = 1:10, y = 1:10, z = 1:10, f = function(init, x, y, z) init + x + y + z, init = 0)
+```
+
+```{r}
+hmm_backward_sample <- function(ys,
+                               alphas, # matrix of forward filtered probabilities
+                               transition_matrix,
+                               observation) {
+ d <- ncol(alphas)
+ n <- length(ys)
+ sample_last <- sample(seq_len(d), size = 1, prob = alphas[n,])
+ 
+ accumulate3(
+   rev(ys),
+   y = alphas[-n,],
+   z = alphas[-1,],
+   hmm_backward_sample_step,
+   transition_matrix = transition_matrix, 
+   observation = observation, 
+   init = sample_last
+ )
+}
+```
+
+Sample a value of the latent-state of an HMM
+
+```{r}
+hmm_forward_backward_sample <- function(ys,
+                                        x0,
+                                        observation,
+                                        transition_matrix) {
+  alphas <- hmm_forward(ys, x0, transition_matrix, observation)
+  alphas <- matrix(unlist(alphas), ncol = length(x0), nrow = length(ys), byrow=TRUE)
+  hmm_backward_sample(ys, alphas, transition_matrix, observation)
+}
+```
+
+Sample a value of the transition matrix from a product of Dirichlet distributions
+
+```{r}
+sample_transition <- function(alpha, n_states) {
+  out <- matrix(NA_real_, ncol = n_states, nrow = n_states)
+  for (i in seq_len(n_states)) {
+    out[i, ] <- MCMCpack::rdirichlet(1, alpha)
+  }
+  out
+}
+
+sample_theta <- function(xs, alpha, n_states) {
+  state_transitions_mat <- state_transitions(n_states, xs)
+  out <- matrix(NA_real_, ncol = n_states, nrow = n_states)
+  for (i in seq_len(n_states)) {
+    out[i, ] <- MCMCpack::rdirichlet(1, alpha + state_transitions_mat[i, ])
+  }
+  out
+}
+```
+
+```{r}
+gibbs_step <- function(alpha,
+                       ys,
+                       x0,
+                       observation,
+                       xs) {
+  transition_matrix <- sample_theta(xs, alpha, length(x0))
+  new_state <-
+    hmm_forward_backward_sample(ys, x0, observation, transition_matrix)
+  list(m = transition_matrix, state = new_state)
+}
+```
+
+```{r}
+ gibbs_hmm <- function(
+   alpha,
+   ys,
+   x0,
+   observation, 
+   iters = 10) {
+   n_states <- length(x0)
+   transition_matrix <- sample_transition(alpha, length(x0))
+   xs <- hmm_forward_backward_sample(ys, x0, observation, transition_matrix)
+   out <- list()
+   for (i in seq_len(iters)) {
+     out[[i]] <- gibbs_step(alpha, ys, x0, observation, xs)
+     xs <- out[[i]]$state
+   }
+   out
+ }
+```
+
+```{r}
+out <- gibbs_hmm(
+  alpha = c(1.0, 1.0), 
+  ys = simple_hmm$y,
+  x0 = c(0.5, 0.5), 
+  observation = function(x) B[,x])
+
+map(out, "m")
+```
+
+# Functional sampling
+
+```{r}
+iterate_dbl <- function(init, f, ..., n) {
+  i <- 2
+  out <- numeric(n)
+  out[1] <- init
+  while (i <= n) {
+    out[i] <- f(out[i-1])
+    i <- i + 1
+  }
+  out
+}
+```
+
+```{r}
+iterate_dbl(0, function(x) x + 1, n=10)
+```

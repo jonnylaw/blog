@@ -1,0 +1,47 @@
+---
+title: "About"
+image: profile.jpg
+about:
+  template: jolla
+  links:
+    - icon: twitter
+      text: Twitter
+      href: https://twitter.com/lawsy
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/jonny-law-5513b554/
+    - icon: github
+      text: Github
+      href: https://github.com/jonnylaw
+
+---
+
+Jonny Law is a senior data scientist at the [National Innovation Centre for Data](https://www.ncl.ac.uk/nicd/), working closely with external collaborators to teach them data skills to deliver real world data science projects. Previously he was a Statistics PhD student on the [Cloud Computing for Big Data CDT](http://www.bigdata-cdt.ac.uk/). 
+
+## Skills
+
+* Python
+* R
+* Scala
+* SQL
+* Bayesian Statistics
+* Time series analysis
+* Machine Learning 
+* Deep Learning
+
+## Projects
+
+**Bayesian State Space Model**
+
+[git.io/dlm](https://jonnylaw.github.io/bayesian_dlms/)
+*A Scala library for Dynamic Linear Models, with filtering and parameter inference algorithms*
+
+**Gaussian Processes**
+
+[git.io/gaussianprocesses](https://jonnylaw.github.io/gaussian-processes/)
+*A Scala library for Gaussian Processes*
+
+**Composable POMP Models**
+
+[git.io/statespace](https://git.io/statespace)
+*A Scala library for online Bayesian filtering of univariate state space models, sometimes called POMP (Partially Observed Markov Process Models).*%

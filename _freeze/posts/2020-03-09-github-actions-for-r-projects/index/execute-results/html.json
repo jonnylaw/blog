@@ -1,0 +1,14 @@
+{
+  "hash": "e0483df54506a447306cd717e0def526",
+  "result": {
+    "markdown": "---\ntitle: Github Actions for R projects\nauthor: Jonny Law\ndate: '2020-03-09'\nslug: github-actions-for-r-projects\ncategories:\n  - R\ntags: []\ndraft: true\n---\n\n::: {.cell}\n\n```{.r .cell-code}\nknitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)\nlibrary(jonnylaw)\nlibrary(dplyr)\n```\n\n::: {.cell-output .cell-output-stderr}\n```\nWarning: package 'dplyr' was built under R version 4.1.2\n```\n:::\n\n::: {.cell-output .cell-output-stderr}\n```\n\nAttaching package: 'dplyr'\n```\n:::\n\n::: {.cell-output .cell-output-stderr}\n```\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n```\n:::\n\n::: {.cell-output .cell-output-stderr}\n```\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n```\n:::\n\n```{.r .cell-code}\nlibrary(readr)\n```\n\n::: {.cell-output .cell-output-stderr}\n```\nWarning: package 'readr' was built under R version 4.1.2\n```\n:::\n\n```{.r .cell-code}\nlibrary(ggplot2)\ntheme_set(theme_minimal())\n```\n:::\n\n\n# Github Actions\n\n## Renv\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": null
+  }
+}
