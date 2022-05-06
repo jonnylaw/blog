@@ -45,3 +45,4 @@ docs
 models
 .metals
 .vscode
+/.quarto/

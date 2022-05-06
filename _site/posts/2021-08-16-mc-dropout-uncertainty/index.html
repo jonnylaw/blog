@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2021-08-16">
 <meta name="description" content="Using MC Dropout to get probability intervals for neural network predictions.">
 
-<title>blog-quarto - Uncertainty in Neural Networks</title>
+<title>Bayesian Inference and Functional Programming - Uncertainty in Neural Networks</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -150,7 +150,7 @@ div.csl-indent {
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
       <a class="navbar-brand" href="../../index.html">
-    <span class="navbar-title">blog-quarto</span>
+    <span class="navbar-title">Bayesian Inference and Functional Programming</span>
   </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
@@ -182,7 +182,9 @@ div.csl-indent {
     <div class="quarto-title column-body">
       <h1 class="title">Uncertainty in Neural Networks</h1>
                           <div class="quarto-categories">
-                <div class="quarto-category">PythonDeep LearningBayesian</div>
+                <div class="quarto-category">Python</div>
+                <div class="quarto-category">Deep Learning</div>
+                <div class="quarto-category">Bayesian</div>
               </div>
                   </div>
   </div>
@@ -193,18 +195,27 @@ div.csl-indent {
     </div>
   </div>
 
+  <div class="quarto-title-meta-author">
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-heading">Affiliation</div>
+    
+      <div class="quarto-title-meta-contents">
+      <a href="https://jonnylaw.rocks">Jonny Law</a> <a href="https://orcid.org/0000-0002-8332-2982" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a>
+    </div>
+      <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              <a href="https://www.nicd.org.uk">
+              National Innovation Centre for Data
+              </a>
+            </p>
+        </div>
+      </div>
 
 
 
   <div class="quarto-title-meta">
 
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>Jonny Law </p>
-            </div>
-    </div>
-      
+        
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
@@ -385,7 +396,7 @@ y_i &amp;\sim \mathcal{N}(\mu_i, \sigma^2), \\
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>log_likelihood.<span class="bu">sum</span>(), manual_ll.<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(tensor(-624.7519, grad_fn=&lt;SumBackward0&gt;), tensor(-624.7519, grad_fn=&lt;SumBackward0&gt;))</code></pre>
+<pre><code>(tensor(-617.9488, grad_fn=&lt;SumBackward0&gt;), tensor(-617.9488, grad_fn=&lt;SumBackward0&gt;))</code></pre>
 </div>
 </div>
 <p>We can modify the <code>nn.Module</code> to return an additional parameter representing the log of the standard deviation of the Normal distribution. Additionally, the forward model will return the predicted mean and the global standard deviation - this is necessary when using Skorch, since the standard form of the loss function is <code>def loss(y_pred, y_true)</code>.</p>
@@ -608,14 +619,14 @@ Gal, Yarin, and Zoubin Ghahramani. 2016. <span>“Dropout as a Bayesian Approxim
 Izmailov, Pavel, Sharad Vikram, Matthew D Hoffman, and Andrew Gordon Wilson. 2021. <span>“What Are Bayesian Neural Network Posteriors Really Like?”</span> <em>arXiv Preprint arXiv:2104.14421</em>.
 </div>
 </div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{law2021,
-  author = {Jonny Law and Jonny Law},
+  author = {Jonny Law},
   title = {Uncertainty in {Neural} {Networks}},
   date = {2021-08-16},
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-law2021" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
-Jonny Law, and Jonny Law. 2021. <span>“Uncertainty in Neural
-Networks.”</span> August 16, 2021.
+Jonny Law. 2021. <span>“Uncertainty in Neural Networks.”</span> August
+16, 2021.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
