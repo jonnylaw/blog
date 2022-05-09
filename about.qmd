@@ -1,6 +1,6 @@
 ---
 title: "About"
-image: profile.jpg
+image: picture_cropped.jpg
 about:
   template: trestles
   links:
