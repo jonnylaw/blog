@@ -40,7 +40,6 @@ blogdown/*
 .RData
 .RDataTmp
 .Rhistory
-.Rprofile
 .Renviron
 .Renviron.local
 .Renviron.local.bak
