@@ -16,22 +16,18 @@ about:
 
 ---
 
-Jonny Law is a senior data scientist at the [National Innovation Centre for Data](https://www.ncl.ac.uk/nicd/), working closely with external collaborators to teach them data skills to deliver real world data science projects. Previously he was a Statistics PhD student on the [Cloud Computing for Big Data CDT](http://www.bigdata-cdt.ac.uk/). 
+Jonny Law is a data scientist at [Shopify](https://shopify.com) working with Big Data.
 
 ## Skills
 
-* Python
-* R
-* Scala
-* SQL
+* Cloud Native Architectures for Big Data
 * Bayesian Statistics
 * Time series analysis
-* Machine Learning 
-* Deep Learning
+* AI / Machine Learning 
 
 ## Projects
 
-**Bayesian State Space Model**
+**Bayesian State Space Models**
 
 [git.io/dlm](https://jonnylaw.github.io/bayesian_dlms/)
 *A Scala library for Dynamic Linear Models, with filtering and parameter inference algorithms*

@@ -7,8 +7,11 @@ categories:
   - Bayesian
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 library(tidyr)
 library(dplyr)

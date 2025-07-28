@@ -8,6 +8,10 @@ categories:
 ---
 
 ```{r}
+#| include: false
+#| warning: false
+#| message: false
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(jonnylaw)
 library(dplyr)
 library(tidyr)

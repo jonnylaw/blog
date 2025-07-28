@@ -2,7 +2,8 @@
 title: 'Tidy Tuesday: Tour de France'
 date: '2020-04-08'
 slug: tidy-tuesday-tour-de-france
-categories: R
+categories:
+  - R
 format:
   html:
     code-fold: true
@@ -12,6 +13,7 @@ format:
 #| include: false
 #| warning: false
 #| message: false
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyr) 
 library(dplyr)
 library(readr)
@@ -22,6 +24,8 @@ theme_set(theme_minimal())
 ```
 
 ```{r}
+#| warning: false
+#| message: false
 tuesdata <- tidytuesdayR::tt_load('2020-04-07')
 ```
 
@@ -35,13 +39,15 @@ The Tour de France has several competitions running simultaneously. There is one
 
 There are two other jerseys, the green jersey awarded to the rider who has the most accumulated the most points from stage wins and intermediate sprints. This can reward riders for trying to break away from the pelaton and work hard in a small group battling the wind. The polka-dot jersey is awarded to the best climber, with points being awarded for the first few over key climbs in the race. The final jersey is the white jersey for best young rider, awarded to the rider with the lowest cumulative time under the age of 26. Other prizes include the team classification, which awards a yellow number to the leading team calculated by adding the times of the three best riders of each team per stage. The image below shows the 2018 Tour de France Jersey winners, Pierre Latour in White, Geraint Thomas in Yellow, Julian Alaphilippe in Polka-dot and Peter Sagan in Green.
 
-![2018 tour de France Jersey winners](/blog/tidy-tuesday-tour-de-france_files/tour-de-france-jersey-winners-2019_1kmrquz26n90e1nkfth5ge9bew.jpg)
+![2018 tour de France Jersey winners](tdf-jersey-winners-2018.jpg)
 
 ## Cumulative wins by nationality
 
 This weeks data consists of TdF winners, stage results and information about each stage. First we will look at the TdF overall winners by nationality.
 
 ```{r}
+#| warning: false
+#| message: false
 winners <- tuesdata$tdf_winners
 
 winners %>% 
@@ -63,6 +69,8 @@ France have won the most Tours, unsurprisingly. However France haven't had a win
 Total number of wins. 
 
 ```{r}
+#| warning: false
+#| message: false
 winners %>% 
   select(start_date, edition, winner_name) %>% 
   mutate(year = lubridate::year(start_date), true = TRUE) %>% 
@@ -76,8 +84,6 @@ winners %>%
   gghighlight::gghighlight(winner %in% c("Jacques Anquetil", "Bernard Hinault", "Eddy Merckx", "Miguel Induráin", "Lance Armstrong")) + 
   labs(title = "Total wins", y = "Wins")
 ```
-
-## Specialists
 
 ## Which was the most difficult edition
 
@@ -96,6 +102,8 @@ Some of these will be difficult to quantify - for instance is weather data avail
 First consider the total distance of each Tour.
 
 ```{r}
+#| warning: false
+#| message: false
 stages <- tuesdata$tdf_stages
 
 stages %>% 
@@ -104,12 +112,15 @@ stages %>%
   ggplot(aes(y = total_distance, x = year)) + 
   geom_col() +
   gghighlight::gghighlight(total_distance > 5000) +
-  coord_flip()
+  coord_flip() + labs(title = "Total distance by year",
+                      x = "Year", y = "Distance (km)")
 ```
 
 If we look at the composition of the stages we see that the 1903 had only six stages! Let's calculate the total distance by stage type.
 
 ```{r}
+#| warning: false
+#| message: false
 stage_types <- stages %>% 
   rowwise() %>% 
   mutate(year = lubridate::year(Date),
@@ -128,6 +139,8 @@ stage_types %>%
   ggplot(aes(x = year, y = total_distance, fill = type)) +
   geom_col() +
   coord_flip() +
-  scale_x_reverse()
+  labs(title = "Distance by stage type",
+       x = "Year", y = "Distance (km)")
 ```
 
+If we were to determine the most challenging editions it looks like the inter-war years featured the longest tours. 

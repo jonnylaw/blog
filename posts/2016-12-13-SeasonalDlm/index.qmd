@@ -6,7 +6,10 @@ categories:
   - Scala
 ---
 
-```{r setup, include=FALSE}
+```{r}
+#| include: false
+#| warning: false
+#| message: false
 library(tidyr)
 library(dplyr)
 library(readr)

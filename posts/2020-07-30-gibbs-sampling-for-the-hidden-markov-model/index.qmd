@@ -9,7 +9,10 @@ categories:
 draft: true
 ---
 
-```{r setup, include=FALSE}
+```{r}
+#| include: false
+#| warning: false
+#| message: false
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(jonnylaw)
 library(tidyverse)
@@ -18,7 +21,7 @@ theme_set(theme_minimal())
 
 In this post we will consider the backward smoothing algorithm for a hidden Markov model (HMM). While exploring the derivation and implementation we will consider how to avoid the use of mutable state and implement the algorithm in a purely functional way. This post follows from the previous post discussing [hidden Markov models] and functional programming, the inference scheme developed in that post was a Metropolis-Hastings algorithm where the marginal likelihood calculated using the HMM forward algorithm.
 
-We will consider another parameter inference algorithm, a Gibbs sampling algorithm targeting the posterior distribution of the transition matrix.
+We will consider another parameter inference algorithm, a Gibbs sampling algorithm targeting the posterior distribution of the transition matrix. 
 
 ## Simple HMM
 
@@ -261,15 +264,38 @@ gibbs_step <- function(alpha,
  }
 ```
 
+Now we can use Gibbs sampling to determine the posterior distribution of the transition matrix
+
 ```{r}
 out <- gibbs_hmm(
   alpha = c(1.0, 1.0), 
   ys = simple_hmm$y,
   x0 = c(0.5, 0.5), 
-  observation = function(x) B[,x])
+  observation = function(x) B[,x],
+  iters = 10000)
 
-map(out, "m")
+list(reduce(map(out, "m"), `+`) / length(out), P)
 ```
+
+```{r}
+
+data_frame(
+  iteration = seq_len(10000),
+  p_11 = map_dbl(map(out, "m"), 1),
+  p_12 = map_dbl(map(out, "m"), 2),
+  p_21 = map_dbl(map(out, "m"), 3),
+  p_22 = map_dbl(map(out, "m"), 4)
+) %>% 
+  pivot_longer(-iteration) %>% 
+  ggplot(aes(x = iteration, y = value)) +
+    geom_line() +
+    facet_wrap(vars(name), scales = "free_y")
+```
+
+```{r}
+out
+```
+
 
 # Functional sampling
 

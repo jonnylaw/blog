@@ -6,13 +6,16 @@ categories:
   - R
 ---
 
-```{r setup, include=FALSE}
+```{r}
+#| include: false
+#| warning: false
+#| message: false
 library(tidyr)
 library(dplyr)
 library(readr)
 library(ggplot2)
 library(jonnylaw)
-library(htmltab)
+library(rvest)
 ```
 
 The [Harrier League](http://www.harrierleague.com) is a cross country
@@ -55,10 +58,12 @@ than four runners will be removed from the final results. Now, we can
 calculate the position of each runner within each division by the actual
 running time of each runner.
 
-First we need to download the relevant information, since the results are available as an HTML table, the package [htmltab](https://cran.r-project.org/web/packages/htmltab/index.html) can be used to select the table containing the individual results
+First we need to download the relevant information, since the results are available as an HTML table, the package [rvest](https://rvest.tidyverse.org/) can be used to select the table containing the individual results
 
 ```{r import_info, message=FALSE, warning=FALSE}
-womens_results_raw = htmltab::htmltab(doc = "http://www.harrierleague.com/results/2017-18/druridge/SenF.htm")
+womens_results_raw = read_html("http://www.harrierleague.com/results/2017-18/druridge/SenF.htm") %>%
+  html_table()
+womens_results_raw = womens_results_raw[[1]]
 ```
 
 These results are then cleaned up, removing any guest runners and extracting the division of each runner from the club field. 
@@ -147,7 +152,9 @@ calculate the position of each runner within each division by the actual
 running time of each runner.
 
 ```{r read_means_results, message=FALSE, warning=FALSE}
-mens_results_raw = htmltab(doc = "http://www.harrierleague.com/results/2017-18/druridge/SenM.htm")
+mens_results_raw = read_html("http://www.harrierleague.com/results/2017-18/druridge/SenM.htm") %>%
+  html_table()
+mens_results_raw = mens_results_raw[[1]]
 mens_results = clean_results(mens_results_raw)
 ```
 

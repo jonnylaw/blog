@@ -10,8 +10,11 @@ categories:
   - Bayesian
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 reticulate::use_virtualenv("/Users/jonnylaw/.virtualenvs/dl/", required = TRUE)
 library(reticulate)
 ```

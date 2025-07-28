@@ -6,7 +6,10 @@ categories:
   - Scala
 ---
 
-```{r setup, include=FALSE}
+```{r}
+#| include: false
+#| warning: false
+#| message: false
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyr)
 library(dplyr)

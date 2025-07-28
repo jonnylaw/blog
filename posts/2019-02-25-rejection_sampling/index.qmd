@@ -3,11 +3,15 @@ title: Bayesian Inference using rejection sampling
 date: '2019-02-25'
 slug: rejection-sampling
 categories:
-  - [R, Bayesian]
+  - R
+  - Bayesian
 ---
 
 
-```{r setup, include=FALSE}
+```{r}
+#| include: false
+#| warning: false
+#| message: false
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyr)
 library(dplyr)

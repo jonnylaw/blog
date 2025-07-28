@@ -8,6 +8,9 @@ categories:
 ---
 
 ```{r}
+#| include: false
+#| warning: false
+#| message: false
 library(ggplot2)
 library(tibble)
 library(dplyr)

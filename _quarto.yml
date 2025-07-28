@@ -8,8 +8,10 @@ website:
       - about.qmd
       - icon: github
         href: https://github.com/jonnylaw
-      - icon: twitter
-        href: https://twitter.com/lawsy
+
+exclude:
+  - "drafts"
+
 format:
   html:
     theme: litera

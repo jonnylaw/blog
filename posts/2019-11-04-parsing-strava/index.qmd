@@ -2,9 +2,13 @@
 title: "Analysing .fit files in R"
 date: '2019-11-04'
 slug: analysing-fit-files-in-R
-categories: R
+categories: 
+  - R
 ---
 ```{r}
+#| include: false
+#| warning: false
+#| message: false
 library(tidyr)
 library(dplyr)
 library(readr)

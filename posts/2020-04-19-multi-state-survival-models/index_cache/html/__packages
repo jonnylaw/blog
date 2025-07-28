@@ -1,12 +1,7 @@
-base
-methods
-datasets
-utils
-grDevices
-graphics
-stats
 tidyr
 dplyr
 readr
 ggplot2
 patchwork
+future
+purrr

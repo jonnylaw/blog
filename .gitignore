@@ -37,6 +37,13 @@ blogdown/*
 **/~*
 # R Stuff
 .Rproj.user
+.RData
+.RDataTmp
+.Rhistory
+.Rprofile
+.Renviron
+.Renviron.local
+.Renviron.local.bak
 # renv
 renv/library
 # Generated website
@@ -46,3 +53,6 @@ models
 .metals
 .vscode
 /.quarto/
+# draft posts
+drafts/*
+post-ideas

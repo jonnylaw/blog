@@ -4,10 +4,17 @@ description: |
   Comparing the performance of multiple machine learning models using Bayesian Hierarchical models.
 date: "2021-09-27"
 bibliography: bibliography.bib
+categories:
+  - R
+  - Bayesian
+  - Machine Learning
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(tidymodels)
 library(patchwork)

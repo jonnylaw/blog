@@ -5,9 +5,14 @@ slug: bayesian-inference-for-an-sir-model
 categories:
   - R
   - Bayesian
+freeze: true
 ---
 
 ```{r}
+#| include: false
+#| warning: false
+#| message: false
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyr)
 library(dplyr)
 library(readr)

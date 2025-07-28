@@ -4,16 +4,20 @@ date: '2019-02-22'
 slug: national-cross-country
 categories:
   - R
+freeze: true
 ---
 
-```{r setup, include=FALSE}
+```{r}
+#| include: false
+#| warning: false
+#| message: false
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 library(tidyr)
 library(dplyr) 
 library(readr)
 library(ggplot2)
 library(jonnylaw)
-library(htmltab)
+library(rvest)
 library(gridExtra)
 theme_set(theme_minimal())
 ```
@@ -24,16 +28,19 @@ Download the results from Power of ten for northern, midlands, southern and nati
 
 ```{r cache=TRUE}
 parse_po10 <- function(url, page) {
+  page_content <- read_html(paste0(url, "&pagenum=", page))
+  table_node <- html_nodes(page_content, xpath = "//*[@id='cphBody_dgP']")
+  
   if (page == 1) {
-    out = htmltab(paste0(url, "&pagenum=", page), 
-          which = "//*[@id=\"cphBody_dgP\"]",
-          header = 3)  
+    out <- html_table(table_node, header = FALSE)[[1]]
+    colnames(out) <- out[3, ]
+    out <- out[4:nrow(out), ]
   } else {
-    out = htmltab(paste0(url, "&pagenum=", page), 
-          which = "//*[@id=\"cphBody_dgP\"]",
-          header = 2)
+    out <- html_table(table_node, header = FALSE)[[1]]
+    colnames(out) <- out[2, ]
+    out <- out[3:nrow(out), ]
   }
-  out[-1,]
+  out
 }
 northern_url = "https://www.thepowerof10.info/results/results.aspx?meetingid=215941&event=12KXC&venue=Harewood&date=27-Jan-18"
 mens_northern_results = purrr::map_dfr(1:4, function(i) parse_po10(northern_url, i))
