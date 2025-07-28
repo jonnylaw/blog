@@ -9,7 +9,10 @@ categories:
 ---
 
 ```{r}
-knitr::opts_chunk$set(echo = TRUE)
+#| include: false
+#| warning: false
+#| message: false
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(torch)
 theme_set(theme_minimal())

@@ -19,6 +19,7 @@ p_value
 # %% Sample size and significance
 import matplotlib.pyplot as plt
 sample_sizes = np.geomspace(100, 10000, 50)
+reps = 100
 def fisher_exact_significance(sample_sizes):
     p_values = []
     for n in sample_sizes:
@@ -27,11 +28,11 @@ def fisher_exact_significance(sample_sizes):
             _, p_value = fisher_exact(table=np.array([[y1, n - y1],[y2, n - y2]]).squeeze(), alternative="less")
             p_values.append(p_value)
     
-    return pd.DataFrame([sample_sizes, p_values])
+    return pd.DataFrame({'sample_size': sample_sizes, 'p_value': p_values})
 
-sample_size, p_values = fisher_exact_significance(sample_sizes)
+df = fisher_exact_significance(sample_sizes)
 
-plt.plot(sample_size, p_values)
+df
 
 # %% Chi Square Test
 from statsmodels.stats.proportion import proportions_chisquare

@@ -9,10 +9,11 @@ categories:
 ---
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-reticulate::use_virtualenv("/Users/jonnylaw/.virtualenvs/entity_embeddings-Xxyc6zLp/", required = TRUE)
-library(reticulate)
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
 The tidymodels framework in R has a function for [constructing Entity Embeddings](https://embed.tidymodels.org/articles/Applications/Tensorflow.html) from categorical features. The library is know as [embed](https://embed.tidymodels.org/) and the heavy lifting (neural network fitting) is performed using Keras. What if we want something similar in Python and sklearn. First, we will aim to understand what an embedding is and how it can be created (and re-used). Embeddings are familiar to those who have used the Word2Vec model for natural language processing (NLP). Word2Vec is a shallow neural network trained on a corpus of (unlabelled) documents. The task of the network is to predict a context word close to the original word. The resulting shallow network has an "embedding matrix" which has the same number of rows as the number of words in the corpus vocabulary and a user-chosen embedding dimension as the number of columns. Each row represents the position of a word in the embedding space and its location is very close to its meaning. Additionally, we can perform arithmetic with the embeddings and get reasonable answers. 

@@ -2,10 +2,14 @@
 title: "MCMC with Scala Breeze"
 date: "2017-04-23"
 categories:
-  - [Scala, Bayesian]
+  - Scala
+  - Bayesian
 ---
 
-```{r setup, include=FALSE}
+```{r}
+#| include: false
+#| warning: false
+#| message: false
 library(tidyr)
 library(dplyr)
 library(readr)

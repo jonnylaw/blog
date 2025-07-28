@@ -5,11 +5,13 @@ slug: multi-state-survival-models
 categories: 
   - R
   - Bayesian
+freeze: auto
 ---
 
 ```{r}
-#| label: setup
 #| include: false
+#| warning: false
+#| message: false
 library(tidyr) 
 library(dplyr)
 library(readr)
@@ -165,8 +167,7 @@ replicates %>%
   drop_na() %>% 
   count(from, to) %>% 
   arrange(to) %>% 
-  pivot_wider(names_from = "to", values_from = "n") %>% 
-  mutate_all(~replace_na(., 0)) %>% 
+  pivot_wider(names_from = "to", values_from = "n", values_fill = 0) %>% 
   group_by(from) %>% 
   summarise_at(vars(`1`:`3`), sum) %>% 
   arrange(from)
@@ -217,8 +218,7 @@ qs <- replicates %>%
   drop_na() %>% 
   count(from, to) %>% 
   arrange(to) %>% 
-  pivot_wider(names_from = "to", values_from = "n") %>% 
-  mutate_all(~replace_na(., 0)) %>% 
+  pivot_wider(names_from = "to", values_from = "n", values_fill = 0) %>% 
   group_by(from) %>% 
   summarise_at(vars(`1`:`3`), sum) %>% 
   arrange(from) %>% 
@@ -239,9 +239,10 @@ lambdas %>%
   pivot_longer(healthy:illness, names_to = "state", values_to = "value") %>% 
   group_by(state) %>% 
   tidybayes::median_qi(value, .width = c(0.66, 0.95)) %>% 
-  ggplot(aes(x = value, y = state)) +
-  tidybayes::geom_pointintervalh() +
-  labs(x = "Days", title = "Distribution of the mean time in each state.")
+  ggplot(aes(x = state, y = value, ymin = .lower, ymax = .upper)) +
+  tidybayes::geom_pointinterval() +
+  labs(x = "Days", title = "Distribution of the mean time in each state.") +
+  coord_flip()
 ```
 
 ### Simulating a real-world example
@@ -389,8 +390,7 @@ observed_transitions <- sims %>%
   drop_na() %>% 
   count(from, to) %>% 
   arrange(to) %>% 
-  pivot_wider(names_from = "to", values_from = "n") %>% 
-  mutate_all(~replace_na(., 0)) %>% 
+  pivot_wider(names_from = "to", values_from = "n", values_fill = 0) %>% 
   group_by(from) %>% 
   summarise_at(vars(`1`:`3`), sum) %>% 
   arrange(from) %>% 

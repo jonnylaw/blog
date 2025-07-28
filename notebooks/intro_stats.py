@@ -32,12 +32,12 @@ ggplot(melt_df, aes(x = "y", colour = "x")) + \
 # observed one under the null hypothesis.
 from statsmodels.stats.weightstats import ttest_ind
 
-def experiment(n):
-    y1, y2 = simulate_two_pops(mu1=0, mu2=0, n=n)
+def experiment(mu1, mu2, n):
+    y1, y2 = simulate_two_pops(mu1=mu1, mu2=mu2, n=n)
     return ttest_ind(y1, y2)
 
 ns = np.geomspace(10, 10000, 10)
-results = [(n, experiment(int(n))) for n in ns for _ in range(10)]
+results = [(int(n), experiment(0.0, 0.1, int(n))) for n in ns for _ in range(10)]
 
 results
 # %%
@@ -134,3 +134,4 @@ ggplot(summary_df) + \
 # %% We can directly use the formula interface
 import statsmodels.formula.api as smf
 model
+# %%

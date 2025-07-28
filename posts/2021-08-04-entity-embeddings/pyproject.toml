@@ -1,0 +1,12 @@
+[project]
+name = "2021-08-04-entity-embeddings"
+version = "0.1.0"
+description = "Entity Embeddings blog post"
+requires-python = ">=3.11"
+dependencies = [
+    "torch",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "skorch"
+]
