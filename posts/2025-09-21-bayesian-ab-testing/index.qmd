@@ -310,7 +310,8 @@ We can now plot the stopping criterion, first the probability that the `Variant`
 ```{python}
 #| echo: false
 
-# Plot 3: Probability that Variant is better over time
+# Probability that Variant is better over time
+days_list = [r['day'] for r in results_history]
 prob_better = [r['prob_b_better'] for r in results_history]
 prob_data = pd.DataFrame({
     'day': days_list,
@@ -329,7 +330,9 @@ prob_data = pd.DataFrame({
 Second, the expected loss over time
 
 ```{python}
-# Plot 4: Expected loss over time
+#| echo: false
+
+# Expected loss over time
 expected_losses = [r['expected_loss_b'] for r in results_history]
 loss_data = pd.DataFrame({
     'day': days_list,
@@ -339,15 +342,16 @@ loss_data = pd.DataFrame({
 (ggplot(loss_data, aes(x='day', y='expected_loss')) +
          geom_line(color='orange', size=1) +
          labs(x='Day', y='Expected Loss',
-              title='Expected Loss if Choosing Variant') +
+              title='Expected Loss if Choosing Variant over Control') +
          theme_minimal())
 ```
 
 There is another stopping criteria we haven't yet mentioned - we can stop when the credible intervals of the posterior probabilities no longer overlap. Let's plot the 95% credible interval over the duration of the experiment. To calculate the credible interval we can use `stats.beta.interval` or we can use monte-carlo sampling as we did in the other stopping criteria: `np.percentile(samples, 95)`.
 
-```python
+```{python}
 #| echo: false
-# Plot 2: Credible intervals over time
+
+# Credible intervals over time
 days_list = [r['day'] for r in results_history]
 control_means = [r['rate_a_mean'] for r in results_history]
 variant_means = [r['rate_b_mean'] for r in results_history]

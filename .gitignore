@@ -55,3 +55,5 @@ models
 # draft posts
 drafts/*
 post-ideas
+# Local Netlify folder
+.netlify
