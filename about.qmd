@@ -4,9 +4,6 @@ image: picture_cropped.jpg
 about:
   template: trestles
   links:
-    - icon: twitter
-      text: Twitter
-      href: https://twitter.com/lawsy
     - icon: linkedin
       text: LinkedIn
       href: https://www.linkedin.com/in/jonny-law-5513b554/
@@ -16,7 +13,7 @@ about:
 
 ---
 
-Jonny Law is a data scientist at [Shopify](https://shopify.com) working with Big Data.
+Jonny Law is a Senior AI Research Engineer at [Neo4j](https://neo4j.com) working in the Gen AI team. Previously, he was a data engineer at [Shopify](https://shopify.com), focused on high-velocity streaming data using Flink and Google Cloud Dataflow. Jonny Law has a PhD in Bayesian Statistics from the University of Newcastle upon Tyne.
 
 ## Skills
 

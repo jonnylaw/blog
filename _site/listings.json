@@ -2,9 +2,11 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2025-09-21-bayesian-ab-testing/index.html",
       "/posts/2021-09-27-model-comparison/index.html",
       "/posts/2021-08-16-mc-dropout-uncertainty/index.html",
       "/posts/2021-08-04-entity-embeddings/index.html",
+      "/posts/2025-08-20-lora/index.html",
       "/posts/2021-02-02-neural-networks-in-r/index.html",
       "/posts/2020-05-01-hidden-markov-model/index.html",
       "/posts/2020-04-19-multi-state-survival-models/index.html",
