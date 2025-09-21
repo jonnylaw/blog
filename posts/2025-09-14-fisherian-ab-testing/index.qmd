@@ -2,7 +2,6 @@
 title: "Using the Fisher Exact test for A/B Testing"
 description: "Using the Fisher exact test to analyse the results of an A/B test with a conversion metric outcome."
 date: "2025-09-14"
-draft: true
 ---
 
 ```{r setup, include=FALSE}
