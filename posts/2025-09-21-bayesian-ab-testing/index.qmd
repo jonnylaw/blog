@@ -1,0 +1,388 @@
+---
+title: "Bayesian A/B Testing"
+description: |
+  An introduction to Bayesian A/B testing using the conjugate beta-binomial model for conversion rate experiments.
+date: "2025-09-21"
+categories:
+  - Statistics
+  - Bayesian
+  - A/B Testing
+  - Python
+---
+
+```{python}
+#| include: false
+#| warning: false
+#| message: false
+import numpy as np
+import pandas as pd
+import scipy.stats as stats
+from scipy.special import beta as beta_func
+from plotnine import *
+```
+
+## Introduction
+
+When deploying new features to production we want the confidence that our change produces positive outcomes. We should always monitor reliability metrics such as latency and response rates as well as business outcomes such as conversion rate. These values can vary due to outside factors, e.g. more people are visiting the site due to an unrelated marketing campaign which results in higher-latency and hence reduced conversion rate - this could lead us to believe our new feature has caused a drop in conversion and we revert to the previous version erroneously.
+
+In A/B testing we deploy two (or more) versions of out product, app or website simultaneously and ensure users only ever see one of these versions consistently, even when visiting on two separate occaissions. We can then compare the performance of variants directly. We can use this when deploying new ML models or Agentic/AI models. Typically we'd measure a business outcome (or an easier/faster to measure proxy-metric) and evaluate it for each variant and compare them using an A/B test - note that when we consider non-deterministic (i.e. probabilistic) features then the variance of outcomes is higher and we may need a larger sample-size to get definitive results.
+
+## Mathematical Justification for the Beta-Binomial
+
+### Bernoulli Distribution
+
+In A/B testing, each user interaction can be modeled as a Bernoulli trial with parameter $p$ representing the success probability. For a single user:
+
+$$X \sim \text{Bernoulli}(p)$$
+
+The probability mass function is:
+$$P(X = x) = p^x (1-p)^{1-x}, \quad x \in \{0, 1\}$$
+
+where $x = 1$ indicates success and $x = 0$ indicates failure.
+
+### Binomial Distribution
+
+When we observe $n$ independent users, the total number of successes $Y$ follows a binomial distribution:
+
+$$Y \sim \text{Binomial}(n, p)$$
+
+The probability mass function is:
+$$P(Y = y) = \binom{n}{y} p^y (1-p)^{n-y}, \quad y \in \{0, 1, 2, \ldots, n\}$$
+
+Where $\binom{n}{y}$ is the binomial coefficient, $\frac{n!}{y!(n-y)!}$. In this context it represents the number of ways we can choose $y$ elements from a set of $n$ elements. 
+
+### Beta Prior Distribution
+
+We model our prior belief about the success rate using a Beta distribution:
+
+$$p \sim \text{Beta}(\alpha, \beta)$$
+
+The probability density function is:
+$$f(p) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} p^{\alpha-1} (1-p)^{\beta-1}, \quad p \in (0, 1)$$
+where $\Gamma(x) = (x-1)!$ for positive integer values of x.
+
+We choose the Beta distribution because it has support on $(0, 1)$, which makes it appropriate for probabilities. We can also calculate the posterior distribution analytically as we'll see in the next section.
+
+### Deriving the Posterior using Bayes' Theorem
+
+Using Bayes' theorem:
+$$f(p | y) = \frac{f(y | p) \cdot f(p)}{f(y)}$$
+
+Substituting our likelihood and prior:
+$$f(p | y) = \frac{\binom{n}{y} p^y (1-p)^{n-y} \cdot \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} p^{\alpha-1} (1-p)^{\beta-1}}{f(y)}$$
+The denominator is the marginal likelihood:
+$$f(y) =\sum_y \binom{n}{y} p^y (1-p)^{n-y} \cdot \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} p^{\alpha-1} (1-p)^{\beta-1}$$ 
+Let's group the terms in the numerator and spot the kernel of a Beta distribution:
+
+$$\begin{aligned}f(p|y) &\propto p^{\alpha+y-1}(1-p)^{\beta + n-y-1} \\
+&= \text{Beta}(\alpha + y, \beta + n - y)
+\end{aligned}$$
+
+We say the Beta distribution is conjugate to the Binomial distribution, this is nice because we don't have to do any complex numerical integration to calculate our posterior distributions for the success probability. The figure below shows the beta distribution for a variety of values of $\alpha$ and $\beta$.
+
+We can write the posterior distribution as a python function and it should be equivalent to the build in pdf in `scipy.stats.beta`.
+
+```{python}
+from scipy.special import factorial
+
+def _gamma_function(x):
+    """Helper function to compute the gamma function."""
+    return factorial(x-1)
+  
+def beta_pdf(x, alpha, beta):
+    """Probability density function of the Beta distribution."""
+    coeff = _gamma_function(alpha + beta) / (_gamma_function(alpha) * _gamma_function(beta))
+    return coeff * (x ** (alpha - 1)) * ((1 - x) ** (beta - 1))
+  
+beta_pdf(0.5, 2, 5), stats.beta.pdf(0.5, 2, 5)  # Should be the same
+```
+
+The figure below shows the Beta distribution with a variety of different parameters.
+
+```{python}
+#| echo: false
+# Demonstrate the beta distribution with different parameters
+params = [(1, 1), (2, 2), (5, 2), (10, 5)]
+x = np.linspace(0, 1, 1000)
+
+# Create data for plotting
+plot_data_list = []
+for alpha, beta in params:
+    y = stats.beta.pdf(x, alpha, beta)
+    param_label = f'Beta({alpha}, {beta})'
+    for xi, yi in zip(x, y):
+        plot_data_list.append({
+            'x': xi,
+            'density': yi,
+            'parameters': param_label
+        })
+
+plot_data = pd.DataFrame(plot_data_list)
+
+# Create the plot
+(ggplot(plot_data, aes(x='x', y='density')) +
+ geom_line(color='blue', size=1) +
+ facet_wrap('~parameters', ncol=2) +
+ labs(x='Conversion Rate', y='Density', title='Beta Distribution with Different Parameters') +
+ theme_minimal() +
+ theme(figure_size=(12, 8)))
+```
+
+## Choosing between variant A and B
+
+Now that we have know the form of the posterior distribution for each arm of the experiment we can think about how to use this to make decisions. We can calculate the posterior distribution of the success probability for each arm, $A$ and $B$, of the experiment and then compare them. 
+
+We first define a [Pydantic](https://docs.pydantic.dev/latest/) record class to hold the data for our trials, then we can calculate the probability that variant A has a higher conversion rate than variant B by sampling from the posterior distribution and calculating the mean of $p_b > p_a$ - we can calculate summary statistics like this whenever we have samples from a distribution. 
+
+```{python}
+from pydantic import BaseModel
+import numpy as np
+from scipy import stats
+
+class ABTestData(BaseModel):
+    trials_a: int
+    successes_a: int
+    trials_b: int
+    successes_b: int
+    prior_alpha: float = 1.0
+    prior_beta: float = 1.0
+
+def _posterior_samples(data: ABTestData, n_samples: int):
+    # Posterior parameters for variant A
+    alpha_a = data.prior_alpha + data.successes_a
+    beta_a = data.prior_beta + data.trials_a - data.successes_a
+
+    # Posterior parameters for variant B
+    alpha_b = data.prior_alpha + data.successes_b
+    beta_b = data.prior_beta + data.trials_b - data.successes_b
+
+    # Sample from posterior distributions
+    samples_a = np.random.beta(alpha_a, beta_a, n_samples)
+    samples_b = np.random.beta(alpha_b, beta_b, n_samples)
+
+    return samples_a, samples_b
+
+def probability_better(samples_a, samples_b) -> float:
+    return np.mean(samples_a > samples_b)
+```
+
+Another way we can decide between variant A over variant B is to define a loss function. A symmetric loss function to calculate the loss for choosing B, when variant A is better $\mathbb{E}(\max(0, p_a - p_b))$.
+
+```{python}
+def expected_loss(samples_a, samples_b) -> tuple[float, float]:
+    # Expected loss for choosing A when B is better
+    loss_a = np.mean(np.maximum(0, samples_b - samples_a))
+
+    # Expected loss for choosing B when A is better
+    loss_b = np.mean(np.maximum(0, samples_a - samples_b))
+
+    return loss_a, loss_b
+```
+
+## Running the Experiment
+
+Let's simulate an A/B test comparing two landing page variants - we'll simulate visitors arriving over a period of two weeks.
+
+```{python}
+# Simulate data collection over time
+np.random.seed(42)
+
+# True conversion rates (unknown in practice)
+true_rate_a = 0.05  # Control: 5% conversion rate
+true_rate_b = 0.06  # Variant: 6% conversion rate
+
+# Simulate daily data collection
+days = 14
+daily_visitors = 1000
+
+results_history = []
+
+for day in range(1, days + 1):
+    # Generate daily conversions for each variant
+    visitors_a = visitors_b = daily_visitors // 2
+
+    conversions_a = np.random.binomial(visitors_a, true_rate_a)
+    conversions_b = np.random.binomial(visitors_b, true_rate_b)
+
+    # Create test data for cumulative results
+    test_data = ABTestData(
+        trials_a=visitors_a * day,
+        successes_a=conversions_a * day,
+        trials_b=visitors_b * day,
+        successes_b=conversions_b * day
+    )
+
+    # Get posterior samples
+    samples_a, samples_b = _posterior_samples(test_data, n_samples=10000)
+
+    # Calculate statistics
+    prob_b_better = probability_better(samples_b, samples_a)  # Note: B > A
+    loss_a, loss_b = expected_loss(samples_a, samples_b)
+
+    # Calculate posterior means for display
+    alpha_a = test_data.prior_alpha + test_data.successes_a
+    beta_a = test_data.prior_beta + test_data.trials_a - test_data.successes_a
+    alpha_b = test_data.prior_alpha + test_data.successes_b
+    beta_b = test_data.prior_beta + test_data.trials_b - test_data.successes_b
+
+    rate_a_mean = alpha_a / (alpha_a + beta_a)
+    rate_b_mean = alpha_b / (alpha_b + beta_b)
+
+    # Calculate credible intervals
+    rate_a_ci = stats.beta.interval(0.95, alpha_a, beta_a)
+    rate_b_ci = stats.beta.interval(0.95, alpha_b, beta_b)
+
+    results_history.append({
+        'day': day,
+        'total_visitors_a': test_data.trials_a,
+        'total_conversions_a': test_data.successes_a,
+        'total_visitors_b': test_data.trials_b,
+        'total_conversions_b': test_data.successes_b,
+        'rate_a_mean': rate_a_mean,
+        'rate_b_mean': rate_b_mean,
+        'rate_a_ci_lower': rate_a_ci[0],
+        'rate_a_ci_upper': rate_a_ci[1],
+        'rate_b_ci_lower': rate_b_ci[0],
+        'rate_b_ci_upper': rate_b_ci[1],
+        'prob_b_better': prob_b_better,
+        'expected_loss_b': loss_b
+    })
+```
+
+## Visualizing Results
+
+First we plot the final posterior distributions of the probability of conversion for each arm of the A/B test
+
+1. select the final day of `results_history`
+2. calculate the parameters of the posterior beta distribution
+3. use `stats.beta.pdf` to calculate the probability density function for a range of 1,000 values from $[0, 0.15]$.
+
+```{python}
+#| echo: false
+# Plot 1: Final posterior distributions
+x = np.linspace(0, 0.15, 1000)
+
+# The final results are the last day of results_history
+final_results = results_history[-1]
+
+# Create final test data
+final_test_data = ABTestData(
+    trials_a=final_results['total_visitors_a'],
+    successes_a=final_results['total_conversions_a'],
+    trials_b=final_results['total_visitors_b'],
+    successes_b=final_results['total_conversions_b']
+)
+
+# Calculate posterior parameters
+alpha_a = final_test_data.prior_alpha + final_test_data.successes_a
+beta_a = final_test_data.prior_beta + final_test_data.trials_a - final_test_data.successes_a
+alpha_b = final_test_data.prior_alpha + final_test_data.successes_b
+beta_b = final_test_data.prior_beta + final_test_data.trials_b - final_test_data.successes_b
+
+y_a = stats.beta.pdf(x, alpha_a, beta_a)
+y_b = stats.beta.pdf(x, alpha_b, beta_b)
+
+posterior_data = pd.DataFrame({
+    'x': np.concatenate([x, x]),
+    'density': np.concatenate([y_a, y_b]),
+    'variant': ['Control'] * len(x) + ['Variant'] * len(x)
+})
+
+mean_data = pd.DataFrame({
+    'mean': [alpha_a / (alpha_a + beta_a), alpha_b / (alpha_b + beta_b)],
+    'variant': ['Control', 'Variant']
+})
+
+(ggplot(posterior_data, aes(x='x', y='density', color='variant')) +
+         geom_line(size=1) +
+         geom_vline(data=mean_data, mapping=aes(xintercept='mean', color='variant'),
+                    linetype='dashed', alpha=0.7) +
+         scale_color_manual(values=['blue', 'red']) +
+         labs(x='Conversion Rate', y='Posterior Density',
+              title='Final Posterior Distributions', color='Variant') +
+         theme_minimal())
+```
+
+### Stopping Criterion
+
+We can now plot the stopping criterion, first the probability that the `Variant` is better than `Control`.
+
+```{python}
+#| echo: false
+
+# Plot 3: Probability that Variant is better over time
+prob_better = [r['prob_b_better'] for r in results_history]
+prob_data = pd.DataFrame({
+    'day': days_list,
+    'probability': prob_better
+})
+
+(ggplot(prob_data, aes(x='day', y='probability')) +
+         geom_line(color='green', size=1) +
+         geom_hline(yintercept=0.5, color='black', linetype='dashed', alpha=0.7) +
+         geom_hline(yintercept=0.95, color='red', linetype='dashed', alpha=0.7) +
+         labs(x='Day', y='P(Variant > Control)',
+              title='Probability Variant is Better') +
+         theme_minimal())
+```
+
+Second, the expected loss over time
+
+```{python}
+# Plot 4: Expected loss over time
+expected_losses = [r['expected_loss_b'] for r in results_history]
+loss_data = pd.DataFrame({
+    'day': days_list,
+    'expected_loss': expected_losses
+})
+
+(ggplot(loss_data, aes(x='day', y='expected_loss')) +
+         geom_line(color='orange', size=1) +
+         labs(x='Day', y='Expected Loss',
+              title='Expected Loss if Choosing Variant') +
+         theme_minimal())
+```
+
+There is another stopping criteria we haven't yet mentioned - we can stop when the credible intervals of the posterior probabilities no longer overlap. Let's plot the 95% credible interval over the duration of the experiment. To calculate the credible interval we can use `stats.beta.interval` or we can use monte-carlo sampling as we did in the other stopping criteria: `np.percentile(samples, 95)`.
+
+```python
+#| echo: false
+# Plot 2: Credible intervals over time
+days_list = [r['day'] for r in results_history]
+control_means = [r['rate_a_mean'] for r in results_history]
+variant_means = [r['rate_b_mean'] for r in results_history]
+control_ci_lower = [r['rate_a_ci_lower'] for r in results_history]
+control_ci_upper = [r['rate_a_ci_upper'] for r in results_history]
+variant_ci_lower = [r['rate_b_ci_lower'] for r in results_history]
+variant_ci_upper = [r['rate_b_ci_upper'] for r in results_history]
+
+ci_data = pd.DataFrame({
+    'day': days_list * 2,
+    'mean': control_means + variant_means,
+    'ci_lower': control_ci_lower + variant_ci_lower,
+    'ci_upper': control_ci_upper + variant_ci_upper,
+    'variant': ['Control'] * len(days_list) + ['Variant'] * len(days_list)
+})
+
+true_rates = pd.DataFrame({
+    'rate': [true_rate_a, true_rate_b],
+    'variant': ['Control', 'Variant'],
+    'label': ['True Control Rate', 'True Variant Rate']
+})
+
+(ggplot(ci_data, aes(x='day', y='mean', color='variant', fill='variant')) +
+         geom_ribbon(aes(ymin='ci_lower', ymax='ci_upper'), alpha=0.3) +
+         geom_line(size=1) +
+         geom_hline(data=true_rates, mapping=aes(yintercept='rate', color='variant'),
+                    linetype='dotted', alpha=0.7) +
+         scale_color_manual(values=['blue', 'red']) +
+         scale_fill_manual(values=['blue', 'red']) +
+         labs(x='Day', y='Conversion Rate',
+              title='Conversion Rate Estimates Over Time (95% CI)',
+              color='Variant', fill='Variant') +
+         theme_minimal())
+```
+
+## Conclusion
+
+Bayesian A/B testing with the beta-binomial model provides a principled, intuitive framework for conversion rate experiments. Unlike frequentist methods, we can look at results whenever we want and have early stopping out of the box without complex adjustments. The downside to this method is that it's challenging to provide relevant prior information so in practice we mostly use $\text{Beta}(1, 1)$ and (as in all A/B tests) we make a decision once and never change our minds. Often changes will simply revert to the mean! If we want to continuously make optimization decisions we can use a multi-armed bandit which can direct traffic dynamically to different variants by either exploring (randomly choosing an arm of the bandit) or exploiting (choosing the arm which is the current best performer). In this way if the best performer starts to regress then continued feedback would result in a new best performer being selected.
