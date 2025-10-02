@@ -6,8 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Jonny Law">
+<meta name="dcterms.date" content="2025-09-28">
+<meta name="description" content="Introduction to managing cloud Infrastructure as Code (IaC) Collaboratively.">
 
-<title>About – Bayesian Inference and Functional Programming</title>
+<title>Managing Cloud Infrastructure as Code using GitOps – Bayesian Inference and Functional Programming</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,22 +26,23 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-fc539113232677d296c547e50173fa21.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-fc539113232677d296c547e50173fa21.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -68,17 +72,17 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
 <body class="nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Bayesian Inference and Functional Programming</span>
     </a>
   </div>
@@ -89,7 +93,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./about.html" aria-current="page"> 
+    <a class="nav-link" href="../../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
@@ -105,66 +109,152 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Managing Cloud Infrastructure as Code using GitOps</h1>
+                  <div>
+        <div class="description">
+          Introduction to managing cloud Infrastructure as Code (IaC) Collaboratively.
+        </div>
+      </div>
+                </div>
+  </div>
+    
+  <div class="quarto-title-meta-author">
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-heading">Affiliation</div>
+    
+      <div class="quarto-title-meta-contents">
+      <p class="author"><a href="https://jonnylaw.rocks">Jonny Law</a> <a href="https://orcid.org/0000-0002-8332-2982" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+    </div>
+    <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              <a href="https://www.nicd.org.uk">
+              National Innovation Centre for Data
+              </a>
+            </p>
+        </div>
+    </div>
+
+  <div class="quarto-title-meta">
+
+        
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">September 28, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
     
 <!-- main -->
-<div class="quarto-about-trestles">
-  <div class="about-entity">
-    <img src="picture_cropped.jpg" class="about-image
-  rounded " style="width: 20em;">
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">About</h1>
-</div>
-<div class="quarto-title-meta">
-  </div>
-</header>
-    <div class="about-links">
-  <a href="https://www.linkedin.com/in/jonny-law-5513b554/" class="about-link" rel="" target="">
-    <i class="bi bi-linkedin"></i>
-     <span class="about-link-text">LinkedIn</span>
-  </a>
-  <a href="https://github.com/jonnylaw" class="about-link" rel="" target="">
-    <i class="bi bi-github"></i>
-     <span class="about-link-text">Github</span>
-  </a>
-</div>
-  </div>
-  <div class="about-contents"><main class="content" id="quarto-document-content">
-<p>Jonny Law is a Senior AI Research Engineer at <a href="https://neo4j.com">Neo4j</a> working in the Gen AI team. Previously, he was a data engineer at <a href="https://shopify.com">Shopify</a>, focused on high-velocity streaming data using Flink and Google Cloud Dataflow. Jonny Law has a PhD in Bayesian Statistics from the University of Newcastle upon Tyne.</p>
-<section id="skills" class="level2">
-<h2 data-anchor-id="skills">Skills</h2>
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<p>This post introduces Infrastructure as Code (IaC) to manage and deploy cloud resources collaboratively. By treating infrastructure configuration as code, we can apply software development best practices to infrastructure management, including version control, testing, and automated deployment pipelines.</p>
+<section id="what-is-infrastructure-as-code" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-infrastructure-as-code">What is Infrastructure as Code?</h2>
+<p>Infrastructure as Code is the practice of managing and provisioning computing infrastructure through machine-readable definition files, rather than through physical hardware configuration or interactive configuration tools. For instance we could deploy and configure using the cloud console or we could use a CLI tool like <code>gcloud</code> in Google Cloud. These options are straightforward, but are not reproducible and difficult to audit. It is common to deploy the same infrastructure to at least two projects; staging and production. Defining the infrastructure as code means we can replicate everything exactly and ensure our staging deployments are as close to production as possible, eliminating bugs in production products caused by differences in the staging and production infrastructure.</p>
+<p>Managing the infrastructure using code means we can inherit software engineering best practice:</p>
 <ul>
-<li>Cloud Native Architectures for Big Data</li>
-<li>Bayesian Statistics</li>
-<li>Time series analysis</li>
-<li>AI / Machine Learning</li>
+<li>Versioning the infrastructure in e.g.&nbsp;git, allowing us to roll-back changes which result in regressions</li>
+<li>Peer review of infrastructure changes through pull requests (PR)</li>
+<li>Code re-use, when we need to deploy common infrastructure across multiple projects</li>
 </ul>
 </section>
-<section id="selected-projects" class="level2">
-<h2 data-anchor-id="selected-projects">Selected Projects</h2>
-<section id="shopify" class="level3">
-<h3 data-anchor-id="shopify">Shopify</h3>
+<section id="terraform-for-iac" class="level2">
+<h2 class="anchored" data-anchor-id="terraform-for-iac">Terraform for IaC</h2>
+<p>Terraform is a popular open-source tool that uses a declarative configuration language to define infrastructure resources across multiple cloud providers.</p>
+<pre class="hcl"><code># Example Terraform configuration
+resource "aws_instance" "web_server" {
+  ami           = "ami-0c55b159cbfafe1d0"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "WebServer"
+    Environment = "production"
+  }
+}</code></pre>
+<p>Terraform maintains a state of the infrastructure for each cloud project, changes are then “planned” which takes into account the current terraform state, the state of the project and any changes in the infrastructure configuration. If something new is added to the IaC, the plan will report needing to create that infrastructure, if something is removed, the plan will report deleting this.</p>
+<p>Here’s an example of what a <code>terraform plan</code> output looks like:</p>
+<pre><code>Terraform will perform the following actions:
+
+  # aws_instance.web_server will be created
+  + resource "aws_instance" "web_server" {
+      + ami                          = "ami-0c55b159cbfafe1d0"
+      + instance_type                = "t2.micro"
+      + id                           = (known after apply)
+      + public_ip                    = (known after apply)
+      + tags                         = {
+          + "Name"        = "WebServer"
+          + "Environment" = "production"
+        }
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.</code></pre>
+<p>This plan shows that Terraform will create one new resource (the EC2 instance), with no modifications or deletions. The <code>(known after apply)</code> values indicate attributes that will only be known after the resource is created.</p>
 </section>
-<section id="newcastle-university" class="level3">
-<h3 data-anchor-id="newcastle-university">Newcastle University</h3>
-<p><strong>Bayesian State Space Models</strong></p>
-<p><a href="https://jonnylaw.github.io/bayesian_dlms/">git.io/dlm</a> <em>A Scala library for Dynamic Linear Models, with filtering and parameter inference algorithms</em></p>
-<p><strong>Gaussian Processes</strong></p>
-<p><a href="https://jonnylaw.github.io/gaussian-processes/">git.io/gaussianprocesses</a> <em>A Scala library for Gaussian Processes</em></p>
-<p><strong>Composable POMP Models</strong></p>
-<p><a href="https://git.io/statespace">git.io/statespace</a> <em>A Scala library for online Bayesian filtering of univariate state space models, sometimes called POMP (Partially Observed Markov Process Models).</em>%</p>
+<section id="gitops-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="gitops-workflow">GitOps workflow</h2>
+<p>We can use git version control to manage infrastructure code. Each commit should be atomic. The workflow is:</p>
+<ol type="1">
+<li>Create a pull-request PR with infrastucture changes</li>
+<li>Continuous integration (CI) will:
+<ol type="1">
+<li>Detect changes to infrastructure</li>
+<li>Check the infrastructure state lock to ensure no one else is making changes concurrently</li>
+<li>If the lock is free, run the plan against current state</li>
+<li>Comment the plan on the infrastructure PR</li>
+</ol></li>
+<li>The PR is reviewed and approved by a colleague</li>
+<li>Once approved, the plan can be applied by replying in a comment on the PR <code>/apply &lt;environment-name&gt;</code></li>
+<li>If the application is successful, we can merge the PR</li>
+</ol>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Infrastructure as Code is essential for modern cloud operations, providing consistency, reliability, and scalability. In addition, using GitOps workflow to manage the infrastructure code allows for collaborative, safe infrastructure changes. GitOps can democratize the ownership of infrastructure for a small team - allowing anyone to propose a change and unblock themselves to deliver quickly.</p>
+</section>
+<section id="further-reading" class="level2">
+<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
+<ul>
+<li><a href="https://www.terraform.io/docs/cloud/guides/recommended-practices/index.html">Terraform Best Practices</a></li>
+<li><a href="https://infrastructure-as-code.com/">Infrastructure as Code Patterns and Practices</a></li>
+</ul>
 
 
 </section>
-</section>
-</main></div>
-</div>
- <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{law2025,
+  author = {Law, Jonny},
+  title = {Managing {Cloud} {Infrastructure} as {Code} Using {GitOps}},
+  date = {2025-09-28},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-law2025" class="csl-entry quarto-appendix-citeas" role="listitem">
+Law, Jonny. 2025. <span>“Managing Cloud Infrastructure as Code Using
+GitOps.”</span> September 28, 2025.
+</div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
     const isCodeAnnotation = (el) => {
       for (const clz of el.classList) {
         if (clz.startsWith('code-annotation-')) {                     

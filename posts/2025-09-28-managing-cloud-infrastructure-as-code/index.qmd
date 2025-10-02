@@ -1,0 +1,81 @@
+---
+title: "Managing Cloud Infrastructure as Code using GitOps"
+description: "Introduction to managing cloud Infrastructure as Code (IaC) Collaboratively."
+date: "2025-09-28"
+---
+
+This post introduces Infrastructure as Code (IaC) to manage and deploy cloud resources collaboratively. By treating infrastructure configuration as code, we can apply software development best practices to infrastructure management, including version control, testing, and automated deployment pipelines.
+
+## What is Infrastructure as Code?
+
+Infrastructure as Code is the practice of managing and provisioning computing infrastructure through machine-readable definition files, rather than through physical hardware configuration or interactive configuration tools. For instance we could deploy and configure using the cloud console or we could use a CLI tool like `gcloud` in Google Cloud. These options are straightforward, but are not reproducible and difficult to audit. It is common to deploy the same infrastructure to at least two projects; staging and production. Defining the infrastructure as code means we can replicate everything exactly and ensure our staging deployments are as close to production as possible, eliminating bugs in production products caused by differences in the staging and production infrastructure.
+
+Managing the infrastructure using code means we can inherit software engineering best practice:
+
+- Versioning the infrastructure in e.g. git, allowing us to roll-back changes which result in regressions
+- Peer review of infrastructure changes through pull requests (PR)
+- Code re-use, when we need to deploy common infrastructure across multiple projects
+
+## Terraform for IaC
+
+Terraform is a popular open-source tool that uses a declarative configuration language to define infrastructure resources across multiple cloud providers.
+
+```hcl
+# Example Terraform configuration
+resource "aws_instance" "web_server" {
+  ami           = "ami-0c55b159cbfafe1d0"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "WebServer"
+    Environment = "production"
+  }
+}
+```
+
+Terraform maintains a state of the infrastructure for each cloud project, changes are then "planned" which takes into account the current terraform state, the state of the project and any changes in the infrastructure configuration. If something new is added to the IaC, the plan will report needing to create that infrastructure, if something is removed, the plan will report deleting this.
+
+Here's an example of what a `terraform plan` output looks like:
+
+```
+Terraform will perform the following actions:
+
+  # aws_instance.web_server will be created
+  + resource "aws_instance" "web_server" {
+      + ami                          = "ami-0c55b159cbfafe1d0"
+      + instance_type                = "t2.micro"
+      + id                           = (known after apply)
+      + public_ip                    = (known after apply)
+      + tags                         = {
+          + "Name"        = "WebServer"
+          + "Environment" = "production"
+        }
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+```
+
+This plan shows that Terraform will create one new resource (the EC2 instance), with no modifications or deletions. The `(known after apply)` values indicate attributes that will only be known after the resource is created.
+
+## GitOps workflow 
+
+We can use git version control to manage infrastructure code. Each commit should be atomic. The workflow is:
+
+1. Create a pull-request PR with infrastucture changes
+2. Continuous integration (CI) will:
+    1. Detect changes to infrastructure
+    2. Check the infrastructure state lock to ensure no one else is making changes concurrently
+    3. If the lock is free, run the plan against current state
+    4. Comment the plan on the infrastructure PR
+3. The PR is reviewed and approved by a colleague 
+4. Once approved, the plan can be applied by replying in a comment on the PR `/apply <environment-name>`
+5. If the application is successful, we can merge the PR
+
+## Conclusion
+
+Infrastructure as Code is essential for modern cloud operations, providing consistency, reliability, and scalability. In addition, using GitOps workflow to manage the infrastructure code allows for collaborative, safe infrastructure changes. GitOps can democratize the ownership of infrastructure for a small team - allowing anyone to propose a change and unblock themselves to deliver quickly.
+
+## Further Reading
+
+- [Terraform Best Practices](https://www.terraform.io/docs/cloud/guides/recommended-practices/index.html)
+- [Infrastructure as Code Patterns and Practices](https://infrastructure-as-code.com/)

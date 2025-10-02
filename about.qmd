@@ -22,7 +22,13 @@ Jonny Law is a Senior AI Research Engineer at [Neo4j](https://neo4j.com) working
 * Time series analysis
 * AI / Machine Learning 
 
-## Projects
+## Selected Projects
+
+### Shopify
+
+
+
+### Newcastle University
 
 **Bayesian State Space Models**
 
