@@ -1,0 +1,122 @@
+#!/usr/bin/env -S uv run --script
+#MISE description="Create a new blog post"
+
+# /// script
+# dependencies = [
+#   "fire",
+# ]
+# ///
+
+import json
+import re
+import sys
+import unicodedata
+from datetime import date
+from pathlib import Path
+import fire
+
+def slugify(value: str) -> str:
+    """
+    Normalizes string, converts to lowercase, removes non-alpha characters,
+    and converts spaces to hyphens.
+    """
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^a-zA-Z0-9\s-]+', '', value)
+    value = re.sub(r'[-\s]+', '-', value).strip('-').lower()
+    return value
+
+def create_post(*title_words, env: bool = False):
+    """
+    Creates a new blog post directory and markdown file.
+    
+    Args:
+        env: If True, generates a pyproject.toml and adds the post to the workspace.
+    """
+    if not title_words:
+        print("Error: You must provide a post title.")
+        print("Usage: mise run new-post <Post Title> [--env]")
+        sys.exit(1)
+
+    # Join words together so quotes aren't strictly required
+    post_title = " ".join(str(word) for word in title_words)
+    slug = slugify(post_title)
+    today = date.today().strftime("%Y-%m-%d")
+    
+    post_dir_name = f"{today}-{slug}"
+    post_dir = Path(f"posts/{post_dir_name}")
+    post_file = post_dir / "index.qmd"
+    
+    post_dir.mkdir(parents=True, exist_ok=True)
+    
+    # 1. Generate the Quarto document
+    template = f"""---
+title: "{post_title}"
+description: "A brief description of your post."
+date: "{today}"
+---
+
+# Introduction
+
+Start writing your blog post here!
+"""
+    post_file.write_text(template, encoding="utf-8")
+    print(f"New blog post created at: {post_file}")
+
+    # 2. Handle the optional Python environment setup
+    if env:
+        # Create pyproject.toml
+        pyproject_content = f"""[project]
+name = "{post_dir_name}"
+version = "0.1.0"
+description = "Environment for {post_title}"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "ipykernel>=6.30.1",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.10.6",
+    "numpy>=2.3.3",
+    "plotnine>=0.15.0",
+    "pydantic>=2.11.9",
+    "scipy>=1.16.2",
+    "seaborn>=0.13.2",
+]
+"""
+        pyproject_file = post_dir / "pyproject.toml"
+        pyproject_file.write_text(pyproject_content, encoding="utf-8")
+        
+        # Create an empty README.md to satisfy the pyproject.toml reference
+        (post_dir / "README.md").write_text(f"# {post_title}\n", encoding="utf-8")
+        print(f"Created pyproject.toml at: {pyproject_file}")
+
+        # 3. Add to VS Code Workspace
+        workspace_files = list(Path('.').glob('*.code-workspace'))
+        if workspace_files:
+            ws_file = workspace_files[0]
+            try:
+                ws_data = json.loads(ws_file.read_text(encoding="utf-8"))
+                if "folders" not in ws_data:
+                    ws_data["folders"] = []
+                
+                # Check if path already exists to avoid duplicates
+                folder_path = str(post_dir)
+                if not any(f.get("path") == folder_path for f in ws_data["folders"]):
+                    ws_data["folders"].append({"path": folder_path})
+                    ws_file.write_text(json.dumps(ws_data, indent=4), encoding="utf-8")
+                    print(f"Appended to workspace file: {ws_file}")
+            except Exception as e:
+                print(f"Warning: Could not automatically update workspace file: {e}")
+        else:
+            # Create a new workspace file dynamically at the blog root
+            ws_file = Path("blog.code-workspace")
+            ws_data = {
+                "folders": [
+                    {"path": "."},
+                    {"path": str(post_dir)}
+                ]
+            }
+            ws_file.write_text(json.dumps(ws_data, indent=4), encoding="utf-8")
+            print(f"Created new workspace file: {ws_file}")
+
+if __name__ == "__main__":
+    fire.Fire(create_post)
