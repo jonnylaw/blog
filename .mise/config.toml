@@ -1,0 +1,3 @@
+[tools]
+"aqua:quarto-dev/quarto-cli" = "latest"
+uv = "latest"
