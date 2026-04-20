@@ -8,10 +8,11 @@ date: "2026-04-10"
 
 In this post I will cover the basics of stream processing with higher order functions in order to scale a data processing pipeline safely using Python. The scale covered in this post is local parallelism - but these learnings can be applied to distributed data processing across thousands of nodes and is how [Spark](https://spark.apache.org/), [Flink](https://flink.apache.org/) and [Apache Beam](https://beam.apache.org/) among others handle arbitrary large scale data processing.
 
-I believe there are a few considerations to safely scale
-- Use typing (via mypy etc. in Python) which can catch a range of errors before we even run the program. Inputs, outputs and configuration should be well defined types (not just strings).
-- Functions should be small in scope (ideally with a single consideration), easy to understand and straightforward to test. 
-- We should lean into functional programming which emphasises immutability and no shared mutable state - you can't have a race condition if you don't have any shared mutable state
+I believe there are a few considerations to safely scale:
+
+* Use typing (via mypy etc. in Python) which can catch a range of errors before we even run the program. Inputs, outputs and configuration should be well defined types (not just strings).
+* Functions should be small in scope (ideally with a single consideration), easy to understand and straightforward to test. 
+* We should lean into functional programming which emphasises immutability and no shared mutable state - you can't have a race condition if you don't have any shared mutable state
 
 We also want to use our resources efficiently, some approaches to parallelism simply split the workload across multiple workers - but this doesn't make it easy to account for heterogeneity of workers/workloads. Ideally in batch we'd be using a pull-model and in a streaming context we'd use backpressure to control the rate of data processing, maintaining high-throughput, low-latency and sustainable resource usage. This post will not consider building full backpressure, but I might write about it in a future post.
 
@@ -294,7 +295,7 @@ pipeline = (
 )
 ```
 
-The call to `to_sink` is the terminal operation — it drives the pipeline and writes each result to the sink.
+The call to `to_sink` is a terminal operation, this triggers the pipeline to start and writes each result to the sink.
 
 We can add `tee` to print the intermediate steps of the pipeline.    
 

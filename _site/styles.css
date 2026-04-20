@@ -1,1 +1,6 @@
 /* css styles */
+/* Match Litera theme: paragraphs use serif; lists inherit body sans-serif without this. */
+main ul li,
+main ol li {
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+}
