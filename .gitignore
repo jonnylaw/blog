@@ -57,3 +57,5 @@ drafts/*
 post-ideas
 # Local Netlify folder
 .netlify
+
+**/*.quarto_ipynb
