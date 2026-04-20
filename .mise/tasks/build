@@ -1,4 +1,4 @@
 #!/bin/bash -eu
 
-docker build -t blog-build ../../Dockerfile
+docker build -t blog-build -f Dockerfile .
 docker run --rm -v "$(pwd)":/home/rstudio/project -w /home/rstudio/project blog-build bash -c "mise install && mise exec quarto render"

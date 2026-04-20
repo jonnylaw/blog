@@ -1,0 +1,9 @@
+[project]
+name = "2026-04-20-introduction-to-dataflow-programming"
+version = "0.1.0"
+description = "Stream processing / higher-order functions blog post"
+requires-python = ">=3.11"
+dependencies = [
+    "ipykernel>=6.30.1",
+    "jupyter>=1.1.1",
+]
