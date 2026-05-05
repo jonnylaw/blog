@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -11,6 +11,9 @@
 
 <title>Multi-armed Bandits in Scala – Bayesian Inference and Functional Programming</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -73,10 +76,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-fc539113232677d296c547e50173fa21.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-1b5cbb678aba238cc9ecc8dbef59e0a8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -106,7 +109,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -119,7 +122,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -218,7 +221,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="setting-up-the-environment">Setting up the Environment</h2>
 <p>This post uses <a href="https://almond.sh/">Almond</a> in order to run Scala code in a Jupyter notebook. See <a href="../../2019/04/15/scala-and-jupyter-notebook-with-almond/">my previous post</a> to learn how to setup Jupyter, Ammonite and Almond. That post examined using the Scala libraries EvilPlot (including inline plotting in the Jupyter notebook) and Rainier for Bayesian inference in a simple linear model.</p>
 <p>The imports required for this post are:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> coursier<span class="op">.</span>MavenRepository</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> coursier<span class="op">.</span>MavenRepository</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>interp<span class="op">.</span><span class="fu">repositories</span><span class="op">()</span> <span class="op">++=</span> <span class="bu">Seq</span><span class="op">(</span><span class="fu">MavenRepository</span><span class="op">(</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"http://dl.bintray.com/cibotech/public"</span></span>
@@ -230,7 +233,7 @@ window.Quarto = {
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> breeze<span class="op">.</span>stats<span class="op">.</span>distributions<span class="op">.</span>_</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> breeze<span class="op">.</span>linalg<span class="op">.</span>_</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> almond<span class="op">.</span>interpreter<span class="op">.</span>api<span class="op">.</span>_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> almond<span class="op">.</span>interpreter<span class="op">.</span>api<span class="op">.</span>_</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The full working notebook can be found <a href="https://github.com/jonnylaw/blog/tree/master/notebooks/multi_armed_bandit.ipynb">here</a>.</p>
 </section>
 <section id="a-multi-armed-bandit" class="level1">
@@ -242,13 +245,13 @@ window.Quarto = {
 <p>One strategy to maximise the expected long-term reward from a bandit is to choose the bandit with the largest long-term reward a fraction of the time and the rest of the time choose a bandit uniformly at random in order to continually explore the space of actions. At each time step, the reward for a given action can be calculated and the long-term reward can be calculated as the function:</p>
 <p><span class="math display">\[Q_{t+1}(A) = Q_t(A) + \frac{R_t(A) - Q_t(A)}{N_t(A)}\]</span> where <span class="math inline">\(A\)</span> is the current action, <span class="math inline">\(Q_t(A)\)</span> is the long-term reward at time <span class="math inline">\(t\)</span> for action <span class="math inline">\(A\)</span>, <span class="math inline">\(R_t(A)\)</span> is the instantaneous reward for action <span class="math inline">\(A\)</span> at time <span class="math inline">\(t\)</span> and <span class="math inline">\(N_t(A)\)</span> is the total number of times action <span class="math inline">\(A\)</span> has been performed by time step <span class="math inline">\(t\)</span>. Before writing the algorithm for the epsilon greedy algorithm, first we define a few helper functions.</p>
 <p>The first is to sample a value uniformly a random from a selection of values.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sample</span><span class="op">(</span>selection<span class="op">:</span> <span class="ex">Vector</span><span class="op">[</span><span class="bu">Int</span><span class="op">]):</span> Rand<span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sample</span><span class="op">(</span>selection<span class="op">:</span> <span class="ex">Vector</span><span class="op">[</span><span class="bu">Int</span><span class="op">]):</span> Rand<span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">{</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        i <span class="op">&lt;-</span> <span class="fu">Multinomial</span><span class="op">(</span>DenseVector<span class="op">.</span>ones<span class="op">[</span><span class="ex">Double</span><span class="op">](</span>selection<span class="op">.</span>size<span class="op">))</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">yield</span> <span class="fu">selection</span><span class="op">(</span>i<span class="op">)</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>If there are multiple actions with the same long-term reward then the next action should be selected randomly from all the actions which maximise the long term reward.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">maxActionWithTies</span><span class="op">(</span>longTermReward<span class="op">:</span> <span class="ex">Vector</span><span class="op">[</span><span class="ex">Double</span><span class="op">]):</span> Rand<span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">maxActionWithTies</span><span class="op">(</span>longTermReward<span class="op">:</span> <span class="ex">Vector</span><span class="op">[</span><span class="ex">Double</span><span class="op">]):</span> Rand<span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> maxReward <span class="op">=</span> longTermReward<span class="op">.</span>max</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> rewards <span class="op">=</span> longTermReward<span class="op">.</span>zipWithIndex<span class="op">.</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>          filter <span class="op">{</span> <span class="cf">case</span> <span class="op">(</span>r<span class="op">,</span> a<span class="op">)</span> <span class="op">=&gt;</span> r <span class="op">==</span> maxReward <span class="op">}.</span><span class="fu">map</span><span class="op">(</span>_<span class="op">.</span>_2<span class="op">)</span></span>
@@ -257,9 +260,9 @@ window.Quarto = {
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        Rand<span class="op">.</span><span class="fu">always</span><span class="op">(</span>rewards<span class="op">.</span>head<span class="op">)</span></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Then a single step of the epsilon greedy algorithm can be written</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">BanditState</span><span class="op">(</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">BanditState</span><span class="op">(</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    reward<span class="op">:</span> <span class="ex">Array</span><span class="op">[</span><span class="ex">Double</span><span class="op">],</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    longTermReward<span class="op">:</span> <span class="ex">Vector</span><span class="op">[</span><span class="ex">Double</span><span class="op">],</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    actions<span class="op">:</span> <span class="ex">Map</span><span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="bu">Int</span><span class="op">]</span></span>
@@ -277,10 +280,10 @@ window.Quarto = {
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">yield</span> <span class="fu">BanditState</span><span class="op">(</span>s<span class="op">.</span>reward <span class="op">:+</span> newReward<span class="op">,</span> </span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>                s<span class="op">.</span>longTermReward<span class="op">.</span><span class="fu">updated</span><span class="op">(</span>nextAction<span class="op">,</span> newLongTermReward<span class="op">),</span></span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>                s<span class="op">.</span>actions<span class="op">.</span><span class="fu">updated</span><span class="op">(</span>nextAction<span class="op">,</span> nextCount<span class="op">))</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Firstly, we define a <code>BanditState</code> which contains all of the rewards <span class="math inline">\(R_t(A)\)</span> for each time step, a list of length equal to the number of actions containing the long-term reward for each action. <code>actions</code> represents <span class="math inline">\(N_t(A)\)</span> using a map from the index of the action to the count of actions. The algorithm proceeds by sampling a uniform random number, if this number is less than the chosen value of epsilon, then a random action is sampled from a Multinomial distribution with equal probabilities, otherwise the algorithm selects the action which currently has the highest long-term reward. The values are updated according to the formula above.</p>
 <p>To run this algorithm for a pre-determined number of steps, realise that it is recursive and completely determined by the count and long-term reward at the previous time step. Hence it can be implemented as a Markov chain.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">buildActions</span><span class="op">(</span>actions<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> <span class="ex">Map</span><span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">buildActions</span><span class="op">(</span>actions<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> <span class="ex">Map</span><span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span><span class="dv">0</span> until actions<span class="op">).</span><span class="fu">map</span><span class="op">(</span>a <span class="op">=&gt;</span> a <span class="op">-&gt;</span> <span class="dv">0</span><span class="op">).</span>toMap</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -292,9 +295,9 @@ window.Quarto = {
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> initState <span class="op">=</span> <span class="fu">BanditState</span><span class="op">(</span><span class="ex">Array</span><span class="op">(</span><span class="fl">0.0</span><span class="op">),</span> <span class="ex">Vector</span><span class="op">.</span><span class="fu">fill</span><span class="op">(</span><span class="dv">10</span><span class="op">)(</span><span class="fl">0.0</span><span class="op">),</span> <span class="fu">buildActions</span><span class="op">(</span>actions<span class="op">))</span></span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">MarkovChain</span><span class="op">(</span>initState<span class="op">)(</span><span class="fu">banditStep</span><span class="op">(</span>epsilon<span class="op">,</span> reward<span class="op">,</span> <span class="fu">selectGreedy</span><span class="op">(</span>epsilon<span class="op">))).</span>steps<span class="op">.</span><span class="fu">drop</span><span class="op">(</span>n<span class="op">-</span><span class="dv">1</span><span class="op">).</span>next</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>We can assume that the rewards for each of the ten actions is Normally distributed and define a suitable reward function</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> qs <span class="op">=</span> <span class="fu">Gaussian</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">1</span><span class="op">).</span><span class="fu">sample</span><span class="op">(</span><span class="dv">10</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> qs <span class="op">=</span> <span class="fu">Gaussian</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">1</span><span class="op">).</span><span class="fu">sample</span><span class="op">(</span><span class="dv">10</span><span class="op">)</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">// The reward is selected from a N(q(A_t), 1)</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">r</span><span class="op">(</span>qa<span class="op">:</span> <span class="bu">Seq</span><span class="op">[</span><span class="ex">Double</span><span class="op">])(</span>action<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> Rand<span class="op">[</span><span class="ex">Double</span><span class="op">]</span> <span class="op">=</span> </span>
@@ -311,13 +314,13 @@ window.Quarto = {
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">//    0.3758538986470721,</span></span>
 <span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">//    1.9412629812694995,</span></span>
 <span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">//    1.0620845496569054</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">//)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">//)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Then the algorithm can be run for a single multi-armed bandit</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> oneBandit <span class="op">=</span> <span class="fu">epsilonGreedy</span><span class="op">(</span><span class="fl">0.5</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="fu">r</span><span class="op">(</span>qs<span class="op">),</span> <span class="dv">1000</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> oneBandit <span class="op">=</span> <span class="fu">epsilonGreedy</span><span class="op">(</span><span class="fl">0.5</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="fu">r</span><span class="op">(</span>qs<span class="op">),</span> <span class="dv">1000</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The distribution of actions at the end of 1,000 steps with epsilon = 0.5 and number of actions 10 is:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>action_distribution <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"notebooks/data/action_distribution.csv"</span>), </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                                <span class="at">col_names =</span> <span class="fu">c</span>(<span class="st">"action"</span>, <span class="st">"count"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>action_distribution <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"notebooks/data/action_distribution.csv"</span>), </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                                <span class="at">col_names =</span> <span class="fu">c</span>(<span class="st">"action"</span>, <span class="st">"count"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Rows: 10 Columns: 2
 ── Column specification ────────────────────────────────────────────────────────
@@ -327,9 +330,9 @@ dbl (2): action, count
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>action_distribution <span class="sc">%&gt;%</span> </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>action_distribution <span class="sc">%&gt;%</span> </span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> action, <span class="at">y =</span> count)) <span class="sc">+</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -343,13 +346,13 @@ dbl (2): action, count
 <section id="multiple-multi-armed-bandits" class="level1">
 <h1>Multiple Multi-armed Bandits</h1>
 <p>Now to see the behaviour of a typical multi-armed bandit with a constant reward function, calculate the average reward for n = 2,000 10-arm bandits each with 1,000 steps.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Vector</span><span class="op">.</span><span class="fu">fill</span><span class="op">(</span><span class="dv">2000</span><span class="op">)(</span><span class="fu">DenseVector</span><span class="op">(</span><span class="fu">bandit</span><span class="op">(</span><span class="fl">0.1</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="fu">r</span><span class="op">(</span>qs<span class="op">),</span> <span class="dv">1000</span><span class="op">).</span>reward<span class="op">)).</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Vector</span><span class="op">.</span><span class="fu">fill</span><span class="op">(</span><span class="dv">2000</span><span class="op">)(</span><span class="fu">DenseVector</span><span class="op">(</span><span class="fu">bandit</span><span class="op">(</span><span class="fl">0.1</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="fu">r</span><span class="op">(</span>qs<span class="op">),</span> <span class="dv">1000</span><span class="op">).</span>reward<span class="op">)).</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">reduce</span><span class="op">(</span>_ <span class="op">+</span> _<span class="op">).</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span><span class="op">(</span>_ <span class="op">/</span> <span class="dv">2000</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span><span class="op">(</span>_ <span class="op">/</span> <span class="dv">2000</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The average reward for each time step can then be plotted, this can be used to evaluate different choices of epsilon. Different values of epsilon can be compared and the average reward can be calculated</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> data <span class="op">=</span> <span class="ex">List</span><span class="op">(</span><span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.1</span><span class="op">,</span> <span class="fl">0.5</span><span class="op">).</span><span class="fu">map</span> <span class="op">(</span> eps <span class="op">=&gt;</span> <span class="fu">averageReward</span><span class="op">(</span><span class="dv">2000</span><span class="op">,</span> <span class="dv">1000</span><span class="op">,</span> eps<span class="op">))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> data <span class="op">=</span> <span class="ex">List</span><span class="op">(</span><span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.1</span><span class="op">,</span> <span class="fl">0.5</span><span class="op">).</span><span class="fu">map</span> <span class="op">(</span> eps <span class="op">=&gt;</span> <span class="fu">averageReward</span><span class="op">(</span><span class="dv">2000</span><span class="op">,</span> <span class="dv">1000</span><span class="op">,</span> eps<span class="op">))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>average_reward <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"notebooks/data/average_reward.csv"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>average_reward <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"notebooks/data/average_reward.csv"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Rows: 3003 Columns: 3
 ── Column specification ────────────────────────────────────────────────────────
@@ -359,13 +362,13 @@ dbl (3): epsilon, step, reward
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>average_reward <span class="sc">%&gt;%</span> </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>average_reward <span class="sc">%&gt;%</span> </span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> step, <span class="at">y =</span> reward, <span class="at">colour =</span> <span class="fu">as.factor</span>(epsilon))) <span class="sc">+</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_label</span>(<span class="at">data =</span> <span class="fu">filter</span>(average_reward, step <span class="sc">==</span> <span class="dv">1000</span>), </span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">label =</span> epsilon, <span class="at">x =</span> <span class="dv">950</span>, <span class="at">y =</span> reward), <span class="at">hjust =</span> .<span class="dv">5</span>) <span class="sc">+</span></span>
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Average reward by step for various values of epsilon"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Average reward by step for various values of epsilon"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -385,8 +388,7 @@ dbl (3): epsilon, step, reward
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-law2019" class="csl-entry quarto-appendix-citeas" role="listitem">
-Law, Jonny. 2019. <span>“Multi-Armed Bandits in Scala.”</span> April 16,
-2019.
+Law, Jonny. 2019. <span>“Multi-Armed Bandits in Scala.”</span> April 16.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -439,13 +441,14 @@ Law, Jonny. 2019. <span>“Multi-Armed Bandits in Scala.”</span> April 16,
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
