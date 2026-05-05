@@ -1,0 +1,12 @@
+[project]
+name = "2026-05-03-functional-stream-dsl"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "ipykernel>=7.2.0",
+    "multiprocess>=0.70.19",
+    "nbclient>=0.10.4",
+    "nbformat>=5.10.4",
+    "pyyaml>=6.0.3",
+]

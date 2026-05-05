@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -11,6 +11,9 @@
 
 <title>Using Monads for Handling Failures and Exceptions – Bayesian Inference and Functional Programming</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -73,10 +76,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-fc539113232677d296c547e50173fa21.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-1b5cbb678aba238cc9ecc8dbef59e0a8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -153,25 +156,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
                   </div>
   </div>
     
-  <div class="quarto-title-meta-author">
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-heading">Affiliation</div>
-    
-      <div class="quarto-title-meta-contents">
-      <p class="author"><a href="https://jonnylaw.rocks">Jonny Law</a> <a href="https://orcid.org/0000-0002-8332-2982" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
-    </div>
-    <div class="quarto-title-meta-contents">
-          <p class="affiliation">
-              <a href="https://www.nicd.org.uk">
-              National Innovation Centre for Data
-              </a>
-            </p>
-        </div>
-    </div>
-
+  
   <div class="quarto-title-meta">
 
-        
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p><a href="https://jonnylaw.rocks">Jonny Law</a> <a href="https://orcid.org/0000-0002-8332-2982" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+            </div>
+    </div>
+      
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
@@ -199,80 +193,80 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="referential-transparency">Referential Transparency</h2>
 <p>One of the most important properties of functional programming is referential transparency and programming with pure functions. This means we can substitute a pure function with its result, for intance if we have the function <code>def f = 1 + 2</code>, we can replace every occurence of <code>f</code> with <code>3</code> and the final evaluation will remain unchanged</p>
 <p>This simple idea can lead to difficulties when considering functions which involve side effects, such as reading from external sources or generating random numbers. One example of a side effect is an exception, an imperative programmer might write a function to calculate a square root as:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">unsafe_sqrt</span><span class="op">(</span>a<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> <span class="ex">Double</span> <span class="op">=</span> <span class="op">{</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">unsafe_sqrt</span><span class="op">(</span>a<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> <span class="ex">Double</span> <span class="op">=</span> <span class="op">{</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>a <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> math<span class="op">.</span><span class="fu">sqrt</span><span class="op">(</span>a<span class="op">)</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">(</span><span class="st">"Can't calculate square root of negative number"</span><span class="op">)</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This compiles fine, however if we wrote this function for an end user and they didn’t look at the implementation they might not know the function can possibly return an exception.</p>
 </section>
 <section id="try" class="level2">
 <h2 class="anchored" data-anchor-id="try">Try</h2>
 <p>In order to make it clear that a function can fail, we can return a <code>Try</code>:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">try_sqrt</span><span class="op">(</span>a<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> Try<span class="op">[</span><span class="ex">Double</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">try_sqrt</span><span class="op">(</span>a<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> Try<span class="op">[</span><span class="ex">Double</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>a <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="fu">Success</span><span class="op">(</span>math<span class="op">.</span><span class="fu">sqrt</span><span class="op">(</span>a<span class="op">))</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> <span class="fu">Failure</span><span class="op">(</span><span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">(</span><span class="st">"Can't calculate square root of negative number"</span><span class="op">))</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Now, if someone were to use this function they would be forced to deal with the <code>Try</code> return type and understand that the function can return an exception. Try is actually an algebraic datatype (ADT), an illustrative implementation is:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> Try<span class="op">[+</span>A<span class="op">]</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> Try<span class="op">[+</span>A<span class="op">]</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> Success<span class="op">[+</span>A<span class="op">](</span>a<span class="op">:</span> A<span class="op">)</span> <span class="kw">extends</span> Try<span class="op">[</span>A<span class="op">]</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> Failure<span class="op">[+</span>A<span class="op">](</span>exception<span class="op">:</span> <span class="ex">Throwable</span><span class="op">)</span> <span class="kw">extends</span> Try<span class="op">[</span>A<span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> Failure<span class="op">[+</span>A<span class="op">](</span>exception<span class="op">:</span> <span class="ex">Throwable</span><span class="op">)</span> <span class="kw">extends</span> Try<span class="op">[</span>A<span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This means that a <code>Try</code> can either be a <code>Success</code> or <code>Failure</code>. Learn more about <code>Try</code> in Daniel Westheide’s excellent <a href="http://danielwestheide.com/blog/2012/12/26/the-neophytes-guide-to-scala-part-6-error-handling-with-try.html">Neophyte’s Guide to Scala</a>.</p>
 </section>
 <section id="option" class="level2">
 <h2 class="anchored" data-anchor-id="option">Option</h2>
 <p>Another simple structure to represent computations which may fail is <code>Option</code>, this is an algebraic datatype:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> <span class="ex">Option</span><span class="op">[+</span>A<span class="op">]</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> <span class="ex">Option</span><span class="op">[+</span>A<span class="op">]</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="bu">Some</span><span class="op">[+</span>A<span class="op">](</span>a<span class="op">:</span> A<span class="op">)</span> <span class="kw">extends</span> <span class="ex">Option</span><span class="op">[</span>A<span class="op">]</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="bu">None</span> <span class="kw">extends</span> <span class="ex">Option</span><span class="op">[</span>Nothing<span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="bu">None</span> <span class="kw">extends</span> <span class="ex">Option</span><span class="op">[</span>Nothing<span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>In this case, option can either contain a value using the constructor <code>Some</code>, or can represent the absense of a value using <code>None</code>. This provides less information on failure that <code>Try</code>, but nevertheless is sometimes useful. We can re-write the <code>sqrt</code> function to return an optional value</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">option_sqrt</span><span class="op">(</span>a<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">Double</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">option_sqrt</span><span class="op">(</span>a<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">Double</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>a <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="bu">Some</span><span class="op">(</span>math<span class="op">.</span><span class="fu">sqrt</span><span class="op">(</span>a<span class="op">))</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> <span class="bu">None</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Now, when provide an incorrect argument to the function, we get <code>None</code> as the result.</p>
 </section>
 <section id="chaining-computations" class="level1">
 <h1>Chaining Computations</h1>
 <p>In real world functional codebases we compose programs from many small functions. Let’s consider the problem of how to apply <code>def sqrt(a: Double): Option[Double]</code> twice. A naive attempt would be to simply compose the functions as we would for the Scala math library:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sqrt_twice <span class="op">=</span> unsafe_sqrt _ compose unsafe_sqrt _</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sqrt_twice <span class="op">=</span> unsafe_sqrt _ compose unsafe_sqrt _</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>_</code> represents partial application of <code>unsafe_sqrt</code>, if we try to compose the <code>option_sqrt</code> function as in this example we will get a type mismatch. One application of <code>option_sqrt</code> returns a typle <code>Option[Double]</code>, but we need the type <code>Double</code>. Luckily <code>Option</code> has a function defined on it for composing operations like this:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> flatMap<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>a<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> <span class="ex">Option</span><span class="op">[</span>B<span class="op">]):</span> <span class="ex">Option</span><span class="op">[</span>B<span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> flatMap<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>a<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> <span class="ex">Option</span><span class="op">[</span>B<span class="op">]):</span> <span class="ex">Option</span><span class="op">[</span>B<span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>We can now use <code>flatMap</code> to compose <code>option_sqrt</code>:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sqrt_twice_option</span><span class="op">(</span>x<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">Double</span><span class="op">]</span> <span class="op">=</span> </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">option_sqrt</span><span class="op">(</span>x<span class="op">)</span> flatMap option_sqrt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sqrt_twice_option</span><span class="op">(</span>x<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">Double</span><span class="op">]</span> <span class="op">=</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">option_sqrt</span><span class="op">(</span>x<span class="op">)</span> flatMap option_sqrt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Now we can calculate <code>sqrt_twice_option(81) = Some(3.0)</code>.</p>
 <p>We can compose <code>try_sqrt</code> in the same way:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sqrt_twice_try</span><span class="op">(</span>x<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> Try<span class="op">[</span><span class="ex">Double</span><span class="op">]</span> <span class="op">=</span> </span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">try_sqrt</span><span class="op">(</span><span class="dv">81</span><span class="op">)</span> flatMap try_sqrt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sqrt_twice_try</span><span class="op">(</span>x<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> Try<span class="op">[</span><span class="ex">Double</span><span class="op">]</span> <span class="op">=</span> </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">try_sqrt</span><span class="op">(</span><span class="dv">81</span><span class="op">)</span> flatMap try_sqrt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Now, what if we want to compose <code>option_sqrt</code> and <code>try_sqrt</code>. This is not an easy problem in general, however the Scala standard library implements a <code>toOption</code> method on <code>Try</code> values. Hence we can just convert the output of <code>try_sqrt</code> to an <code>Option</code>, however we lose the text from the exception upon failure, which could illuminating in the event of a failure. Let’s consider a more general way to compose the two.</p>
 <section id="nested-maps" class="level2">
 <h2 class="anchored" data-anchor-id="nested-maps">Nested Maps</h2>
 <p><code>Option</code> and <code>Try</code> are both monads (strictly <code>Try</code> is <a href="https://issues.scala-lang.org/browse/SI-6284">not a proper monad</a>), which means they are equipped with two methods which satisfy the monad laws. The two methods defined for all monads are:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Monad<span class="op">[</span>A<span class="op">,</span> M<span class="op">[</span>_<span class="op">]]</span> <span class="op">{</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Monad<span class="op">[</span>A<span class="op">,</span> M<span class="op">[</span>_<span class="op">]]</span> <span class="op">{</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> flatMap<span class="op">[</span>B<span class="op">](</span>f<span class="op">:</span> A <span class="op">=&gt;</span> M<span class="op">[</span>B<span class="op">]):</span> M<span class="op">[</span>B<span class="op">]</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">pure</span><span class="op">(</span>a<span class="op">:</span> A<span class="op">):</span> M<span class="op">[</span>A<span class="op">]</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>We can define all the functions on <code>Try</code> and <code>Option</code> using these two functions, for instance <code>map</code>:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> map<span class="op">[</span>B<span class="op">](</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> M<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span> <span class="kw">this</span><span class="op">.</span><span class="fu">flatMap</span><span class="op">(</span>a <span class="op">=&gt;</span> <span class="fu">pure</span><span class="op">(</span><span class="fu">f</span><span class="op">(</span>a<span class="op">)))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> map<span class="op">[</span>B<span class="op">](</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> M<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span> <span class="kw">this</span><span class="op">.</span><span class="fu">flatMap</span><span class="op">(</span>a <span class="op">=&gt;</span> <span class="fu">pure</span><span class="op">(</span><span class="fu">f</span><span class="op">(</span>a<span class="op">)))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Now, we can use the <code>map</code> function to compose <code>option_sqrt</code> and <code>try_sqrt</code>:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sqrt_twice</span><span class="op">(</span>a<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> Try<span class="op">[</span><span class="ex">Option</span><span class="op">[</span><span class="ex">Double</span><span class="op">]]</span> <span class="op">=</span> <span class="fu">try_sqrt</span><span class="op">(</span>a<span class="op">)</span> map option_sqrt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sqrt_twice</span><span class="op">(</span>a<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> Try<span class="op">[</span><span class="ex">Option</span><span class="op">[</span><span class="ex">Double</span><span class="op">]]</span> <span class="op">=</span> <span class="fu">try_sqrt</span><span class="op">(</span>a<span class="op">)</span> map option_sqrt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>However, what if we want to apply another function to a value returned by this function:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">f</span><span class="op">(</span>a<span class="op">:</span> <span class="ex">Double</span><span class="op">)</span> <span class="op">=</span> a <span class="op">+</span> <span class="dv">1</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">f</span><span class="op">(</span>a<span class="op">:</span> <span class="ex">Double</span><span class="op">)</span> <span class="op">=</span> a <span class="op">+</span> <span class="dv">1</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt_twice</span><span class="op">(</span><span class="dv">81</span><span class="op">)</span> <span class="fu">map</span> <span class="op">(</span>_<span class="op">.</span><span class="fu">map</span><span class="op">(</span>f<span class="op">))</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Success(Some(4.0))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Success(Some(4.0))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>We get the correct value, but we have to apply <code>map</code> twice, this seems cumbersome. There is a better way!</p>
 </section>
 <section id="monad-transformers" class="level2">
 <h2 class="anchored" data-anchor-id="monad-transformers">Monad Transformers</h2>
 <p>The functional programming library <a href="http://typelevel.org/cats/">cats</a>, short for category, has some built in types for dealing with nesting in a more elegent way. The type <code>OptionT[F[_], A]</code> can be used instead of <code>F[Option[A]]</code>, our <code>F[_]</code> type in this case is <code>Try[A]</code></p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>implicits<span class="op">.</span>_</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>implicits<span class="op">.</span>_</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>data<span class="op">.</span>OptionT</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sqrt_twice_trans</span><span class="op">(</span>a<span class="op">:</span> <span class="ex">Double</span><span class="op">):</span> OptionT<span class="op">[</span>Try<span class="op">,</span> <span class="ex">Double</span><span class="op">]</span> <span class="op">=</span> </span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  OptionT<span class="op">.</span>fromOption<span class="op">[</span>Try<span class="op">](</span><span class="fu">option_sqrt</span><span class="op">(</span>a<span class="op">))</span> <span class="fu">flatMap</span> <span class="op">(</span>b <span class="op">=&gt;</span> OptionT<span class="op">.</span><span class="fu">liftF</span><span class="op">(</span><span class="fu">try_sqrt</span><span class="op">(</span>b<span class="op">))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  OptionT<span class="op">.</span>fromOption<span class="op">[</span>Try<span class="op">](</span><span class="fu">option_sqrt</span><span class="op">(</span>a<span class="op">))</span> <span class="fu">flatMap</span> <span class="op">(</span>b <span class="op">=&gt;</span> OptionT<span class="op">.</span><span class="fu">liftF</span><span class="op">(</span><span class="fu">try_sqrt</span><span class="op">(</span>b<span class="op">))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>OptionT</code> provides the function <code>fromOption</code> to transform the result of the <code>option_sqrt</code> function into the <code>OptionT</code> monad. The function <code>liftF</code> is used to lift any monad, in this case <code>Try</code> into the <code>OptionT</code> monad. This compiles and we if we now try to apply the function <code>def f(a: Double) = a + 1</code> to the result of this function we only need a single call to <code>map</code>. This is because <code>OptionT</code> is also a monad:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt_twice_trans</span><span class="op">(</span><span class="dv">81</span><span class="op">)</span> map f</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">// OptionT(Success(Some(4.0)))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt_twice_trans</span><span class="op">(</span><span class="dv">81</span><span class="op">)</span> map f</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">// OptionT(Success(Some(4.0)))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This may seem like quite a lot of effort to remove a call to map, but removing unecessary duplication can help with readability of code, and enable bugs to be spotted earlier. The code has been assembled in a <a href="https://gist.github.com/jonnylaw/99460d466c84d9b52b57010d28b6a4f6">Github gist</a>.</p>
 
 
@@ -287,7 +281,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-law2017" class="csl-entry quarto-appendix-citeas" role="listitem">
 Law, Jonny. 2017. <span>“Using Monads for Handling Failures and
-Exceptions.”</span> January 4, 2017.
+Exceptions.”</span> January 4.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -340,13 +334,14 @@ Exceptions.”</span> January 4, 2017.
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

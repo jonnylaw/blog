@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -11,6 +11,9 @@
 
 <title>An Akka HTTP Client with JSON Parsing – Bayesian Inference and Functional Programming</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -73,10 +76,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-fc539113232677d296c547e50173fa21.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-1b5cbb678aba238cc9ecc8dbef59e0a8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -302,18 +305,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="parsing-the-json-in-scala" class="level2">
 <h2 class="anchored" data-anchor-id="parsing-the-json-in-scala">Parsing the JSON in Scala</h2>
 <p>There are many JSON parsing libraries in Scala, including my favourite <a href="https://circe.github.io/circe/">Circe</a> which is a Typelevel project, providing generic parsers for case classes without additional boilerplate. However, Spray JSON and Akka HTTP work well together, so that is what we will be using today. In order to complete this tutorial, you will need the Akka HTTP and Spray JSON dependencies in your <code>build.sbt</code> file.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>libraryDependencies <span class="op">++=</span>  <span class="bu">Seq</span><span class="op">(</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>libraryDependencies <span class="op">++=</span>  <span class="bu">Seq</span><span class="op">(</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"com.typesafe.akka"</span> <span class="op">%%</span> <span class="st">"akka-stream"</span> <span class="op">%</span> <span class="st">"2.4.17"</span><span class="op">,</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"com.typesafe.akka"</span> <span class="op">%%</span> <span class="st">"akka-http"</span> <span class="op">%</span> <span class="st">"10.0.3"</span><span class="op">,</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"com.typesafe.akka"</span> <span class="op">%%</span> <span class="st">"akka-http-spray-json"</span> <span class="op">%</span> <span class="st">"10.0.0"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"com.typesafe.akka"</span> <span class="op">%%</span> <span class="st">"akka-http-spray-json"</span> <span class="op">%</span> <span class="st">"10.0.0"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Firstly, we describe the data we are interested in, in a collection of case classes representing the JSON data:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">Sensor</span><span class="op">(</span>name<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> data<span class="op">:</span> SensorData<span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">Sensor</span><span class="op">(</span>name<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> data<span class="op">:</span> SensorData<span class="op">)</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">SensorData</span><span class="op">(</span>averageSpeed<span class="op">:</span> AverageSpeed<span class="op">)</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">AverageSpeed</span><span class="op">(</span>meta<span class="op">:</span> Meta<span class="op">,</span> data<span class="op">:</span> <span class="ex">Map</span><span class="op">[</span><span class="ex">String</span><span class="op">,</span> <span class="ex">Double</span><span class="op">])</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">Meta</span><span class="op">(</span>units<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> theme<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> name<span class="op">:</span> <span class="ex">String</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">Meta</span><span class="op">(</span>units<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> theme<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> name<span class="op">:</span> <span class="ex">String</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>We extract the sensor name, and associated data, without bothering with the additional top-level fields. The sensor data field contains only average speed, by appending <code>&amp;variable=average speed</code> to the end of the HTTP Get request.</p>
 <p>Now we have a domain model for the sensor data, we must provide a way for Spray JSON to parse the JSON to the case classes:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> spray<span class="op">.</span>json<span class="op">.</span>_</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> spray<span class="op">.</span>json<span class="op">.</span>_</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> akka<span class="op">.</span>http<span class="op">.</span>scaladsl<span class="op">.</span>marshallers<span class="op">.</span>sprayjson<span class="op">.</span>SprayJsonSupport</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Protocols <span class="kw">extends</span> SprayJsonSupport <span class="kw">with</span> DefaultJsonProtocol <span class="op">{</span></span>
@@ -325,22 +328,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">jsonFormat</span><span class="op">(</span>SensorData<span class="op">.</span>apply<span class="op">,</span> <span class="st">"Average Speed"</span><span class="op">)</span></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">implicit</span> <span class="kw">val</span> sensorFormat<span class="op">:</span> RootJsonFormat<span class="op">[</span>Sensor<span class="op">]</span> <span class="op">=</span> </span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">jsonFormat</span><span class="op">(</span>Sensor<span class="op">.</span>apply<span class="op">,</span> <span class="st">"name"</span><span class="op">,</span> <span class="st">"data"</span><span class="op">)</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This trait can be <a href="http://docs.scala-lang.org/tutorials/tour/mixin-class-composition.html">mixed in</a> when the time comes to parse the JSON data. Let’s first test the JSON parsing by directly reading in the JSON we get when running the request in a web browser:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> TestJson <span class="kw">extends</span> App <span class="kw">with</span> Protocols <span class="op">{</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> TestJson <span class="kw">extends</span> App <span class="kw">with</span> Protocols <span class="op">{</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> json_string <span class="op">=</span> scala<span class="op">.</span>io<span class="op">.</span><span class="ex">Source</span><span class="op">.</span><span class="fu">fromFile</span><span class="op">(</span><span class="st">"data/traffic_sensor.json"</span><span class="op">).</span>getLines<span class="op">.</span>mkString</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  json_string<span class="op">.</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    parseJson<span class="op">.</span></span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    convertTo<span class="op">[</span><span class="ex">List</span><span class="op">[</span>Sensor<span class="op">]].</span></span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">foreach</span><span class="op">(</span>println<span class="op">)</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>There’s a bit going on here, first we have a file which contains the JSON String, this could have been pasted in directly to Scala. Then the string is parsed, this is possible since the <code>TestJson</code> object has the JSON <code>Protocols</code> trait we defined earlier mixed in using <code>with</code>.</p>
 </section>
 <section id="making-an-api-request-using-akka-http" class="level2">
 <h2 class="anchored" data-anchor-id="making-an-api-request-using-akka-http">Making an API Request using Akka HTTP</h2>
 <p>In order to make an API request using Akka HTTP, we utilise the high-level client API based on Scala futures:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> akka<span class="op">.</span>actor<span class="op">.</span>ActorSystem</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> akka<span class="op">.</span>actor<span class="op">.</span>ActorSystem</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> akka<span class="op">.</span>http<span class="op">.</span>scaladsl<span class="op">.</span>marshallers<span class="op">.</span>sprayjson<span class="op">.</span>SprayJsonSupport</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> akka<span class="op">.</span>http<span class="op">.</span>scaladsl<span class="op">.</span>model<span class="op">.</span>_</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> akka<span class="op">.</span>http<span class="op">.</span>scaladsl<span class="op">.</span>Http</span>
@@ -363,27 +366,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"variable"</span> <span class="op">-&gt;</span> <span class="st">"average speed"</span><span class="op">)</span></span>
 <span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res<span class="op">:</span> <span class="ex">Future</span><span class="op">[</span>HttpResponse<span class="op">]</span> <span class="op">=</span> </span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Http</span><span class="op">().</span><span class="fu">singleRequest</span><span class="op">(</span><span class="fu">HttpRequest</span><span class="op">(</span>GET<span class="op">,</span> uri <span class="op">=</span> uri<span class="op">.</span><span class="fu">withQuery</span><span class="op">(</span>query<span class="op">)))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Http</span><span class="op">().</span><span class="fu">singleRequest</span><span class="op">(</span><span class="fu">HttpRequest</span><span class="op">(</span>GET<span class="op">,</span> uri <span class="op">=</span> uri<span class="op">.</span><span class="fu">withQuery</span><span class="op">(</span>query<span class="op">)))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>We have created a Query object, which is just a sequence of <code>(String, Sting)</code>, denoted using the nicer arrow syntax. The request is initialised simply as a <code>singleRequest</code> which retuns a <code>Future</code> containing the <code>HttpResponse</code>. The <code>HttpResponse</code> object contains the status (200 OK, 404 Not Found etc.), and importantly the body content, called <code>HttpEntity</code>, the <code>HttpEntity</code> in this case is simply the JSON. In order to verify we are able to make a requst to the Urban Observatory, we can match on the result of the future using <code>andThen</code>:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>res andThen <span class="op">{</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>res andThen <span class="op">{</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="fu">Success</span><span class="op">(</span>response<span class="op">)</span> <span class="op">=&gt;</span> <span class="fu">println</span><span class="op">(</span>response<span class="op">)</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="fu">Failure</span><span class="op">(</span>ex<span class="op">)</span> <span class="op">=&gt;</span> <span class="fu">println</span><span class="op">(</span>ex<span class="op">)</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> onComplete <span class="op">{</span></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=&gt;</span> system<span class="op">.</span><span class="fu">terminate</span><span class="op">()</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>andThen</code> expects a function from a <code>Try</code>, an algebraic data type (ADT) which can be either <code>Success</code> or <code>Failure</code>. When the future completes, we shutdown the Actor System required by Akka HTTP. When you run this minimal example, you should receive a response similar to:</p>
 <pre><code>HttpResponse(200 OK,List(Date: Tue, 21 Feb 2017 09:27:24 GMT, Server: Apache/2.4.7 (Ubuntu), Vary
 : Cookie, X-Frame-Options: SAMEORIGIN),HttpEntity.Chunked(application/json),HttpProtocol(HTTP/1.1
 ))</code></pre>
 <p>The server has returned 200 OK, some headers and some response data. In order to access the response data, we must convert it to a string, first we access the <code>entity</code> field of the <code>HttpResponse</code>, the get the results as a <code>ByteString</code> which can finally be parsed to a String:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> resp <span class="op">=</span> response<span class="op">.</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> resp <span class="op">=</span> response<span class="op">.</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  entity<span class="op">.</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  dataBytes<span class="op">.</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span><span class="op">(</span>_<span class="op">.</span>utf8String<span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span><span class="op">(</span>_<span class="op">.</span>utf8String<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This is an Akka Stream, containing the response from the server. In order to parse it into the sensor data, we map over the string using the JSON parsing function we have previously seen:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>resp<span class="op">.</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>resp<span class="op">.</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span><span class="op">(</span>_<span class="op">.</span>parseJson<span class="op">.</span>convertTo<span class="op">[</span><span class="ex">List</span><span class="op">[</span>Sensor<span class="op">]]).</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">runForeach</span><span class="op">(</span>println<span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">runForeach</span><span class="op">(</span>println<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This should print the parsed data to the console. There are a variety of other Akka <code>Sink</code>s which can be used to consume the <code>HttpEntity</code>, they can be found in the Akka docs <a href="http://doc.akka.io/docs/akka/current/scala/stream/stages-overview.html">overview of built in stages</a>.</p>
 <p>A complete working example is available in this <a href="https://gist.github.com/jonnylaw/028083cf3bf41923b5dc38ade58d2622">Gist</a>.</p>
 
@@ -398,7 +401,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-law2017" class="csl-entry quarto-appendix-citeas" role="listitem">
 Law, Jonny. 2017. <span>“An Akka HTTP Client with JSON Parsing.”</span>
-February 21, 2017.
+February 21.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -451,13 +454,14 @@ February 21, 2017.
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
