@@ -1,0 +1,17 @@
+[project]
+name = "2026-05-08-handling-concurrency"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "ipykernel>=7.2.0",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.10.8",
+    "nbclient>=0.10.4",
+    "nbformat>=5.10.4",
+    "simpy>=4.1.1",
+    "pandas>=2.2.3",
+    "plotnine>=0.14.0",
+    "numpy>=2.2.3",
+]
