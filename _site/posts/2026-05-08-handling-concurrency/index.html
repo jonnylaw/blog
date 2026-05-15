@@ -247,7 +247,7 @@ L = \lambda W
 <h1>Concurrency Primitive: A Semaphore</h1>
 <p>A semaphore can be used to limit the number of concurrent requests sent from a single coordinator. We set a <code>max_concurrency</code> limit and never deviate - in practice we might not hit the maximum throughput and if we’re paying for provisioned throughput then we’re leaving money on the table. Additionally, if we have a single semaphore per machine and other machines are sending requests to the same service how can we understand the current load on the service? We can’t without coordination which is expensive. This might lead to us capping the throughput per-machine to be much less than capacity, additionally, in a system with horizontal autoscaling, we might not know the number of machines sending requests to the service.</p>
 <p>To implement the semaphore we use write a class with <code>__enter__</code> and <code>__exit__</code> dunder methods which allows us to use the <code>CustomSemaphore</code> as a <a href="https://docs.python.org/3/library/stdtypes.html#typecontextmanager">context manager</a> using <code>with</code> syntax. Then we can use threading primitives to determine when a slot is available and when it is not.</p>
-<div id="2ae8372e" class="cell" data-execution_count="1">
+<div id="5f48f7cd" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> threading</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -323,7 +323,7 @@ Task 4 is working...
 \]</span></p>
 <p>where <span class="math inline">\(\tau\)</span> is the latency target, <span class="math inline">\(\alpha\)</span> is the additive increase step, and <span class="math inline">\(\beta \in (0, 1)\)</span> is the multiplicative decrease factor.</p>
 <p>We can now define a base class for the controller so we can re-use it when we define a simulation for the capacity of the system. The <code>update</code> method accepts parameters that we can measure and can update the interval and the rate (which is the inverse of the interval). In this case we are going to measure the latency of the response.</p>
-<div id="d27475b8" class="cell" data-execution_count="2">
+<div id="a8874527" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Controller:</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, initial_interval: <span class="bu">float</span>):</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.interval <span class="op">=</span> initial_interval</span>
@@ -339,7 +339,7 @@ Task 4 is working...
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> rate(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="fl">1.0</span> <span class="op">/</span> <span class="va">self</span>.interval</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="fd5f3416" class="cell" data-execution_count="3">
+<div id="0d4b08bc" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AIMDController(Controller):</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Additive Increase / Multiplicative Decrease controller.</span></span>
@@ -386,7 +386,7 @@ Task 4 is working...
 \log(c_{t+1}) = \log(c_t) + \theta(\mu - \log(c_t)) + \sigma w_t, \quad w_t \sim \mathcal{N}(0, W)
 \]</span></p>
 <p>Where <span class="math inline">\(\mu\)</span> is the long-run mean of the capacity and <span class="math inline">\(\theta\)</span> is the speed of mean reversion and <span class="math inline">\(\sigma\)</span> is the volatility of the process. We can define a single step of the OU process as follows:</p>
-<div id="7d5e5424" class="cell" data-execution_count="4">
+<div id="7af91ebf" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ou_step(x: <span class="bu">float</span>, mu: <span class="bu">float</span>, theta: <span class="bu">float</span>, sigma: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
@@ -394,14 +394,14 @@ Task 4 is working...
 </div>
 <p>We can simulate the OU process by iterating the step function from an initial log-capacity equal to the long-run mean <span class="math inline">\(\mu\)</span>.</p>
 <div id="cell-fig-ou-process" class="cell" data-execution_count="5">
-<div class="cell-output cell-output-display" data-execution_count="82">
+<div class="cell-output cell-output-display" data-execution_count="24">
 <div id="fig-ou-process" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ou-process-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="index_files/figure-html/fig-ou-process-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ou-process-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: The Ornstein-Uhlenbeck Process for the log-capacity of the system, with mu = 1.0, theta = 0.05, and sigma = 0.2
+Figure&nbsp;1: The Ornstein-Uhlenbeck Process for the log-capacity of the system, with mu = log(20.0), theta = 0.05, and sigma = 0.2
 </figcaption>
 </figure>
 </div>
@@ -419,23 +419,23 @@ g(c_t, \ell_0) = \begin{cases}
 \end{cases}
 \]</span></p>
 <p>So when demand <span class="math inline">\(k\)</span> is at or below capacity <span class="math inline">\(c_t\)</span>, the service time is constant at the base latency <span class="math inline">\(\ell_0\)</span>. When demand exceeds capacity, latency grows proportionally with the overload ratio <span class="math inline">\(k/c_t &gt; 1\)</span>. Because only the dimensionless ratio matters, the absolute scale of <span class="math inline">\(c_t\)</span> and <span class="math inline">\(k\)</span> does not need to match — what counts is whether demand is above or below capacity.</p>
-<div id="995ffb93" class="cell" data-execution_count="6">
+<div id="1f229531" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> g(latent_capacity: <span class="bu">float</span>, applied_concurrency: <span class="bu">float</span>, ell_0: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.where(applied_concurrency <span class="op">&lt;=</span> latent_capacity, ell_0, ell_0 <span class="op">*</span> applied_concurrency <span class="op">/</span> latent_capacity)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> observe(current_capacity, applied_concurrency, base_latency, sigma_v):</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> g(current_capacity, applied_concurrency, base_latency) <span class="op">+</span> np.random.normal(<span class="dv">0</span>, sigma_v)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>We can see in Figure 2, the applied concurrency is constant at 2.0 (plotted as the dashed red line) which is sometimes above the capacity of the system, the mean capacity is <span class="math inline">\(\exp(\mu) = \exp(1.0) \approx 2.718\)</span> hence we can see the latency spiking when the applied concurrency is above the capacity.</p>
+<p>We can see in Figure 2, the applied concurrency is constant at 2.0 (plotted as the dashed red line) which is sometimes above the capacity of the system, the mean capacity is <span class="math inline">\(\exp(\mu) = \exp(\log(20.0)) = 20.0\)</span> hence we can see the latency spiking when <span class="math inline">\(k\)</span>, the applied concurrency/demand, is above the capacity.</p>
 <div id="cell-fig-service-time" class="cell" data-execution_count="7">
-<div class="cell-output cell-output-display" data-execution_count="84">
+<div class="cell-output cell-output-display" data-execution_count="26">
 <div id="fig-service-time" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-service-time-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="index_files/figure-html/fig-service-time-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-service-time-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Service Time and System Capacity where k = 2.0, ell_0 = 1.0, and sigma_v = 0.1, the latent capacity is the OU-process with mean mu = log(20.0), theta = 0.05, and sigma = 0.2
+Figure&nbsp;2: Service Time and System Capacity where k = 20.0 (applied concurrency/demand), ell_0 = 1.0, and sigma_v = 0.1, the latent capacity is the OU-process with mean mu = log(20.0), theta = 0.05, and sigma = 0.2
 </figcaption>
 </figure>
 </div>
@@ -448,7 +448,7 @@ Figure&nbsp;2: Service Time and System Capacity where k = 2.0, ell_0 = 1.0, and 
 <p><span class="math display">\[\mu_t = \mu - \frac{1}{2} \max(0, \log(k) - \log(c_{t-1}))\]</span></p>
 <p>where <span class="math inline">\(k\)</span> is the applied concurrency and <span class="math inline">\(c_{t-1}\)</span> is the capacity at time <span class="math inline">\(t-1\)</span>. This means that as the applied concurrency increases, the mean of the log-capacity decreases.</p>
 <p>We can apply the controllers to the observed latency to control the inter-arrival time of the requests - this should prevent the system from reaching capacity and receiving a 429 response. Let’s try with each controller in turn. First we’ll try with a constant controller at a constant rate of 50 requests per second (way above the capacity of the system).</p>
-<div id="17371939" class="cell" data-execution_count="8">
+<div id="fc22b42b" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ConstantController(Controller):</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, rate: <span class="bu">float</span>):</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(initial_interval<span class="op">=</span><span class="fl">1.0</span> <span class="op">/</span> rate)</span>
@@ -456,62 +456,71 @@ Figure&nbsp;2: Service Time and System Capacity where k = 2.0, ell_0 = 1.0, and 
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>controller <span class="op">=</span> ConstantController(rate<span class="op">=</span><span class="fl">50.0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can apply the controller as follows:</p>
-<div id="52a78ab8" class="cell" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _get_dynamic_drift(log_cap: <span class="bu">float</span>, concurrency: <span class="bu">float</span>, base_log_cap: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Calculates the drift for the OU process based on current system stress."""</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    stress_factor <span class="op">=</span> <span class="bu">max</span>(<span class="dv">0</span>, np.log(concurrency) <span class="op">-</span> log_cap)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> base_log_cap <span class="op">-</span> (<span class="fl">0.5</span> <span class="op">*</span> stress_factor)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _evolve_capacity(log_cap: <span class="bu">float</span>, drift: <span class="bu">float</span>, speed: <span class="bu">float</span>, volatility: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>]:</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    next_log_cap <span class="op">=</span> ou_step(log_cap, drift, speed, volatility)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> next_log_cap, np.exp(next_log_cap)</span>
+<div id="4335653e" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _get_dynamic_drift(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    log_capacity: <span class="bu">float</span>, </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    applied_concurrency: <span class="bu">float</span>, </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    base_log_capacity: <span class="bu">float</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Calculates the drift for the OU process based on current system stress."""</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    stress_factor <span class="op">=</span> <span class="bu">max</span>(<span class="dv">0</span>, np.log(applied_concurrency) <span class="op">-</span> log_capacity)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> base_log_capacity <span class="op">-</span> (<span class="fl">0.5</span> <span class="op">*</span> stress_factor)</span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> apply_controller(</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    controller: Controller, </span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    ell_0: <span class="bu">float</span>, </span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    sigma_v: <span class="bu">float</span>, </span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    t_max: <span class="bu">int</span>, </span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    base_mean_capacity: <span class="bu">float</span>, </span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    capacity_mean_reversion_speed: <span class="bu">float</span>, </span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    capacity_volatility: <span class="bu">float</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Apply a controller to the observed latency to control the inter-arrival time of the requests."""</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    applied_concurrency_values <span class="op">=</span> np.zeros(t_max)</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    applied_concurrency_values[<span class="dv">0</span>] <span class="op">=</span> controller.rate</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    latency_values <span class="op">=</span> np.zeros(t_max)</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    capacity_values <span class="op">=</span> np.zeros(t_max)</span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    capacity_values[<span class="dv">0</span>] <span class="op">=</span> base_mean_capacity</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    log_capacity_values <span class="op">=</span> np.zeros(t_max)</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    log_capacity_values[<span class="dv">0</span>] <span class="op">=</span> np.log(base_mean_capacity)</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    dynamic_mu <span class="op">=</span> np.zeros(t_max)</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    dynamic_mu[<span class="dv">0</span>] <span class="op">=</span> np.log(base_mean_capacity)</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(t_max <span class="op">-</span> <span class="dv">1</span>):</span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1. Determine current environmental drift based on load</span></span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        dynamic_mu[t<span class="op">+</span><span class="dv">1</span>] <span class="op">=</span> _get_dynamic_drift(</span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>            log_capacity_values[t], </span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>            applied_concurrency_values[t],  </span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>            np.log(base_mean_capacity)</span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2. Advance the hidden state (Capacity)</span></span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>        log_cap_next, cap_next <span class="op">=</span> _evolve_capacity(</span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>            log_capacity_values[t], </span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>            dynamic_mu[t<span class="op">+</span><span class="dv">1</span>], </span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>            capacity_mean_reversion_speed, </span>
-<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>            capacity_volatility</span>
-<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>        log_capacity_values[t<span class="op">+</span><span class="dv">1</span>] <span class="op">=</span> log_cap_next</span>
-<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>        capacity_values[t<span class="op">+</span><span class="dv">1</span>] <span class="op">=</span> cap_next</span>
-<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3. Generate Observation and Update Controller</span></span>
-<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>        latency_values[t<span class="op">+</span><span class="dv">1</span>] <span class="op">=</span> observe(cap_next, applied_concurrency_values[t], ell_0, sigma_v)</span>
-<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>        controller.update(latency_values[t<span class="op">+</span><span class="dv">1</span>])</span>
-<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>        applied_concurrency_values[t<span class="op">+</span><span class="dv">1</span>] <span class="op">=</span> controller.rate</span>
-<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> applied_concurrency_values, latency_values, capacity_values, log_capacity_values, dynamic_mu</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _evolve_capacity(</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    log_capacity: <span class="bu">float</span>, </span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    drift: <span class="bu">float</span>, </span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    speed: <span class="bu">float</span>, </span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    volatility: <span class="bu">float</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>]:</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    next_log_capacity <span class="op">=</span> ou_step(log_capacity, drift, speed, volatility)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> next_log_capacity, np.exp(next_log_capacity)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> apply_controller(</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    controller: Controller, </span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    ell_0: <span class="bu">float</span>, </span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    sigma_v: <span class="bu">float</span>, </span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    t_max: <span class="bu">int</span>, </span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    base_mean_capacity: <span class="bu">float</span>, </span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    capacity_mean_reversion_speed: <span class="bu">float</span>, </span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    capacity_volatility: <span class="bu">float</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Apply a controller to the observed latency to control the inter-arrival time of the requests."""</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    applied_concurrency_values <span class="op">=</span> np.zeros(t_max)</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    applied_concurrency_values[<span class="dv">0</span>] <span class="op">=</span> controller.rate</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    latency_values <span class="op">=</span> np.zeros(t_max)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    capacity_values <span class="op">=</span> np.zeros(t_max)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    capacity_values[<span class="dv">0</span>] <span class="op">=</span> base_mean_capacity</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    log_capacity_values <span class="op">=</span> np.zeros(t_max)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    log_capacity_values[<span class="dv">0</span>] <span class="op">=</span> np.log(base_mean_capacity)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    dynamic_mu <span class="op">=</span> np.zeros(t_max)</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    dynamic_mu[<span class="dv">0</span>] <span class="op">=</span> np.log(base_mean_capacity)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(t_max <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1. Determine current environmental drift based on load</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>        dynamic_mu[t<span class="op">+</span><span class="dv">1</span>] <span class="op">=</span> _get_dynamic_drift(</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>            log_capacity_values[t], </span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>            applied_concurrency_values[t],  </span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>            np.log(base_mean_capacity)</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2. Advance the hidden state (Capacity)</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        log_cap_next, cap_next <span class="op">=</span> _evolve_capacity(</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>            log_capacity_values[t], </span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>            dynamic_mu[t<span class="op">+</span><span class="dv">1</span>], </span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>            capacity_mean_reversion_speed, </span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>            capacity_volatility</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>        log_capacity_values[t<span class="op">+</span><span class="dv">1</span>] <span class="op">=</span> log_cap_next</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>        capacity_values[t<span class="op">+</span><span class="dv">1</span>] <span class="op">=</span> cap_next</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3. Generate Observation and Update Controller</span></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>        latency_values[t<span class="op">+</span><span class="dv">1</span>] <span class="op">=</span> observe(cap_next, applied_concurrency_values[t], ell_0, sigma_v)</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>        controller.update(latency_values[t<span class="op">+</span><span class="dv">1</span>])</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>        applied_concurrency_values[t<span class="op">+</span><span class="dv">1</span>] <span class="op">=</span> controller.rate</span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> applied_concurrency_values, latency_values, capacity_values, log_capacity_values, dynamic_mu</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="6b7dbaa2" class="cell" data-execution_count="10">
+<div id="04517047" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>SEED <span class="op">=</span> <span class="dv">200</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>np.random.seed(SEED)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>applied_concurrency_values, latency_values, capacity_values, log_capacity_values, dynamic_mu <span class="op">=</span> apply_controller(</span>
@@ -525,22 +534,22 @@ Figure&nbsp;2: Service Time and System Capacity where k = 2.0, ell_0 = 1.0, and 
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="cell-fig-applied-concurrency-constant-50-rps" class="cell" data-execution_count="11">
-<div class="cell-output cell-output-display" data-execution_count="88">
+<div class="cell-output cell-output-display" data-execution_count="30">
 <div id="fig-applied-concurrency-constant-50-rps" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-applied-concurrency-constant-50-rps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="index_files/figure-html/fig-applied-concurrency-constant-50-rps-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-applied-concurrency-constant-50-rps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Apply the Constant Controller with a rate of 50 rps
+Figure&nbsp;3: Applying the Constant Controller with a rate of 50 rps
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>With the constant controller and the applied concurrency at 50 rps we saturate the system - the dynamic mean decreases as a function of the applied concurrency which in turn decreases the capacity. Since the capacity is (typically) less than the applied concurrency the latency increases meaning these requests will not be fulfilled.</p>
-<p>We can calculate the throughput as the number of successful requests per second. We can define the total number of successful requests as the number of requests where the latency is less than a threshold, say 1.5 seconds. We can then calculate the throughtput as the number of successful requests divided the total time (300 seconds).</p>
-<div id="9d59042d" class="cell" data-execution_count="12">
+<p>With the constant controller and the applied concurrency at 50 rps we saturate the system - the dynamic mean decreases as a function of the applied concurrency which in turn decreases the capacity. Since the capacity is (typically) less than the applied concurrency the latency increases. If the capacity is too low in reality, these requests will not be fulfilled.</p>
+<p>We can calculate the throughput as the number of successful requests per second. We can define the total number of successful requests as the number of requests where the latency is less than a threshold, say 1.5 seconds. We can then calculate the throughtput as the number of successful requests divided the total time (<code>t_max</code> = 300 seconds).</p>
+<div id="e354b79b" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> controller_summary(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    latency_values: np.ndarray, </span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    applied_concurrency_values: np.ndarray, </span>
@@ -552,8 +561,8 @@ Figure&nbsp;3: Apply the Constant Controller with a rate of 50 rps
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    throughput <span class="op">=</span> successful_requests <span class="op">/</span> time_elapsed</span>
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">int</span>(<span class="bu">round</span>(successful_requests, <span class="dv">0</span>)), <span class="bu">int</span>(<span class="bu">round</span>(failed_requests, <span class="dv">0</span>)), <span class="bu">round</span>(throughput, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="e5ca36ae" class="cell" data-execution_count="13">
-<div class="cell-output cell-output-display" data-execution_count="90">
+<div id="446248a9" class="cell" data-execution_count="13">
+<div class="cell-output cell-output-display" data-execution_count="32">
 <div>
 
 
@@ -579,23 +588,23 @@ Figure&nbsp;3: Apply the Constant Controller with a rate of 50 rps
 </div>
 </div>
 </div>
-<p>We can try instead with a lower constant rate of 20 rps instead (right around the capacity of the system). There are still moments when the system is saturated and the latency is pinned at the maximum latency of 1 second - we want to be able to react to moments when the system is saturated and reduce the applied concurrency.</p>
+<p>We can try instead with a lower constant rate of 20 rps instead (right around the capacity of the system). There are still moments when the system is saturated and the latency grows proportional to demand/applied concurrency - ideally we want to be able to react to moments when the system is saturated and reduce the applied concurrency.</p>
 <div id="cell-fig-applied-concurrency-constant-20-rps" class="cell" data-execution_count="14">
-<div class="cell-output cell-output-display" data-execution_count="91">
+<div class="cell-output cell-output-display" data-execution_count="33">
 <div id="fig-applied-concurrency-constant-20-rps" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-applied-concurrency-constant-20-rps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="index_files/figure-html/fig-applied-concurrency-constant-20-rps-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-applied-concurrency-constant-20-rps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: We apply the Constant Controller with a rate of 20 rps
+Figure&nbsp;4: Applying the Constant Controller with a rate of 20 rps
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<div id="229c59bb" class="cell" data-execution_count="15">
-<div class="cell-output cell-output-display" data-execution_count="92">
+<div id="8fa0a0bb" class="cell" data-execution_count="15">
+<div class="cell-output cell-output-display" data-execution_count="34">
 <div>
 
 
@@ -621,8 +630,8 @@ Figure&nbsp;4: We apply the Constant Controller with a rate of 20 rps
 </div>
 </div>
 </div>
-<p>Next we’ll try with the AIMD Controller. When the latency is larger than the target latency threshold (1.25), we reduce the inter-arrival time by <span class="math inline">\(\alpha\)</span>. When the latency is less than the target latency threshold, we increase the inter-arrival time by a factor of <span class="math inline">\(\beta\)</span>.</p>
-<div id="a9110469" class="cell" data-execution_count="16">
+<p>Next we’ll try with the AIMD Controller. We’ll choose a targer latency threshold of 1.25 seconds - just over the base latency, <span class="math inline">\(\ell_0 = 1.0\)</span> seconds. When the latency is larger than the target latency threshold (1.25), we reduce the inter-arrival time by <span class="math inline">\(\alpha\)</span>. When the latency is less than the target latency threshold, we increase the inter-arrival time by a factor of <span class="math inline">\(\beta\)</span>.</p>
+<div id="de4cd324" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>controller <span class="op">=</span> AIMDController(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    initial_interval<span class="op">=</span><span class="fl">1.0</span>, </span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    target_latency<span class="op">=</span><span class="fl">1.25</span>, </span>
@@ -632,7 +641,7 @@ Figure&nbsp;4: We apply the Constant Controller with a rate of 20 rps
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    max_interval<span class="op">=</span><span class="fl">1.0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="cell-fig-applied-concurrency-aimd" class="cell" data-execution_count="17">
-<div class="cell-output cell-output-display" data-execution_count="94">
+<div class="cell-output cell-output-display" data-execution_count="36">
 <div id="fig-applied-concurrency-aimd" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-applied-concurrency-aimd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -645,8 +654,8 @@ Figure&nbsp;5: The AIMD Controller with an initial interval of 1.0 seconds and a
 </div>
 </div>
 </div>
-<div id="d530b9f6" class="cell" data-execution_count="18">
-<div class="cell-output cell-output-display" data-execution_count="95">
+<div id="98f3e988" class="cell" data-execution_count="18">
+<div class="cell-output cell-output-display" data-execution_count="37">
 <div>
 
 
@@ -676,13 +685,13 @@ Figure&nbsp;5: The AIMD Controller with an initial interval of 1.0 seconds and a
 </section>
 <section id="throughput-comparison" class="level1">
 <h1>Throughput Comparison</h1>
-<p>To compare the algorithms fairly we re-run each controller with the same random seed and simulation parameters. Requests whose observed latency exceeds the threshold (<span class="math inline">\(\tau = 1.5\)</span> s) are treated as rate-limited — the service has rejected or heavily delayed them, so they do not contribute to useful throughput. This makes the effective throughput of controllers that frequently breach the threshold much lower than their nominal rate suggests.</p>
+<p>To compare the algorithms fairly we re-run each controller with the same random seed and simulation parameters. We assume that requests whose observed latency exceeds the threshold (1.5 seconds) are treated as rate-limited (received a 429 response). This means that the service has rejected them, so they do not contribute to useful throughput. This makes the effective throughput of controllers that frequently breach the threshold much lower than their nominal rate suggests.</p>
 <p>Metrics computed:</p>
 <ul>
-<li><strong>Time elapsed</strong> – total simulated time <span class="math inline">\(t_{\max}\)</span> (seconds).</li>
-<li><strong>Successful requests</strong> – number of requests where latency <span class="math inline">\(\leq 1.5\)</span> seconds.</li>
-<li><strong>Effective throughput</strong> – successful requests / time elapsed (req/s).</li>
-<li><strong>% rate-limited</strong> – the proportion of requests where the latency exceeded 1.5 seconds.</li>
+<li><strong>Time elapsed</strong>: total simulated time <span class="math inline">\(t_{\max}\)</span> (seconds).</li>
+<li><strong>Successful requests</strong>: number of requests where latency <span class="math inline">\(\leq 1.5\)</span> seconds.</li>
+<li><strong>Effective throughput</strong>: successful requests / time elapsed (req/s).</li>
+<li><strong>% rate-limited</strong>: the proportion of requests where the latency exceeded 1.5 seconds.</li>
 </ul>
 <div class="cell" data-execution_count="19">
 <div id="tbl-throughput-comparison" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="19">
@@ -691,7 +700,7 @@ Figure&nbsp;5: The AIMD Controller with an initial interval of 1.0 seconds and a
 Table&nbsp;1: Throughput comparison across concurrency-control algorithms (300 steps, fixed seed).
 </figcaption>
 <div aria-describedby="tbl-throughput-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="96">
+<div class="cell-output cell-output-display" data-execution_count="38">
 <div>
 
 
@@ -756,10 +765,10 @@ Table&nbsp;1: Throughput comparison across concurrency-control algorithms (300 s
 </figure>
 </div>
 </div>
-<p>The table highlights the cost of ignoring rate-limiting signals. The constant controller firing at 50 req/s has most requests rejected ends up with a lower effective throughput than one running at 20 req/s (which happens to be the actual long-run mean capacity of the system). AIMD keeps the rate-limited fraction low and therefore achieves better effective throughput despite a lower nominal rate.</p>
+<p>The table highlights the cost of ignoring rate-limiting signals. The constant controller firing at 50 req/s has most requests rejected ends up with a lower effective throughput than one running at 20 req/s (which is the actual long-run mean latent capacity of the system). AIMD keeps the rate-limited fraction low and therefore achieves better effective throughput despite sending fewer total requests compared to the constant controller with 50 req/s.</p>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>AIMD is a useful controller to apply to distributed systems where the underlying capacity is not known. We have simulated a system with a latent capacity and applied the controllers to the observed latency to control the inter-arrival time of the requests. We have seen that with a constant controller we either under-utilise the system or over-utilise the system. The AIMD controller is able to achieve a higher effective throughput by monitoring the latency and adjusting the inter-arrival time accordingly.</p>
+<p>AIMD is a useful controller to apply to distributed systems where the underlying capacity is not known. We have simulated a system with a latent capacity and applied the controllers to the observed latency to control the inter-arrival time of the requests. We have seen that with a constant controller we either under-utilise the system or we saturate the system, which would result in requests being rejected. The AIMD controller is able to achieve a higher effective throughput by monitoring the latency and adjusting the inter-arrival time accordingly.</p>
 
 
 </section>

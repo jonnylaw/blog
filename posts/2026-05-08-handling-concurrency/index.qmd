@@ -174,7 +174,7 @@ We can simulate the OU process by iterating the step function from an initial lo
 
 ```{python}
 #| label: fig-ou-process
-#| fig-cap: "The Ornstein-Uhlenbeck Process for the log-capacity of the system, with mu = 1.0, theta = 0.05, and sigma = 0.2"
+#| fig-cap: "The Ornstein-Uhlenbeck Process for the log-capacity of the system, with mu = log(20.0), theta = 0.05, and sigma = 0.2"
 #| echo: false
 import pandas as pd
 from plotnine import *
@@ -234,15 +234,15 @@ def observe(current_capacity, applied_concurrency, base_latency, sigma_v):
     return g(current_capacity, applied_concurrency, base_latency) + np.random.normal(0, sigma_v)
 ```
 
-We can see in Figure 2, the applied concurrency is constant at 2.0 (plotted as the dashed red line) which is sometimes above the capacity of the system, the mean capacity is $\exp(\mu) = \exp(1.0) \approx 2.718$ hence we can see the latency spiking when the applied concurrency is above the capacity.
+We can see in Figure 2, the applied concurrency is constant at 2.0 (plotted as the dashed red line) which is sometimes above the capacity of the system, the mean capacity is $\exp(\mu) = \exp(\log(20.0)) = 20.0$ hence we can see the latency spiking when $k$, the applied concurrency/demand, is above the capacity.
 
 ```{python}
 #| label: fig-service-time
-#| fig-cap: "Service Time and System Capacity where k = 2.0, ell_0 = 1.0, and sigma_v = 0.1, the latent capacity is the OU-process with mean mu = log(20.0), theta = 0.05, and sigma = 0.2"
+#| fig-cap: "Service Time and System Capacity where k = 20.0 (applied concurrency/demand), ell_0 = 1.0, and sigma_v = 0.1, the latent capacity is the OU-process with mean mu = log(20.0), theta = 0.05, and sigma = 0.2"
 #| echo: false
 SEED = 200
 np.random.seed(SEED)
-k = 2.0
+k = 20.0
 ell_0 = 1.0
 sigma_v = 0.1
 service_times = np.zeros(t_max)
@@ -289,14 +289,23 @@ controller = ConstantController(rate=50.0)
 We can apply the controller as follows:
 
 ```{python}
-def _get_dynamic_drift(log_cap: float, concurrency: float, base_log_cap: float) -> float:
+def _get_dynamic_drift(
+    log_capacity: float, 
+    applied_concurrency: float, 
+    base_log_capacity: float
+) -> float:
     """Calculates the drift for the OU process based on current system stress."""
-    stress_factor = max(0, np.log(concurrency) - log_cap)
-    return base_log_cap - (0.5 * stress_factor)
+    stress_factor = max(0, np.log(applied_concurrency) - log_capacity)
+    return base_log_capacity - (0.5 * stress_factor)
 
-def _evolve_capacity(log_cap: float, drift: float, speed: float, volatility: float) -> tuple[float, float]:
-    next_log_cap = ou_step(log_cap, drift, speed, volatility)
-    return next_log_cap, np.exp(next_log_cap)
+def _evolve_capacity(
+    log_capacity: float, 
+    drift: float, 
+    speed: float, 
+    volatility: float
+) -> tuple[float, float]:
+    next_log_capacity = ou_step(log_capacity, drift, speed, volatility)
+    return next_log_capacity, np.exp(next_log_capacity)
 
 def apply_controller(
     controller: Controller, 
@@ -360,7 +369,7 @@ applied_concurrency_values, latency_values, capacity_values, log_capacity_values
 
 ```{python}
 #| label: fig-applied-concurrency-constant-50-rps
-#| fig-cap: "Apply the Constant Controller with a rate of 50 rps"
+#| fig-cap: "Applying the Constant Controller with a rate of 50 rps"
 #| echo: false
 def plot_applied_concurrency_controller(
     applied_concurrency_values, latency_values, capacity_values, log_capacity_values, dynamic_mu):
@@ -403,9 +412,9 @@ def plot_applied_concurrency_controller(
 plot_applied_concurrency_controller(applied_concurrency_values, latency_values, capacity_values, log_capacity_values, dynamic_mu)
 ```
 
-With the constant controller and the applied concurrency at 50 rps we saturate the system - the dynamic mean decreases as a function of the applied concurrency which in turn decreases the capacity. Since the capacity is (typically) less than the applied concurrency the latency increases meaning these requests will not be fulfilled.
+With the constant controller and the applied concurrency at 50 rps we saturate the system - the dynamic mean decreases as a function of the applied concurrency which in turn decreases the capacity. Since the capacity is (typically) less than the applied concurrency the latency increases. If the capacity is too low in reality, these requests will not be fulfilled.
 
-We can calculate the throughput as the number of successful requests per second. We can define the total number of successful requests as the number of requests where the latency is less than a threshold, say 1.5 seconds. We can then calculate the throughtput as the number of successful requests divided the total time (300 seconds).
+We can calculate the throughput as the number of successful requests per second. We can define the total number of successful requests as the number of requests where the latency is less than a threshold, say 1.5 seconds. We can then calculate the throughtput as the number of successful requests divided the total time (`t_max` = 300 seconds).
 
 ```{python}
 def controller_summary(
@@ -428,11 +437,11 @@ def summary_to_df(summary):
 summary_to_df(summary)
 ```
 
-We can try instead with a lower constant rate of 20 rps instead (right around the capacity of the system). There are still moments when the system is saturated and the latency is pinned at the maximum latency of 1 second - we want to be able to react to moments when the system is saturated and reduce the applied concurrency.
+We can try instead with a lower constant rate of 20 rps instead (right around the capacity of the system). There are still moments when the system is saturated and the latency grows proportional to demand/applied concurrency - ideally we want to be able to react to moments when the system is saturated and reduce the applied concurrency.
 
 ```{python}
 #| label: fig-applied-concurrency-constant-20-rps
-#| fig-cap: "We apply the Constant Controller with a rate of 20 rps"
+#| fig-cap: "Applying the Constant Controller with a rate of 20 rps"
 #| echo: false
 controller = ConstantController(rate=20.0)
 
@@ -454,7 +463,7 @@ summary = controller_summary(latency_values, applied_concurrency_values, time_el
 summary_to_df(summary)
 ```
 
-Next we'll try with the AIMD Controller. When the latency is larger than the target latency threshold (1.25), we reduce the inter-arrival time by $\alpha$. When the latency is less than the target latency threshold, we increase the inter-arrival time by a factor of $\beta$. 
+Next we'll try with the AIMD Controller. We'll choose a targer latency threshold of 1.25 seconds - just over the base latency, $\ell_0 = 1.0$ seconds. When the latency is larger than the target latency threshold (1.25), we reduce the inter-arrival time by $\alpha$. When the latency is less than the target latency threshold, we increase the inter-arrival time by a factor of $\beta$. 
 
 ```{python}
 controller = AIMDController(
@@ -493,14 +502,14 @@ The AIMD controller is a little tricky to set the parameters. We could consider 
 
 # Throughput Comparison
 
-To compare the algorithms fairly we re-run each controller with the same random seed and simulation parameters. Requests whose observed latency exceeds the threshold ($\tau = 1.5$ s) are treated as rate-limited — the service has rejected or heavily delayed them, so they do not contribute to useful throughput. This makes the effective throughput of controllers that frequently breach the threshold much lower than their nominal rate suggests.
+To compare the algorithms fairly we re-run each controller with the same random seed and simulation parameters. We assume that requests whose observed latency exceeds the threshold (1.5 seconds) are treated as rate-limited (received a 429 response). This means that the service has rejected them, so they do not contribute to useful throughput. This makes the effective throughput of controllers that frequently breach the threshold much lower than their nominal rate suggests.
 
 Metrics computed:
 
-- **Time elapsed** – total simulated time $t_{\max}$ (seconds).
-- **Successful requests** – number of requests where latency $\leq 1.5$ seconds.
-- **Effective throughput** – successful requests / time elapsed (req/s).
-- **% rate-limited** – the proportion of requests where the latency exceeded 1.5 seconds.
+- **Time elapsed**: total simulated time $t_{\max}$ (seconds).
+- **Successful requests**: number of requests where latency $\leq 1.5$ seconds.
+- **Effective throughput**: successful requests / time elapsed (req/s).
+- **% rate-limited**: the proportion of requests where the latency exceeded 1.5 seconds.
 
 ```{python}
 #| label: tbl-throughput-comparison
@@ -552,8 +561,8 @@ results_df = pd.DataFrame(rows).set_index("Algorithm")
 results_df
 ```
 
-The table highlights the cost of ignoring rate-limiting signals. The constant controller firing at 50 req/s has most requests rejected ends up with a lower effective throughput than one running at 20 req/s (which happens to be the actual long-run mean capacity of the system). AIMD keeps the rate-limited fraction low and therefore achieves better effective throughput despite a lower nominal rate.
+The table highlights the cost of ignoring rate-limiting signals. The constant controller firing at 50 req/s has most requests rejected ends up with a lower effective throughput than one running at 20 req/s (which is the actual long-run mean latent capacity of the system). AIMD keeps the rate-limited fraction low and therefore achieves better effective throughput despite sending fewer total requests compared to the constant controller with 50 req/s.
 
 ## Conclusion
 
-AIMD is a useful controller to apply to distributed systems where the underlying capacity is not known. We have simulated a system with a latent capacity and applied the controllers to the observed latency to control the inter-arrival time of the requests. We have seen that with a constant controller we either under-utilise the system or over-utilise the system. The AIMD controller is able to achieve a higher effective throughput by monitoring the latency and adjusting the inter-arrival time accordingly.
+AIMD is a useful controller to apply to distributed systems where the underlying capacity is not known. We have simulated a system with a latent capacity and applied the controllers to the observed latency to control the inter-arrival time of the requests. We have seen that with a constant controller we either under-utilise the system or we saturate the system, which would result in requests being rejected. The AIMD controller is able to achieve a higher effective throughput by monitoring the latency and adjusting the inter-arrival time accordingly.
