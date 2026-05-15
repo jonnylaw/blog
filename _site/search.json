@@ -1012,6 +1012,6 @@
     "href": "posts/2026-05-08-handling-concurrency/index.html#conclusion",
     "title": "Handling Concurrency",
     "section": "Conclusion",
-    "text": "Conclusion\nAIMD is a useful controller to apply to distributed systems where the underlying capacity is not known. We have simulated a system with a latent capacity and applied the controllers to the observed latency to control the inter-arrival time of the requests. We have seen that with a constant controller we either under-utilise the system or over-utilise the system. The AIMD controller is able to achieve a higher effective throughput by monitoring the latency and adjusting the inter-arrival time accordingly."
+    "text": "Conclusion\nAIMD is a useful controller to apply to distributed systems where the underlying capacity is not known. We have simulated a system with a latent capacity and applied the controllers to the observed latency to control the inter-arrival time of the requests. We have seen that with a constant controller we either under-utilise the system or we saturate the system, which would result in requests being rejected. The AIMD controller is able to achieve a higher effective throughput by monitoring the latency and adjusting the inter-arrival time accordingly."
   }
 ]
