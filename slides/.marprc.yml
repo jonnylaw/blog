@@ -1,0 +1,2 @@
+engine: ./engine.mjs
+themeSet: themes/

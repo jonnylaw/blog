@@ -1,0 +1,28 @@
+flowchart LR
+    A[("Cloud Bucket")]
+
+    subgraph DocumentParser[Document Parser]
+        B1["document_parser\nmap"]
+        B2["..."]
+        B3["document_parser\nmap"]
+    end
+
+    C["split_into_chunks\nchunk_size=CHUNK_SIZE\nflat_map"]
+    D["Group\nBATCH_SIZE"]
+
+    subgraph EntityExtraction[Entity Extraction]
+        E1["entity_extraction\nmap_async"]
+        E2["..."]
+        E3["entity_extraction\nmap_async"]
+    end
+
+    F["entity_resolution_monoid\nreduce"]
+    G["prune_graph\nmap"]
+    H[("Output Cloud Bucket")]
+
+    A --> B1 & B2 & B3
+    B1 & B2 & B3 --> C
+    C --> D
+    D --> E1 & E2 & E3
+    E1 & E2 & E3 --> F
+    F --> G --> H

@@ -1,0 +1,25 @@
+{
+    "name": "functional-programming",
+    "version": "1.0.0",
+    "author": "Jonny Law <law.jonny@googlemail.com>",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "check-cooldown": "node scripts/check-npm-cooldown.js",
+        "build": "rimraf public && npm run -s diagrams && npm run -s deck && npm run -s copy-assets",
+        "copy-assets": "cp -r images public/images",
+        "diagrams": "mise run slides:build-diagrams",
+        "deck": "marp --no-stdin --html --input-dir . --output public",
+        "start": "npm run -s diagrams && npm run -s copy-assets && marp --html --input-dir slides --output public -wp",
+        "vercel-build": "yum install nss mesa-libgbm -y && MARP_USER=root CHROME_PATH=$(npx -y @puppeteer/browsers@latest install chrome@stable --path $(realpath ./tmp) | awk '{print $2}') npm run build"
+    },
+    "devDependencies": {
+        "@marp-team/marp-cli": "^3.4.0",
+        "@mermaid-js/mermaid-cli": "^11.12.0",
+        "ncp": "^2.0.0",
+        "rimraf": "^6.0.1"
+    },
+    "dependencies": {
+        "markdown-it-container": "^4.0.0"
+    }
+}

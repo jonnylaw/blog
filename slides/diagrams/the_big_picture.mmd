@@ -1,0 +1,17 @@
+flowchart LR
+    D[("Raw\nDocuments")]
+    SE["Schema\nExtractor"]
+    KGB["KG\nBuilder"]
+    KG[("Neo4j\nGraph")]
+    A["Agent"]
+
+subgraph knowledge_graph[Knowledge Graph Builder]
+    D --> SE
+    SE -->|"schema"| KGB
+    
+    D --> KGB
+  end
+
+KGB --> KG
+
+A -->|"query"| KG

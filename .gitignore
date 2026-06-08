@@ -58,4 +58,8 @@ post-ideas
 # Local Netlify folder
 .netlify
 
+# Slides build artifacts
+slides/node_modules/
+slides/public/
+
 **/*.quarto_ipynb
