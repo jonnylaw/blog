@@ -1,0 +1,395 @@
+/*!
+ * Neo4j theme for Marp
+ *
+ * @theme neo4j
+ * @auto-scaling true
+ * @size 16:9 1280px 720px
+ */
+
+@import "https://fonts.bunny.net/css?family=Inter:400,600,700|Fira+Code:400,500&display=swap";
+
+/* ── Colour palette ───────────────────────────────────────────────────── */
+
+section {
+  --color-bg:           #004063;
+  --color-bg-alt:       #16213e;
+  --color-fg:           #e8e8f0;
+  --color-fg-muted:     #9090a8;
+  --color-primary:      #018bff;    /* Neo4j blue  */
+  --color-accent:       #4bc994;    /* Neo4j green */
+  --color-accent-muted: #ff8e6a;    /* Neo4j orange */
+  --color-code-bg:      #0f0f23;
+  --color-border:       rgba(75, 201, 148, 0.25);
+
+  /* ── Layout ──────────────────────────────────────────────────────── */
+  display:              flex;
+  flex-direction:       column;
+  justify-content:      flex-start;
+  width:                1280px;
+  height:               720px;
+  padding:              60px 72px 72px;
+  box-sizing:           border-box;
+  overflow:             hidden;
+
+  /* ── Typography ──────────────────────────────────────────────────── */
+  font-family:          Inter, Segoe UI, sans-serif;
+  font-size:            28px;
+  line-height:          1.5;
+  color:                var(--color-fg);
+
+  /* ── Background ──────────────────────────────────────────────────── */
+  background-color:     var(--color-bg);
+  background-image:
+    radial-gradient(ellipse at 10% 90%, rgba(1, 139, 255, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 90% 10%, rgba(75, 201, 148, 0.06) 0%, transparent 55%);
+}
+
+/* ── Headings ─────────────────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 0.4em;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 1.9em;
+  color: var(--color-accent);
+}
+
+h2 {
+  font-size: 1.45em;
+  color: var(--color-primary);
+}
+
+h3 {
+  font-size: 1.2em;
+  color: var(--color-fg);
+}
+
+h4, h5, h6 {
+  font-size: 1em;
+  color: var(--color-fg-muted);
+}
+
+h1::part(auto-scaling),
+h2::part(auto-scaling),
+h3::part(auto-scaling) {
+  max-height: 580px;
+}
+
+/* ── Body text ────────────────────────────────────────────────────────── */
+
+p {
+  margin: 0.5em 0;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+strong {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+em {
+  color: var(--color-primary);
+}
+
+/* ── Lists ────────────────────────────────────────────────────────────── */
+
+ul, ol {
+  padding-left: 1.4em;
+  margin: 0.4em 0;
+}
+
+li {
+  margin: 0.3em 0;
+}
+
+ul li::marker {
+  color: var(--color-accent);
+}
+
+ol li::marker {
+  color: var(--color-primary);
+}
+
+/* ── Code ─────────────────────────────────────────────────────────────── */
+
+code {
+  font-family:    "Fira Code", "Cascadia Code", monospace;
+  font-size:      0.82em;
+  background:     var(--color-code-bg);
+  color:          var(--color-accent);
+  padding:        0.1em 0.35em;
+  border-radius:  4px;
+  border:         1px solid var(--color-border);
+}
+
+pre {
+  margin:         0.8em 0;
+  border-radius:  8px;
+  border:         1px solid var(--color-border);
+  background:     var(--color-code-bg);
+  overflow:       visible;
+  line-height:    1.4;
+}
+
+pre::part(auto-scaling) {
+  max-height: 520px;
+}
+
+pre code {
+  display:        block;
+  padding:        0.8em 1em;
+  font-size:      0.75em;
+  color:          var(--color-fg);
+  background:     transparent;
+  border:         none;
+}
+
+/* ── Images ──────────────────────────────────────────────────────────── */
+
+img {
+  max-width:  100%;
+  max-height: 500px;
+  display:    block;
+  margin:     0 auto;
+  object-fit: contain;
+}
+
+/* ── Two-column layout ────────────────────────────────────────────────── */
+
+/*  Usage in a slide:
+ *
+ *  <div class="columns">
+ *  <div>
+ *
+ *  Left column content (markdown works here)
+ *
+ *  </div>
+ *  <div>
+ *
+ *  Right column content
+ *
+ *  </div>
+ *  </div>
+ *
+ *  Optional modifiers:
+ *    columns--60-40   left 60% / right 40%
+ *    columns--40-60   left 40% / right 60%
+ */
+
+.columns {
+  display:               grid;
+  grid-template-columns: 1fr 1fr;
+  gap:                   2em;
+  align-items:           start;
+  width:                 100%;
+}
+
+.columns--60-40 { grid-template-columns: 3fr 2fr; }
+.columns--40-60 { grid-template-columns: 2fr 3fr; }
+
+.columns > div {
+  min-width: 0;   /* prevent grid blowout from long content */
+}
+
+/* ── Syntax highlighting (highlight.js tokens) ────────────────────────── */
+
+.hljs-keyword,
+.hljs-operator,
+.hljs-reserved {
+  color: #c792ea;   /* purple  – keywords: def, val, for, if … */
+  font-weight: 600;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #82aaff;   /* periwinkle – built-ins */
+}
+
+.hljs-type,
+.hljs-class .hljs-title,
+.hljs-title.class_ {
+  color: #ffcb6b;   /* amber – type names */
+}
+
+.hljs-function .hljs-title,
+.hljs-title.function_ {
+  color: var(--color-primary);   /* Neo4j blue – function names */
+}
+
+.hljs-string,
+.hljs-template-string,
+.hljs-template-tag {
+  color: #c3e88d;   /* soft green – strings */
+}
+
+.hljs-number,
+.hljs-literal {
+  color: #f78c6c;   /* coral – numbers / true / false / null */
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: var(--color-fg-muted);
+  font-style: italic;
+}
+
+.hljs-variable,
+.hljs-params {
+  color: var(--color-fg);
+}
+
+.hljs-attr,
+.hljs-attribute {
+  color: #89ddff;   /* light cyan – object keys / HTML attrs */
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-subst {
+  color: var(--color-accent);   /* Neo4j green */
+}
+
+.hljs-meta,
+.hljs-selector-tag,
+.hljs-doctag {
+  color: #f07178;   /* rose – decorators / annotations */
+}
+
+.hljs-emphasis  { font-style: italic; }
+.hljs-strong    { font-weight: bold; }
+
+/* ── Blockquote ───────────────────────────────────────────────────────── */
+
+blockquote {
+  margin:         0.8em 0;
+  padding:        0.4em 1em;
+  border-left:    4px solid var(--color-accent);
+  background:     rgba(75, 201, 148, 0.07);
+  border-radius:  0 6px 6px 0;
+  color:          var(--color-fg-muted);
+  font-style:     italic;
+}
+
+blockquote::before,
+blockquote::after {
+  content: none;
+}
+
+/* ── Table ────────────────────────────────────────────────────────────── */
+
+table {
+  border-collapse: collapse;
+  margin: 0.8em 0;
+  width: 100%;
+  font-size: 0.88em;
+}
+
+table th {
+  background:    var(--color-bg-alt);
+  color:         var(--color-accent);
+  font-weight:   600;
+  padding:       0.45em 0.8em;
+  border-bottom: 2px solid var(--color-accent);
+  text-align:    left;
+}
+
+table td {
+  padding:       0.4em 0.8em;
+  border-bottom: 1px solid var(--color-border);
+  color:         var(--color-fg);
+}
+
+table tbody tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ── Header / footer / pagination ────────────────────────────────────── */
+
+header, footer {
+  position:    absolute;
+  left:        72px;
+  right:       72px;
+  font-size:   0.5em;
+  color:       var(--color-fg-muted);
+  line-height: 1;
+}
+
+header {
+  top: 24px;
+}
+
+footer {
+  bottom: 24px;
+  display:     flex;
+  align-items: center;
+  gap:         10px;
+}
+
+footer::before {
+  content:            "";
+  display:            inline-block;
+  width:              60px;
+  height:             16px;
+  background-image:   url("assets/neo4j-logo.svg");
+  background-repeat:  no-repeat;
+  background-size:    contain;
+  background-position: center left;
+  flex-shrink:        0;
+}
+
+section::after {
+  position:   absolute;
+  bottom:     22px;
+  right:      72px;
+  font-size:  0.5em;
+  color:      var(--color-fg-muted);
+}
+
+/* ── Title slide  (<!-- _class: lead -->) ─────────────────────────────── */
+
+section.lead {
+  justify-content: center;
+  align-items:     left;
+  text-align:      left;
+  background-image:
+    radial-gradient(ellipse at 50% 50%, rgba(1, 139, 255, 0.12) 0%, transparent 65%),
+    radial-gradient(ellipse at 80% 20%, rgba(75, 201, 148, 0.10) 0%, transparent 50%);
+}
+
+section.lead h1 {
+  font-size:     2.4em;
+  margin-bottom: 0.25em;
+}
+
+section.lead h2 {
+  font-size:     1.3em;
+  color:         var(--color-fg-muted);
+  font-weight:   400;
+}
+
+section.lead p {
+  color: var(--color-fg-muted);
+}
+
+/* ── Accent slide  (<!-- _class: accent -->) ──────────────────────────── */
+
+section.accent {
+  background-color: var(--color-bg-alt);
+  border-top: 4px solid var(--color-accent);
+}
+
+section.accent h1 {
+  color: var(--color-accent);
+}

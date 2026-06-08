@@ -1,3 +1,12 @@
 [tools]
+node = "20.11.1"
 "aqua:quarto-dev/quarto-cli" = "latest"
 uv = "latest"
+
+[tasks.build-slides]
+description = "Build the Marp slide deck to public/index.html"
+run = "cd slides && npm ci && npm run build"
+
+[tasks.pdf]
+description = "Export a Marp presentation to PDF. Usage: mise run pdf <presentation_name> e.g. mise run pdf dataflow_programming"
+run = "npx marp slides/{{arg(name='presentation')}}.md --theme themes/neo4j.css --pdf --allow-local-files --output slides/{{arg(name='presentation')}}.pdf"

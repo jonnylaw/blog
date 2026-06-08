@@ -1,0 +1,14 @@
+sequenceDiagram
+    actor User
+    participant Agent
+    box MCP Server
+        participant T2C as Text2Cypher
+    end
+    participant Neo4j
+
+    User->>Agent: natural language query
+    Agent->>T2C: call text2cypher tool
+    T2C->>Neo4j: cypher query
+    Neo4j-->>T2C: results
+    T2C-->>Agent: tool response
+    Agent-->>User: answer
