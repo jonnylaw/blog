@@ -4,8 +4,11 @@ node = "20.11.1"
 uv = "latest"
 
 [tasks.build-slides]
-description = "Build the Marp slide deck to public/index.html"
-run = "cd slides && npm ci && npm run build"
+description = "Build the Marp slide deck and install into _site/ai-in-prod"
+run = [
+  "cd slides && npm ci && npm run build",
+  "rm -rf _site/ai-in-prod && cp -r slides/public _site/ai-in-prod"
+]
 
 [tasks.pdf]
 description = "Export a Marp presentation to PDF. Usage: mise run pdf <presentation_name> e.g. mise run pdf dataflow_programming"
